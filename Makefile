@@ -19,6 +19,6 @@ run-local:
 install-deps:
 	@echo "Creating virtual env and installing deps..."
 	@python3 -m venv .venv
-	@. ./venv/bin/activate
+	@. ./.venv/bin/activate
 	@echo "Virtual Env Created..."
 	@pip3 install -r requirements.txt
