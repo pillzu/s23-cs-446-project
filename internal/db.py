@@ -65,29 +65,6 @@ class DatabaseConnection:
 
 
     """
-    drop_table(table): Drop the corresponding table in the database.
-        Parameters: 
-            - table: name of dropped table
-        Returns:
-            - True: if the table is dropped successfully
-            - False: otherwise
-    """
-    def drop_table(self, table):
-        try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
-            self.exec_DDL(f"DROP TABLE IF EXISTS {table}")
-
-            return True
-
-        except Exception as e:
-            logging.fatal("Dropping Tables Failed")
-            logging.fatal(e)
-            return False
-
-
-    """
     add_new_user(username, password, first_name, last_name, phone_no, address, email): Insert a new user with the
     given information into Users table. The user's uid will be generated randomly using gen_random_uuid(). The user
     will also be created with a default party point of 0.
@@ -149,12 +126,120 @@ class DatabaseConnection:
             return True
 
         except Exception as e:
-            logging.fatal("Adding new user to database failed")
+            logging.fatal("Adding new party to database failed")
+            logging.fatal(e)
+            return False
+
+    """
+        query_party(party_name, start_date, end_date, created_after): Query parties using some attributes. If an 
+        attribute is left blank then its constraint is ignored. Return at most 50 results.
+            Parameters: 
+                - party_name: return all parties where party_name is a substring of the party's name
+                - start_date: return all parties with scheduled dates later than start_date
+                - end_date: return all parties with scheduled dates earlier than end_date
+                - created_after: return all parties created after the timestamp created_after
+            Returns:
+                - row: The query result, if stmt is queried successfully
+                - None: If the query present no result
+    """
+    def query_party(self, party_name=None, start_date=None, end_date=None, created_after=None):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
+
+            statement = "SELECT * FROM Parties p "
+            hasConstraint = False
+
+            if party_name is not None:
+                if not hasConstraint:
+                    statement += "WHERE "
+                    hasConstraint = True
+                else:
+                    statement += "AND "
+                statement += f"p.party_name LIKE '%{party_name}%' "
+
+            if start_date is not None:
+                if not hasConstraint:
+                    statement += "WHERE "
+                    hasConstraint = True
+                else:
+                    statement += "AND "
+                statement += f"p.date_time >= '{start_date}' "
+
+            if end_date is not None:
+                if not hasConstraint:
+                    statement += "WHERE "
+                    hasConstraint = True
+                else:
+                    statement += "AND "
+                statement += f"p.date_time <= '{end_date}' "
+
+            if created_after is not None:
+                if not hasConstraint:
+                    statement += "WHERE "
+                else:
+                    statement += "AND "
+                statement += f"p.created_at >= '{created_after}' "
+
+            print(statement)
+
+            with self.conn.cursor() as cur:
+                cur.execute(statement)
+                self.conn.commit()
+                return cur.fetchmany(50)
+
+        except Exception as e:
+            logging.fatal("Query parties failed")
+            logging.fatal(e)
+            return None
+
+
+
+
+    """
+    clear_table(table): Delete all rows from a table
+        Parameters: 
+            - table: name of the cleared table
+        Returns:
+            - True: if the table is cleared successfully
+            - False: otherwise
+    """
+    def clear_table(self, table):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
+
+            self.exec_DDL(f"DELETE FROM {table}")
+
+            return True
+
+        except Exception as e:
+            logging.fatal("Clearing Tables Failed")
             logging.fatal(e)
             return False
 
 
+    """
+    drop_table(table): Drop the corresponding table in the database.
+        Parameters: 
+            - table: name of dropped table
+        Returns:
+            - True: if the table is dropped successfully
+            - False: otherwise
+    """
+    def drop_table(self, table):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
 
+            self.exec_DDL(f"DROP TABLE IF EXISTS {table}")
+
+            return True
+
+        except Exception as e:
+            logging.fatal("Dropping Tables Failed")
+            logging.fatal(e)
+            return False
 
 
     """
