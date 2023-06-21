@@ -1,4 +1,3 @@
-"""Add CockroachDB related functions"""
 import psycopg2 as pscg
 import logging
 from datetime import datetime
@@ -127,15 +126,63 @@ class DatabaseConnection:
             timez = pytz.timezone("Canada/Eastern")
 
             if party_id is None:
-                statement = f"INSERT INTO Parties VALUES (gen_random_uuid(), '{party_name}', {date_time}, '{datetime.now(timez)}')"
+                statement = f"INSERT INTO Parties VALUES (gen_random_uuid(), '{party_name}', '{date_time}', '{datetime.now(timez)}')"
             else:
-                statement = f"INSERT INTO Parties VALUES ({party_id}, '{party_name}', {date_time}, '{datetime.now(timez)}')"
+                statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
 
             self.exec_DDL(statement)
             return True
 
         except Exception as e:
             logging.fatal("Adding new party to database failed")
+            logging.fatal(e)
+            return False
+
+
+    """
+    attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
+        Parameters: 
+            - user_id: the user's id number
+            - party_id: the party's id number
+        Returns:
+            - True: if the user is registered as a guest successfully
+            - False: otherwise
+    """
+    def attend_party(self, user_id, party_id):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
+
+            statement = f"INSERT INTO Guests VALUES ('{user_id}', '{party_id}')"
+            self.exec_DDL(statement)
+            return True
+
+        except Exception as e:
+            logging.fatal("Registering guest to party failed")
+            logging.fatal(e)
+            return False
+
+
+    """
+    host_party(user_id, party_id): Registers the user with user_id into the party with party_id as a host
+        Parameters: 
+            - user_id: the user's id number
+            - party_id: the party's id number
+        Returns:
+            - True: if the user is registered as a host successfully
+            - False: otherwise
+    """
+    def host_party(self, user_id, party_id):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
+
+            statement = f"INSERT INTO Hosts VALUES ('{user_id}', '{party_id}')"
+            self.exec_DDL(statement)
+            return True
+
+        except Exception as e:
+            logging.fatal("Registering host to party failed")
             logging.fatal(e)
             return False
 
