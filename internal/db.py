@@ -76,19 +76,20 @@ class DatabaseConnection:
             - email: the user's email address (String with len <= 50)
             - uid: the user's uuid. If left blank then will use gen_random_uuid() (Integer)
         Returns:
-            - True: if the user is inserted successfully
-            - False: otherwise
+            - uuid: if the user is inserted successfully, return the user's uuid
+            - None: otherwise
         Throws Exception if:
             - the user's information may have invalid fields
     """
     def add_new_user(self, username, password, first_name, last_name, phone_no, address_street, address_city, address_prov,
-                     address_postal, email, uid=None) -> bool:
+                     address_postal, email, uid=None):
         try:
             if self.conn is None:
                 raise Exception("Database Connection Not Initialized")
 
             if uid is None:
-                statement = f"INSERT INTO Users VALUES (gen_random_uuid(), '{username}', '{password}', '{first_name}', " \
+                uid = self.exec_DML("SELECT gen_random_uuid()")[0]
+                statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
                             f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
                             f"'{address_postal}', '{email}', 0)"
             else:
@@ -97,12 +98,12 @@ class DatabaseConnection:
                             f"'{address_postal}', '{email}', 0)"
 
             self.exec_DDL(statement)
-            return True
+            return uid
 
         except Exception as e:
             logging.fatal("Adding new user to database failed")
             logging.fatal(e)
-            return False
+            return None
 
 
     """
@@ -113,8 +114,8 @@ class DatabaseConnection:
             - party_name: the party's name
             - date_time: The scheduled date of the party
         Returns:
-            - True: if the party is inserted successfully
-            - False: otherwise
+            - uuid: if the party is inserted successfully, return the party's id
+            - None: otherwise
         Throws Exception if:
             - the party's information may have invalid fields
     """
@@ -126,17 +127,18 @@ class DatabaseConnection:
             timez = pytz.timezone("Canada/Eastern")
 
             if party_id is None:
-                statement = f"INSERT INTO Parties VALUES (gen_random_uuid(), '{party_name}', '{date_time}', '{datetime.now(timez)}')"
+                party_id = self.exec_DML("SELECT gen_random_uuid()")[0]
+                statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
             else:
                 statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
 
             self.exec_DDL(statement)
-            return True
+            return party_id
 
         except Exception as e:
             logging.fatal("Adding new party to database failed")
             logging.fatal(e)
-            return False
+            return None
 
 
     """
@@ -221,12 +223,15 @@ class DatabaseConnection:
                 - row: The query result
                 - None: If the query present no result
     """
-    def query_party(self, party_name=None, start_date=None, end_date=None, created_after=None, limit=50):
+    def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None, limit=50):
         try:
             if self.conn is None:
                 raise Exception("Database Connection Not Initialized")
 
             sub_queries = []
+
+            if party_id is not None:
+                sub_queries.append(f" p.party_id = '{party_id}'")
 
             if party_name is not None:
                 sub_queries.append(f" p.party_name LIKE '%{party_name}%'")
@@ -275,7 +280,7 @@ class DatabaseConnection:
             sub_queries = []
 
             if user_id is not None:
-                sub_queries.append(f" u.user_id = %{user_id}%")
+                sub_queries.append(f" u.user_id = '{user_id}'")
 
             if username is not None:
                 sub_queries.append(f" u.username LIKE '%{username}%'")

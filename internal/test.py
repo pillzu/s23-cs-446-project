@@ -7,8 +7,9 @@ Test for creating users
 def testCreateUser(conn):
     print("********** TEST_CREATE_USER STARTS **********")
     try:
-        conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo", "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
+        uid = conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo", "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
         rows = conn.exec_DML("SELECT * FROM Users")
+        print(uid)
         print(rows)
     except Exception as e:
         logging.fatal("ERROR: TEST_CREATE_USER FAILED")
@@ -23,8 +24,9 @@ Test for creating parties
 def testCreateParty(conn):
     print("********** TEST_CREATE_PARTY STARTS **********")
     try:
-        conn.add_new_party("JM_Test_Party", "2023-10-01 08:00:00")
+        pid = conn.add_new_party("JM_Test_Party", "2023-10-01 08:00:00")
         rows = conn.query_party()
+        print(pid)
         print(rows)
     except Exception as e:
         logging.fatal("ERROR: TEST_CREATE_PARTY FAILED")
@@ -39,10 +41,12 @@ Test for querying parties
 def testQueryParty(conn):
     print("********** TEST_QUERY_PARTY STARTS **********")
     try:
-        conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        pid1 = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
         conn.add_new_party("JM_Chess_Party", "2023-10-04 09:00:00")
         conn.add_new_party("JM_Music_Party", "2023-12-01 16:30:00")
         rows = conn.query_party()
+        print(rows)
+        rows = conn.query_party(party_id=pid1)
         print(rows)
         rows = conn.query_party(party_name="Chess")
         print(rows)
@@ -61,8 +65,9 @@ def testQueryParty(conn):
 Helper for creating test users
 """
 def createTestUser(conn, username, first_name, last_name, email, uid=None):
-    conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave", "Waterloo",
-                      "ON", "A1B 2C3", email, uid)
+    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave", "Waterloo",
+                            "ON", "A1B 2C3", email, uid)
+    return uid
 
 
 """
@@ -71,11 +76,13 @@ Test for querying users
 def testQueryUser(conn):
     print("********** TEST_QUERY_USER STARTS **********")
     try:
-        createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         createTestUser(conn, "JM_Test_User_2", "YC", "Meng", "jerry2@gmail.com")
         createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerrymeng3@gmail.com")
         createTestUser(conn, "YC_Test_User_4", "YC", "Meng", "ym2023@gmail.com")
         rows = conn.query_user()
+        print(rows)
+        rows = conn.query_user(user_id=uid1)
         print(rows)
         rows = conn.query_user(username="JM")
         print(rows)
@@ -98,9 +105,9 @@ Test for adding user as a guest
 def testAddGuest(conn):
     print("********** TEST_ADD_GUEST STARTS **********")
     try:
-        createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com", "367f2f6c-11f1-45c0-8120-613126d8e56c")
-        conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00", "367f2f6c-11f1-45c0-8120-613126d8e567")
-        conn.attend_party("367f2f6c-11f1-45c0-8120-613126d8e56c", "367f2f6c-11f1-45c0-8120-613126d8e567")
+        uid = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.attend_party(uid, pid)
         rows = conn.exec_DML("SELECT u.username, p.party_name FROM Guests g "
                              "JOIN Users u ON g.guest_id = u.user_id "
                              "JOIN Parties p ON g.party_id = p.party_id")
@@ -120,9 +127,9 @@ Test for adding user as a host
 def testAddHost(conn):
     print("********** TEST_ADD_HOST STARTS **********")
     try:
-        createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com", "367f2f6c-11f1-45c0-8120-613126d8e56c")
-        conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00", "367f2f6c-11f1-45c0-8120-613126d8e567")
-        conn.host_party("367f2f6c-11f1-45c0-8120-613126d8e56c", "367f2f6c-11f1-45c0-8120-613126d8e567")
+        uid = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.host_party(uid, pid)
         rows = conn.exec_DML("SELECT u.username, p.party_name FROM Hosts h "
                              "JOIN Users u ON h.host_id = u.user_id "
                              "JOIN Parties p ON h.party_id = p.party_id")
