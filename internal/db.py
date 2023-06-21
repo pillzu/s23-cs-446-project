@@ -66,8 +66,7 @@ class DatabaseConnection:
 
     """
     add_new_user(username, password, first_name, last_name, phone_no, address, email): Insert a new user with the
-    given information into Users table. The user's uid will be generated randomly using gen_random_uuid(). The user
-    will also be created with a default party point of 0.
+    given information into Users table. The user will be created with a default party point of 0.
         Parameters: 
             - username: the user's account username (String with len <= 20)
             - password: the user's account password (String with len <= 20)
@@ -76,6 +75,7 @@ class DatabaseConnection:
             - phone_no: the user's phone number (Long)
             - address_*: the user's home address (street, city, prov, postal code)
             - email: the user's email address (String with len <= 50)
+            - uid: the user's uuid. If left blank then will use gen_random_uuid() (Integer)
         Returns:
             - True: if the user is inserted successfully
             - False: otherwise
@@ -83,14 +83,19 @@ class DatabaseConnection:
             - the user's information may have invalid fields
     """
     def add_new_user(self, username, password, first_name, last_name, phone_no, address_street, address_city, address_prov,
-                     address_postal, email) -> bool:
+                     address_postal, email, uid=None) -> bool:
         try:
             if self.conn is None:
                 raise Exception("Database Connection Not Initialized")
 
-            statement = f"INSERT INTO Users VALUES (gen_random_uuid(), '{username}', '{password}', '{first_name}', " \
-                        f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
-                        f"'{address_postal}', '{email}', 0)"
+            if uid is None:
+                statement = f"INSERT INTO Users VALUES (gen_random_uuid(), '{username}', '{password}', '{first_name}', " \
+                            f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
+                            f"'{address_postal}', '{email}', 0)"
+            else:
+                statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
+                            f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
+                            f"'{address_postal}', '{email}', 0)"
 
             self.exec_DDL(statement)
             return True
@@ -114,13 +119,17 @@ class DatabaseConnection:
         Throws Exception if:
             - the party's information may have invalid fields
     """
-    def add_new_party(self, party_id, party_name, date_time):
+    def add_new_party(self, party_name, date_time, party_id=None):
         try:
             if self.conn is None:
                 raise Exception("Database Connection Not Initialized")
 
             timez = pytz.timezone("Canada/Eastern")
-            statement = f"INSERT INTO Parties VALUES ({party_id}, '{party_name}', {date_time}, '{datetime.now(timez)}')"
+
+            if party_id is None:
+                statement = f"INSERT INTO Parties VALUES (gen_random_uuid(), '{party_name}', {date_time}, '{datetime.now(timez)}')"
+            else:
+                statement = f"INSERT INTO Parties VALUES ({party_id}, '{party_name}', {date_time}, '{datetime.now(timez)}')"
 
             self.exec_DDL(statement)
             return True
@@ -275,7 +284,7 @@ class DatabaseConnection:
 
             # Parties
             statement = "CREATE TABLE IF NOT EXISTS Parties (" \
-                        "party_id Integer PRIMARY KEY, " \
+                        "party_id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " \
                         "party_name VARCHAR(50) NOT NULL, " \
                         "date_time TIMESTAMP NOT NULL, " \
                         "created_at TIMESTAMP NOT NULL)"

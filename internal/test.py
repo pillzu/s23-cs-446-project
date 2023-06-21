@@ -19,7 +19,7 @@ Test for creating parties
 """
 def testCreateParty(conn):
     try:
-        conn.add_new_party("100001", "JM_Test_Party", "'2023-10-01 08:00:00'")
+        conn.add_new_party("JM_Test_Party", "'2023-10-01 08:00:00'")
         rows = conn.query_party()
         print(rows)
     except Exception:
@@ -32,9 +32,9 @@ Test for querying parties
 """
 def testQueryParty(conn):
     try:
-        conn.add_new_party("100001", "JM_Poker_Party", "'2023-10-01 08:00:00'")
-        conn.add_new_party("100002", "JM_Chess_Party", "'2023-10-04 09:00:00'")
-        conn.add_new_party("100003", "JM_Music_Party", "'2023-12-01 16:30:00'")
+        conn.add_new_party("JM_Poker_Party", "'2023-10-01 08:00:00'")
+        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'")
+        conn.add_new_party("JM_Music_Party", "'2023-12-01 16:30:00'")
         rows = conn.query_party()
         print(rows)
         rows = conn.query_party(party_name="Chess")
@@ -51,9 +51,9 @@ def testQueryParty(conn):
 # Hardcoded URL, for POC only
 db_url = "postgresql://yanchen:9gAOcPaBx4tJJ3OAsD7G6A@vibees-db-11486.7tt.cockroachlabs.cloud:26257/VIBEES?sslmode=verify-full"
 connection = DatabaseConnection(db_url)
-# connection.drop_table("Users")
+# connection.drop_table("Parties")
 # connection.create_tables()
 # testCreateUser(connection)
 # testCreateParty(connection)
-testQueryParty(connection)
+# testQueryParty(connection)
 
