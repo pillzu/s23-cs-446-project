@@ -341,6 +341,43 @@ class DatabaseConnection:
                         "created_at TIMESTAMP NOT NULL)"
             self.exec_DDL(statement)
 
+            # Accounts
+            statement = "CREATE TABLE IF NOT EXISTS Accounts (" \
+                        "account_id UUID PRIMARY KEY, " \
+                        "balance DECIMAL(10, 2) NOT NULL, " \
+                        "CONSTRAINT user_account " \
+                        "FOREIGN KEY (account_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
+            # CreditCards
+            statement = "CREATE TABLE IF NOT EXISTS CreditCards (" \
+                        "account_id UUID, " \
+                        "card_number BIGINT NOT NULL, " \
+                        "cvv INTEGER NOT NULL, " \
+                        "CONSTRAINT account_credit_card " \
+                        "FOREIGN KEY (account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
+            # Hosts
+            statement = "CREATE TABLE IF NOT EXISTS Hosts (" \
+                        "host_id UUID, " \
+                        "party_id UUID, " \
+                        "CONSTRAINT host_user_id " \
+                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
+                        "CONSTRAINT host_party_id " \
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
+            # Guests
+            statement = "CREATE TABLE IF NOT EXISTS Guests (" \
+                        "guest_id UUID, " \
+                        "party_id UUID, " \
+                        "CONSTRAINT guest_user_id " \
+                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
+                        "CONSTRAINT guest_party_id " \
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
             # TODO: Add all DDLs for CREATE TABLE
             return True
 
