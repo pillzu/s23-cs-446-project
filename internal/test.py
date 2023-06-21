@@ -11,6 +11,8 @@ def testCreateUser(conn):
         rows = conn.exec_DML("SELECT * FROM Users")
         print(uid)
         print(rows)
+        rows = conn.exec_DML("SELECT * FROM Accounts")
+        print(rows)
     except Exception as e:
         logging.fatal("ERROR: TEST_CREATE_USER FAILED")
         logging.fatal(e)
@@ -154,5 +156,5 @@ connection = DatabaseConnection(db_url)
 # testQueryParty(connection)
 # testQueryUser(connection)
 # testAddGuest(connection)
-testAddHost(connection)
+# testAddHost(connection)
 

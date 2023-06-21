@@ -65,7 +65,8 @@ class DatabaseConnection:
 
     """
     add_new_user(username, password, first_name, last_name, phone_no, address, email): Insert a new user with the
-    given information into Users table. The user will be created with a default party point of 0.
+    given information into Users table. The user will be created with a default party point of 0. The account
+    associated with the user will also be created with a default balance of 0.
         Parameters: 
             - username: the user's account username (String with len <= 20)
             - password: the user's account password (String with len <= 20)
@@ -96,8 +97,10 @@ class DatabaseConnection:
                 statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
                             f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
                             f"'{address_postal}', '{email}', 0)"
-
             self.exec_DDL(statement)
+
+            self.exec_DDL(f"INSERT INTO Accounts VALUES ('{uid}', 0)")
+
             return uid
 
         except Exception as e:
