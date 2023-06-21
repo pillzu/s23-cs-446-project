@@ -102,48 +102,57 @@ def testQueryUser(conn):
 
 
 """
-Test for adding user as a guest
+Test for attending parties
 """
-def testAddGuest(conn):
-    print("********** TEST_ADD_GUEST STARTS **********")
+def testAttendParties(conn):
+    print("********** TEST_ATTEND_PARTIES STARTS **********")
     try:
-        uid = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
         pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
-        conn.attend_party(uid, pid)
-        rows = conn.exec_DML("SELECT u.username, p.party_name FROM Guests g "
-                             "JOIN Users u ON g.guest_id = u.user_id "
-                             "JOIN Parties p ON g.party_id = p.party_id")
+        conn.attend_party(uid1, pid)
+        conn.attend_party(uid2, pid)
+        rows = conn.show_attendees(pid, show_detail=True)
+        print(rows)
+        conn.leave_party(uid1, pid)
+        rows = conn.show_attendees(pid, show_detail=True)
         print(rows)
     except Exception as e:
-        logging.fatal("ERROR: TEST_ADD_GUEST FAILED")
+        logging.fatal("ERROR: TEST_ATTEND_PARTIES FAILED")
         logging.fatal(e)
     conn.clear_table("Users")
     conn.clear_table("Parties")
     conn.clear_table("Guests")
-    print("********** TEST_ADD_GUEST ENDS **********")
+    print("********** TEST_ATTEND_PARTIES ENDS **********")
 
 
 """
-Test for adding user as a host
+Test for hosting parties
 """
-def testAddHost(conn):
-    print("********** TEST_ADD_HOST STARTS **********")
+def testHostParties(conn):
+    print("********** TEST_HOST_PARTIES STARTS **********")
     try:
-        uid = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
-        conn.host_party(uid, pid)
-        rows = conn.exec_DML("SELECT u.username, p.party_name FROM Hosts h "
-                             "JOIN Users u ON h.host_id = u.user_id "
-                             "JOIN Parties p ON h.party_id = p.party_id")
+        conn.host_party(uid1, pid)
+        rows = conn.show_hosted_parties(uid1, show_detail=True)
+        print(rows)
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        conn.attend_party(uid2, pid)
+        rows = conn.show_attended_parties(uid2, show_detail=True)
+        print(rows)
+        conn.cancel_party(pid)
+        rows = conn.show_attended_parties(uid2, show_detail=True)
+        print(rows)
+        rows = conn.show_hosted_parties(uid1, show_detail=True)
         print(rows)
     except Exception as e:
-        logging.fatal("ERROR: TEST_ADD_HOST FAILED")
+        logging.fatal("ERROR: TEST_HOST_PARTIES FAILED")
         logging.fatal(e)
     conn.clear_table("Users")
     conn.clear_table("Parties")
-    conn.clear_table("Hosts")
-    print("********** TEST_ADD_HOST ENDS **********")
-
+    conn.clear_table("Guests")
+    print("********** TEST_HOST_PARTIES ENDS **********")
 
 
 # Hardcoded URL, for POC only
@@ -155,6 +164,6 @@ connection = DatabaseConnection(db_url)
 # testCreateParty(connection)
 # testQueryParty(connection)
 # testQueryUser(connection)
-# testAddGuest(connection)
-# testAddHost(connection)
+# testAttendParties(connection)
+# testHostParties(connection)
 

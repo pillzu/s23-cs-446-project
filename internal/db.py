@@ -40,22 +40,22 @@ class DatabaseConnection:
 
 
     """
-    exec_DML(stmt): Executes the given DML statement.
+    exec_DML(stmt, limit): Executes the given DML statement.
         Parameters: 
             - stmt: the executed DML statement
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result, if stmt is queried successfully
             - None: otherwise
         Throws Exception if:
             - the statement has format error
     """
-    def exec_DML(self, stmt):
+    def exec_DML(self, stmt, limit=50):
         try:
             with self.conn.cursor() as cur:
                 cur.execute(stmt)
-                row = cur.fetchone()
                 self.conn.commit()
-                return row
+                return cur.fetchmany(limit)
         except Exception as e:
             logging.fatal("Query Execution Failed")
             logging.fatal(f"Last Executed Query: {stmt}")
@@ -85,11 +85,10 @@ class DatabaseConnection:
     def add_new_user(self, username, password, first_name, last_name, phone_no, address_street, address_city, address_prov,
                      address_postal, email, uid=None):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             if uid is None:
-                uid = self.exec_DML("SELECT gen_random_uuid()")[0]
+                with self.conn.cursor() as cur:
+                    cur.execute("SELECT gen_random_uuid()")
+                    uid = cur.fetchone()[0]
                 statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
                             f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
                             f"'{address_postal}', '{email}', 0)"
@@ -124,13 +123,12 @@ class DatabaseConnection:
     """
     def add_new_party(self, party_name, date_time, party_id=None):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             timez = pytz.timezone("Canada/Eastern")
 
             if party_id is None:
-                party_id = self.exec_DML("SELECT gen_random_uuid()")[0]
+                with self.conn.cursor() as cur:
+                    cur.execute("SELECT gen_random_uuid()")
+                    party_id = cur.fetchone()[0]
                 statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
             else:
                 statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
@@ -155,15 +153,34 @@ class DatabaseConnection:
     """
     def attend_party(self, user_id, party_id):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             statement = f"INSERT INTO Guests VALUES ('{user_id}', '{party_id}')"
             self.exec_DDL(statement)
             return True
 
         except Exception as e:
             logging.fatal("Registering guest to party failed")
+            logging.fatal(e)
+            return False
+
+
+    """
+    leave_party(user_id, party_id): Remove the user with user_id from the party with party_id as a guest
+        Parameters: 
+            - user_id: the user's id number
+            - party_id: the party's id number
+        Returns:
+            - True: if the user is removed from the party successfully
+            - False: otherwise
+    """
+
+    def leave_party(self, user_id, party_id):
+        try:
+            statement = f"DELETE FROM Guests g WHERE g.guest_id = '{user_id}' AND g.party_id = '{party_id}'"
+            self.exec_DDL(statement)
+            return True
+
+        except Exception as e:
+            logging.fatal("Failed to leave party")
             logging.fatal(e)
             return False
 
@@ -179,9 +196,6 @@ class DatabaseConnection:
     """
     def host_party(self, user_id, party_id):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             statement = f"INSERT INTO Hosts VALUES ('{user_id}', '{party_id}')"
             self.exec_DDL(statement)
             return True
@@ -190,6 +204,108 @@ class DatabaseConnection:
             logging.fatal("Registering host to party failed")
             logging.fatal(e)
             return False
+
+    """
+    cancel_party(user_id, party_id): Cancels the party with party_id.
+        Parameters: 
+            - user_id: the user's id number
+            - party_id: the party's id number
+            - force_leave: if set to true, then all attenders will also be forced to leave the party
+        Returns:
+            - True: if the party is cancelled successfully
+            - False: otherwise
+    """
+
+    def cancel_party(self, party_id, force_leave=True):
+        try:
+            statement = f"DELETE FROM Hosts h WHERE h.party_id = '{party_id}'"
+            self.exec_DDL(statement)
+            if force_leave:
+                statement = f"DELETE FROM guests g WHERE g.party_id = '{party_id}'"
+                self.exec_DDL(statement)
+            return True
+
+        except Exception as e:
+            logging.fatal("Failed to cancel party")
+            logging.fatal(e)
+            return False
+
+
+    """
+    show_attended_parties(user_id): Returns all parties that the user with user_id attends
+        Parameters: 
+            - user_id: the user's id number
+            - show_detail: if set to true, then return the details of the attended parties. Otherwise only return the ids.
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
+        Returns:
+            - Parties: the id of the parties that the user attends
+            - None: otherwise
+    """
+    def show_attended_parties(self, user_id, show_detail=False, limit=50):
+        try:
+            if show_detail:
+                statement = f"SELECT p.* FROM Guests g " \
+                            f"JOIN Parties p ON g.party_id = p.party_id " \
+                            f"WHERE g.guest_id = '{user_id}'"
+            else:
+                statement = f"SELECT g.party_id FROM Guests g WHERE g.guest_id = '{user_id}'"
+            return self.exec_DML(statement, limit)
+
+        except Exception as e:
+            logging.fatal("Displaying attended parties failed")
+            logging.fatal(e)
+            return None
+
+    """
+    show_hosted_parties(user_id): Returns all parties that the user with user_id hosts
+        Parameters: 
+            - user_id: the user's id number
+            - show_detail: if set to true, then return the details of the hosted parties. Otherwise only return the ids.
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
+        Returns:
+            - Parties: the id of the parties that the user hosts
+            - None: otherwise
+    """
+    def show_hosted_parties(self, user_id, show_detail=False, limit=50):
+        try:
+            if show_detail:
+                statement = f"SELECT p.* FROM Hosts h " \
+                            f"JOIN Parties p ON h.party_id = p.party_id " \
+                            f"WHERE h.host_id = '{user_id}'"
+            else:
+                statement = f"SELECT h.party_id FROM Hosts h WHERE h.host_id = '{user_id}'"
+            return self.exec_DML(statement, limit)
+
+        except Exception as e:
+            logging.fatal("Displaying hosted parties failed")
+            logging.fatal(e)
+            return None
+
+    """
+    show_attendees(party_id): Returns all users that attends the current party
+        Parameters: 
+            - party_id: the party's id number
+            - show_detail: if set to true, then return the details of the attended users. Otherwise only return the ids.
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
+        Returns:
+            - Users: the id of the users that attends the party
+            - None: otherwise
+        """
+
+    def show_attendees(self, party_id, show_detail=False, limit=50):
+        try:
+            if show_detail:
+                statement = f"SELECT u.* FROM Guests g " \
+                            f"JOIN Users u ON g.guest_id = u.user_id " \
+                            f"WHERE g.party_id = '{party_id}'"
+            else:
+                statement = f"SELECT g.guest_id FROM Guests g WHERE g.party_id = '{party_id}'"
+            return self.exec_DML(statement, limit)
+
+        except Exception as e:
+            logging.fatal("Displaying attendees failed")
+            logging.fatal(e)
+            return None
 
 
     """
@@ -215,22 +331,20 @@ class DatabaseConnection:
         return stmt
 
     """
-        query_party(party_name, start_date, end_date, created_after): Query parties using some attributes. If an 
-        attribute is left blank then its constraint is ignored. If no limit is present then return at most 50 results.
+        query_party(party_name, start_date, end_date, created_after, limit): Query parties using some attributes. If an 
+        attribute is left blank then its constraint is ignored.
             Parameters: 
                 - party_name: return all parties where party_name is a substring of the party's name
                 - start_date: return all parties with scheduled dates later than start_date
                 - end_date: return all parties with scheduled dates earlier than end_date
                 - created_after: return all parties created after the timestamp created_after
+                - limit: if specified return at most this amount of rows. Defaulted to 50.
             Returns:
                 - row: The query result
                 - None: If the query present no result
     """
     def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None, limit=50):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             sub_queries = []
 
             if party_id is not None:
@@ -251,10 +365,7 @@ class DatabaseConnection:
             stmt = self.__create_query_statement("SELECT * FROM Parties p", sub_queries)
             print(stmt)
 
-            with self.conn.cursor() as cur:
-                cur.execute(stmt)
-                self.conn.commit()
-                return cur.fetchmany(limit)
+            return self.exec_DML(stmt, limit)
 
         except Exception as e:
             logging.fatal("Query parties failed")
@@ -263,23 +374,21 @@ class DatabaseConnection:
 
 
     """
-        query_user(user_id, username, first_name, last_name, email): Query users using some attributes. If an 
-        attribute is left blank then its constraint is ignored. If no limit is passed then return at most 50 results.
+        query_user(user_id, username, first_name, last_name, email, limit): Query users using some attributes. If an 
+        attribute is left blank then its constraint is ignored.
             Parameters: 
                 - user_id: return the user with the matching user_id
                 - username: return the user with matching username
                 - first_name: return all users with matching first_name
                 - last_name: return all users with matching last_name
                 - email: return the user with matching email address
+                - limit: if specified return at most this amount of rows. Defaulted to 50.
             Returns:
                 - row: The query result
                 - None: If the query present no result
         """
     def query_user(self, user_id=None, username=None, first_name=None, last_name=None, email=None, limit=50):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             sub_queries = []
 
             if user_id is not None:
@@ -300,10 +409,7 @@ class DatabaseConnection:
             stmt = self.__create_query_statement("SELECT * FROM Users u", sub_queries)
             print(stmt)
 
-            with self.conn.cursor() as cur:
-                cur.execute(stmt)
-                self.conn.commit()
-                return cur.fetchmany(limit)
+            return self.exec_DML(stmt, limit)
 
         except Exception as e:
             logging.fatal("Query parties failed")
@@ -321,9 +427,6 @@ class DatabaseConnection:
     """
     def clear_table(self, table):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             self.exec_DDL(f"DELETE FROM {table}")
 
             return True
@@ -344,9 +447,6 @@ class DatabaseConnection:
     """
     def drop_table(self, table):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             self.exec_DDL(f"DROP TABLE IF EXISTS {table}")
 
             return True
@@ -369,9 +469,6 @@ class DatabaseConnection:
     """
     def create_tables(self):
         try:
-            if self.conn is None:
-                raise Exception("Database Connection Not Initialized")
-
             # Users
             statement = "CREATE TABLE IF NOT EXISTS Users (" \
                         "user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " \
