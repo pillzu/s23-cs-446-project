@@ -24,3 +24,4 @@
 | 09 June  |           |          |                |        | 1         |          | Discuss Architecture, Tech Stack, and who builds what |
 | 09 June  |           |          |                |        |           | 1        | Discuss Architecture, Tech Stack, and who builds what |
 | 12 June  |           |          |                | 1      |           |          | Set up basic frontend project                         |
+| 20 June  |           |          |                | 6      |           |          | Set up navigation and skeleton screens                |
