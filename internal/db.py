@@ -256,6 +256,7 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
+
     """
     show_hosted_parties(user_id): Returns all parties that the user with user_id hosts
         Parameters: 
@@ -281,6 +282,7 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
+
     """
     show_attendees(party_id): Returns all users that attends the current party
         Parameters: 
@@ -290,8 +292,7 @@ class DatabaseConnection:
         Returns:
             - Users: the id of the users that attends the party
             - None: otherwise
-        """
-
+    """
     def show_attendees(self, party_id, show_detail=False, limit=50):
         try:
             if show_detail:
@@ -309,14 +310,14 @@ class DatabaseConnection:
 
 
     """
-        create_query_statement(main_query, sub_queries): Create a SQL query statement by concatenating sub_queries 
-        then joining main_query
-            Parameters:
-                - main_query: the main query body
-                - sub_queries: sub-queries that should be concatenated using AND
-            Returns:
-                - row: The query result
-                - None: If the query present no result
+    create_query_statement(main_query, sub_queries): Create a SQL query statement by concatenating sub_queries 
+    then joining main_query
+        Parameters:
+            - main_query: the main query body
+            - sub_queries: sub-queries that should be concatenated using AND
+        Returns:
+            - row: The query result
+            - None: If the query present no result
     """
     def __create_query_statement(self, main_query, sub_queries):
         if len(sub_queries) == 0:
@@ -330,18 +331,19 @@ class DatabaseConnection:
 
         return stmt
 
+
     """
-        query_party(party_name, start_date, end_date, created_after, limit): Query parties using some attributes. If an 
-        attribute is left blank then its constraint is ignored.
-            Parameters: 
-                - party_name: return all parties where party_name is a substring of the party's name
-                - start_date: return all parties with scheduled dates later than start_date
-                - end_date: return all parties with scheduled dates earlier than end_date
-                - created_after: return all parties created after the timestamp created_after
-                - limit: if specified return at most this amount of rows. Defaulted to 50.
-            Returns:
-                - row: The query result
-                - None: If the query present no result
+    query_party(party_name, start_date, end_date, created_after, limit): Query parties using some attributes. If an 
+    attribute is left blank then its constraint is ignored.
+        Parameters: 
+            - party_name: return all parties where party_name is a substring of the party's name
+            - start_date: return all parties with scheduled dates later than start_date
+            - end_date: return all parties with scheduled dates earlier than end_date
+            - created_after: return all parties created after the timestamp created_after
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
+        Returns:
+            - row: The query result
+            - None: If the query present no result
     """
     def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None, limit=50):
         try:
@@ -374,19 +376,19 @@ class DatabaseConnection:
 
 
     """
-        query_user(user_id, username, first_name, last_name, email, limit): Query users using some attributes. If an 
-        attribute is left blank then its constraint is ignored.
-            Parameters: 
-                - user_id: return the user with the matching user_id
-                - username: return the user with matching username
-                - first_name: return all users with matching first_name
-                - last_name: return all users with matching last_name
-                - email: return the user with matching email address
-                - limit: if specified return at most this amount of rows. Defaulted to 50.
-            Returns:
-                - row: The query result
-                - None: If the query present no result
-        """
+    query_user(user_id, username, first_name, last_name, email, limit): Query users using some attributes. If an 
+    attribute is left blank then its constraint is ignored.
+        Parameters: 
+            - user_id: return the user with the matching user_id
+            - username: return the user with matching username
+            - first_name: return all users with matching first_name
+            - last_name: return all users with matching last_name
+            - email: return the user with matching email address
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
+        Returns:
+            - row: The query result
+            - None: If the query present no result
+    """
     def query_user(self, user_id=None, username=None, first_name=None, last_name=None, email=None, limit=50):
         try:
             sub_queries = []
