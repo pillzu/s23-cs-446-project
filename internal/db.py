@@ -139,63 +139,67 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
+
+    """
+        create_query_statement(main_query, sub_queries): Create a SQL query statement by concatenating sub_queries 
+        then joining main_query
+            Parameters:
+                - main_query: the main query body
+                - sub_queries: sub-queries that should be concatenated using AND
+            Returns:
+                - row: The query result
+                - None: If the query present no result
+    """
+    def __create_query_statement(self, main_query, sub_queries):
+        if len(sub_queries) == 0:
+            return main_query
+
+        connector = " WHERE"
+        stmt = main_query
+        for q in sub_queries:
+            stmt += connector + q
+            connector = " AND"
+
+        return stmt
+
     """
         query_party(party_name, start_date, end_date, created_after): Query parties using some attributes. If an 
-        attribute is left blank then its constraint is ignored. Return at most 50 results.
+        attribute is left blank then its constraint is ignored. If no limit is present then return at most 50 results.
             Parameters: 
                 - party_name: return all parties where party_name is a substring of the party's name
                 - start_date: return all parties with scheduled dates later than start_date
                 - end_date: return all parties with scheduled dates earlier than end_date
                 - created_after: return all parties created after the timestamp created_after
             Returns:
-                - row: The query result, if stmt is queried successfully
+                - row: The query result
                 - None: If the query present no result
     """
-    def query_party(self, party_name=None, start_date=None, end_date=None, created_after=None):
+    def query_party(self, party_name=None, start_date=None, end_date=None, created_after=None, limit=50):
         try:
             if self.conn is None:
                 raise Exception("Database Connection Not Initialized")
 
-            statement = "SELECT * FROM Parties p "
-            hasConstraint = False
+            sub_queries = []
 
             if party_name is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.party_name LIKE '%{party_name}%' "
+                sub_queries.append(f" p.party_name LIKE '%{party_name}%'")
 
             if start_date is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.date_time >= '{start_date}' "
+                sub_queries.append(f" p.date_time >= '{start_date}'")
 
             if end_date is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.date_time <= '{end_date}' "
+                sub_queries.append(f" p.date_time <= '{end_date}'")
 
             if created_after is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                else:
-                    statement += "AND "
-                statement += f"p.created_at >= '{created_after}' "
+                sub_queries.append(f" p.created_at >= '{created_after}'")
 
-            print(statement)
+            stmt = self.__create_query_statement("SELECT * FROM Parties p", sub_queries)
+            print(stmt)
 
             with self.conn.cursor() as cur:
-                cur.execute(statement)
+                cur.execute(stmt)
                 self.conn.commit()
-                return cur.fetchmany(50)
+                return cur.fetchmany(limit)
 
         except Exception as e:
             logging.fatal("Query parties failed")
@@ -203,6 +207,53 @@ class DatabaseConnection:
             return None
 
 
+    """
+        query_user(user_id, username, first_name, last_name, email): Query users using some attributes. If an 
+        attribute is left blank then its constraint is ignored. If no limit is passed then return at most 50 results.
+            Parameters: 
+                - user_id: return the user with the matching user_id
+                - username: return the user with matching username
+                - first_name: return all users with matching first_name
+                - last_name: return all users with matching last_name
+                - email: return the user with matching email address
+            Returns:
+                - row: The query result
+                - None: If the query present no result
+        """
+    def query_user(self, user_id=None, username=None, first_name=None, last_name=None, email=None, limit=50):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
+
+            sub_queries = []
+
+            if user_id is not None:
+                sub_queries.append(f" u.user_id = %{user_id}%")
+
+            if username is not None:
+                sub_queries.append(f" u.username LIKE '%{username}%'")
+
+            if first_name is not None:
+                sub_queries.append(f" u.first_name LIKE '%{first_name}%'")
+
+            if last_name is not None:
+                sub_queries.append(f" u.last_name LIKE '%{last_name}%'")
+
+            if email is not None:
+                sub_queries.append(f" u.email LIKE '%{email}%'")
+
+            stmt = self.__create_query_statement("SELECT * FROM Users u", sub_queries)
+            print(stmt)
+
+            with self.conn.cursor() as cur:
+                cur.execute(stmt)
+                self.conn.commit()
+                return cur.fetchmany(limit)
+
+        except Exception as e:
+            logging.fatal("Query parties failed")
+            logging.fatal(e)
+            return None
 
 
     """
