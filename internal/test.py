@@ -1,6 +1,15 @@
 from db import DatabaseConnection
 import logging
 
+"""
+Helper for creating test users
+"""
+def createTestUser(conn, username, first_name, last_name, email, uid=None):
+    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave", "Waterloo",
+                            "ON", "A1B 2C3", email, uid)
+    return uid
+
+
 '''
 Test for creating users
 '''
@@ -8,8 +17,8 @@ def testCreateUser(conn):
     print("********** TEST_CREATE_USER STARTS **********")
     try:
         uid = conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo", "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
-        rows = conn.exec_DML("SELECT * FROM Users")
         print(uid)
+        rows = conn.query_user()
         print(rows)
         rows = conn.exec_DML("SELECT * FROM Accounts")
         print(rows)
@@ -27,14 +36,37 @@ def testCreateParty(conn):
     print("********** TEST_CREATE_PARTY STARTS **********")
     try:
         pid = conn.add_new_party("JM_Test_Party", "2023-10-01 08:00:00")
-        rows = conn.query_party()
         print(pid)
+        rows = conn.query_party()
         print(rows)
     except Exception as e:
         logging.fatal("ERROR: TEST_CREATE_PARTY FAILED")
         logging.fatal(e)
     conn.clear_table("Parties")
     print("********** TEST_CREATE_PARTY ENDS **********")
+
+
+"""
+Test for creating transactions
+"""
+def testCreateTransaction(conn):
+    print("********** TEST_CREATE_TRANS STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.host_party(uid1, pid)
+        conn.add_new_transaction(uid2, uid1, pid, 5.00, "NULL")
+        conn.add_new_transaction(uid3, uid1, pid, 4.50, "NULL")
+        rows = conn.query_transaction()
+        print(rows)
+
+    except Exception as e:
+        logging.fatal("ERROR: TEST_CREATE_TRANS FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    print("********** TEST_CREATE_TRANS ENDS **********")
 
 
 """
@@ -64,15 +96,6 @@ def testQueryParty(conn):
 
 
 """
-Helper for creating test users
-"""
-def createTestUser(conn, username, first_name, last_name, email, uid=None):
-    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave", "Waterloo",
-                            "ON", "A1B 2C3", email, uid)
-    return uid
-
-
-"""
 Test for querying users
 """
 def testQueryUser(conn):
@@ -99,6 +122,39 @@ def testQueryUser(conn):
         logging.fatal(e)
     conn.clear_table("Users")
     print("********** TEST_QUERY_USER ENDS **********")
+
+
+"""
+Test for querying transactions
+"""
+def testQueryTransaction(conn):
+    print("********** TEST_QUERY_TRANS STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.host_party(uid1, pid)
+        trans1 = conn.add_new_transaction(uid2, uid1, pid, 5.00, "NULL")
+        trans2 = conn.add_new_transaction(uid3, uid1, pid, 4.50, "NULL")
+        rows = conn.query_transaction()
+        print(rows)
+        rows = conn.query_transaction(trans_id=trans1)
+        print(rows)
+        rows = conn.query_transaction(from_id=uid2, to_id=uid1)
+        print(rows)
+        rows = conn.query_transaction(party_id=pid)
+        print(rows)
+        rows = conn.query_transaction(min_amount=5.00)
+        print(rows)
+        rows = conn.query_transaction(max_amount=4.50)
+        print(rows)
+
+    except Exception as e:
+        logging.fatal("ERROR: TEST_QUERY_TRANS FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    print("********** TEST_QUERY_TRANS ENDS **********")
 
 
 """
@@ -133,15 +189,17 @@ def testHostParties(conn):
     print("********** TEST_HOST_PARTIES STARTS **********")
     try:
         uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
-        conn.host_party(uid1, pid)
+        pid1 = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        pid2 = conn.add_new_party("JM_Chess_Party", "2023-10-04 09:00:00")
+        conn.host_party(uid1, pid1)
         rows = conn.show_hosted_parties(uid1, show_detail=True)
         print(rows)
         uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
-        conn.attend_party(uid2, pid)
+        conn.attend_party(uid2, pid1)
+        conn.attend_party(uid2, pid2)
         rows = conn.show_attended_parties(uid2, show_detail=True)
         print(rows)
-        conn.cancel_party(pid)
+        conn.cancel_party(pid1)
         rows = conn.show_attended_parties(uid2, show_detail=True)
         print(rows)
         rows = conn.show_hosted_parties(uid1, show_detail=True)
@@ -162,8 +220,10 @@ connection = DatabaseConnection(db_url)
 # connection.create_tables()
 # testCreateUser(connection)
 # testCreateParty(connection)
+# testCreateTransaction(connection)
 # testQueryParty(connection)
 # testQueryUser(connection)
+# testQueryTransaction(connection)
 # testAttendParties(connection)
 # testHostParties(connection)
 

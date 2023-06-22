@@ -89,13 +89,9 @@ class DatabaseConnection:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     uid = cur.fetchone()[0]
-                statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
-                            f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
-                            f"'{address_postal}', '{email}', 0)"
-            else:
-                statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
-                            f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
-                            f"'{address_postal}', '{email}', 0)"
+            statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
+                        f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
+                        f"'{address_postal}', '{email}', 0)"
             self.exec_DDL(statement)
 
             self.exec_DDL(f"INSERT INTO Accounts VALUES ('{uid}', 0)")
@@ -109,10 +105,9 @@ class DatabaseConnection:
 
 
     """
-    add_new_party(party_id, party_name, date_time): Insert a new party entry with given information into Parties 
+    add_new_party(party_name, date_time): Insert a new party entry with given information into Parties 
     table. The party's creation time will be filled as the current system time
         Parameters: 
-            - party_id: the party's id number
             - party_name: the party's name
             - date_time: The scheduled date of the party
         Returns:
@@ -129,12 +124,45 @@ class DatabaseConnection:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     party_id = cur.fetchone()[0]
-                statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
-            else:
-                statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
+            statement = f"INSERT INTO Parties VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}')"
 
             self.exec_DDL(statement)
             return party_id
+
+        except Exception as e:
+            logging.fatal("Adding new party to database failed")
+            logging.fatal(e)
+            return None
+
+
+    """
+    add_new_transaction(from_id, to_id, party_id, amount, qrcode): Insert a new transaction entry with given information
+    into the Transactions table. The transaction's creation time will be filled as the current system time
+        Parameters: 
+            - from_id: the guest's id number
+            - to_id: the host's id number
+            - party_id: the party's id number
+            - amount: the payment amount
+            - qrcode: the generated qrcode
+        Returns:
+            - uuid: if the transaction entry is inserted successfully, return the transaction's id
+            - None: otherwise
+        Throws Exception if:
+            - the transaction's information may have invalid fields
+    """
+    def add_new_transaction(self, from_id, to_id, party_id, amount, qrcode, trans_id=None):
+        try:
+            timez = pytz.timezone("Canada/Eastern")
+
+            if trans_id is None:
+                with self.conn.cursor() as cur:
+                    cur.execute("SELECT gen_random_uuid()")
+                    trans_id = cur.fetchone()[0]
+            statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{from_id}', " \
+                        f"'{to_id}', '{party_id}', {amount}, {qrcode})"
+
+            self.exec_DDL(statement)
+            return trans_id
 
         except Exception as e:
             logging.fatal("Adding new party to database failed")
@@ -414,7 +442,64 @@ class DatabaseConnection:
             return self.exec_DML(stmt, limit)
 
         except Exception as e:
-            logging.fatal("Query parties failed")
+            logging.fatal("Query users failed")
+            logging.fatal(e)
+            return None
+
+
+    """
+    query_transaction(trans_id, from_id, to_id, party_id, min_amount, max_amount, start_date, end_date): Query 
+    transactions using some attributes. If an attribute is left blank then its constraint is ignored.
+        Parameters: 
+            - trans_id: return the transaction with the matching transaction_id
+            - from_id: return all transactions with paid by user with from_id
+            - to_id: return all transactions with paid to user with to_id
+            - party_id: return all transactions associated with the party with party_id
+            - min_amount: return all transactions with payment amount >= min_amount
+            - max_amount: return all transactions with payment amount <= max_amount
+            - start_date: return all transactions happening after this time
+            - end_date: return all transactions happening before this time
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
+        Returns:
+            - row: The query result
+            - None: If the query present no result
+    """
+    def query_transaction(self, trans_id=None, from_id=None, to_id=None, party_id=None, min_amount=None,
+                          max_amount=None, start_date=None, end_date=None, limit=50):
+        try:
+            sub_queries = []
+
+            if trans_id is not None:
+                sub_queries.append(f" t.transaction_id = '{trans_id}'")
+
+            if from_id is not None:
+                sub_queries.append(f" t.from_id = '{from_id}'")
+
+            if to_id is not None:
+                sub_queries.append(f" t.to_id = '{to_id}'")
+
+            if party_id is not None:
+                sub_queries.append(f" t.party_id = '{party_id}'")
+
+            if min_amount is not None:
+                sub_queries.append(f" t.payment_amount >= {min_amount}")
+
+            if max_amount is not None:
+                sub_queries.append(f" t.payment_amount <= {max_amount}")
+
+            if start_date is not None:
+                sub_queries.append(f" t.time >= '{start_date}'")
+
+            if end_date is not None:
+                sub_queries.append(f" t.time <= '{end_date}'")
+
+            stmt = self.__create_query_statement("SELECT * FROM Transactions t", sub_queries)
+            print(stmt)
+
+            return self.exec_DML(stmt, limit)
+
+        except Exception as e:
+            logging.fatal("Query transactions failed")
             logging.fatal(e)
             return None
 
@@ -532,7 +617,25 @@ class DatabaseConnection:
                         "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
-            # TODO: Add all DDLs for CREATE TABLE
+            # Transactions
+            statement = "CREATE TABLE IF NOT EXISTS Transactions (" \
+                        "transaction_id UUID PRIMARY KEY, " \
+                        "time TIMESTAMP, " \
+                        "from_id UUID, " \
+                        "to_id UUID, " \
+                        "party_id UUID, " \
+                        "payment_amount DECIMAL(10, 2), " \
+                        "qrcode BYTEA, " \
+                        "CONSTRAINT guest_user_id " \
+                        "FOREIGN KEY (from_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
+                        "CONSTRAINT host_user_id " \
+                        "FOREIGN KEY (to_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
+                        "CONSTRAINT party_id " \
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
+
+            # TODO: Add DDLs for Tags, PartyLocations, and MusicSuggestions
             return True
 
         except Exception as e:
