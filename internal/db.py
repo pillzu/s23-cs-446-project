@@ -596,8 +596,8 @@ class DatabaseConnection:
                         "created_at TIMESTAMP NOT NULL, " \
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \
-                        "thumbnail BYTEA NOT NULL, " \
-                        "photos BYTEA[] NOT NULL, " \
+                        "thumbnail BYTEA, " \
+                        "photos BYTEA[], " \
                         "UNIQUE(party_name), " \
                         "entry_fee INTEGER)"
             self.exec_DDL(statement)
@@ -635,7 +635,7 @@ class DatabaseConnection:
                         "guest_id VARCHAR(100) NOT NULL, " \
                         "party_id UUID, " \
                         "UNIQUE(guest_id, party_id), " \
-                        "suggested_tracks VARCHAR[], " \
+                        "suggested_tracks VARCHAR[] NOT NULL, " \
                         "CONSTRAINT party_id " \
                         "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
