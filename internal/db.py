@@ -10,7 +10,7 @@ class DatabaseConnection:
     def __init__(self, db_url):
         try:
             self.conn = pscg.connect(db_url,
-                                application_name="$ docs_simplecrud_psycopg2")
+                                     application_name="$ docs_simplecrud_psycopg2")
         except Exception as e:
             logging.fatal("Database Connection Failed")
             logging.fatal(e)
@@ -90,8 +90,8 @@ class DatabaseConnection:
                     cur.execute("SELECT gen_random_uuid()")
                     uid = cur.fetchone()[0]
             statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
-                            f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
-                            f"'{address_postal}', '{email}', 0)"
+                        f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
+                        f"'{address_postal}', '{email}', 0)"
             self.exec_DDL(statement)
 
             self.exec_DDL(f"INSERT INTO Accounts VALUES ('{uid}', 0)")

@@ -64,7 +64,8 @@ def testCreateTransaction(conn):
         uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
         uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
-        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
+                                 b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.host_party(uid1, pid)
         conn.add_new_transaction(uid2, uid1, pid, 5.00, "NULL")
         conn.add_new_transaction(uid3, uid1, pid, 4.50, "NULL")
@@ -75,6 +76,7 @@ def testCreateTransaction(conn):
         logging.fatal("ERROR: TEST_CREATE_TRANS FAILED")
         logging.fatal(e)
     conn.clear_table("Users")
+    conn.clear_table("Parties")
     print("********** TEST_CREATE_TRANS ENDS **********")
 
 
@@ -112,9 +114,8 @@ Test for setting tags
 """
 def testSetTags(conn):
     try:
-        conn.add_new_party("JM_Bowling_Party", "'2023-07-02 14:30:00'", 60, "Bowling Night", b"\x01\x01\x01\x01\x01",
-                           [b"\x11\x22\x33", b"\x44\x55\x66"], 45)
-        party_id = conn.query_party(party_name="JM_Bowling_Party")[0][0]
+        party_id = conn.add_new_party("JM_Bowling_Party", "'2023-07-02 14:30:00'", 60, "Bowling Night",
+                                      b"\x01\x01\x01\x01\x01", [b"\x11\x22\x33", b"\x44\x55\x66"], 45)
 
         conn.set_tags(party_id, ["Bowling", "Pizza"])
         rows = conn.exec_DML("SELECT * FROM Tags")
@@ -125,8 +126,9 @@ def testSetTags(conn):
         print(rows)
 
 
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Set_Tags Failed")
+        logging.fatal(e)
     conn.clear_table("Tags")
     conn.clear_table("Parties")
 
@@ -136,10 +138,8 @@ Test for setting party locations
 """
 def testSetLocation(conn):
     try:
-        conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description", b'Thumbnail Data',
-                           [b'Photo 1', b'Photo 2'], 10)
-
-        party_id = conn.query_party(party_name="Test Party")[0][0]
+        party_id = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
+                                      b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
 
         conn.set_location(party_id, "123 Main St", "City", "Province", "12345")
         rows = conn.exec_DML("SELECT * FROM PartyLocations")
@@ -149,8 +149,9 @@ def testSetLocation(conn):
         rows = conn.exec_DML("SELECT * FROM PartyLocations")
         print(rows)
 
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Set_Location Failed")
+        logging.fatal(e)
     conn.clear_table("PartyLocations")
     conn.clear_table("Parties")
 
@@ -161,9 +162,8 @@ Test for setting music suggestions
 # TODO: Edit the test once the Guests table is complete so that guest_id can be validated as well
 def testSetSuggestions(conn):
     try:
-        conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description", b'Thumbnail Data',
-                           [b'Photo 1', b'Photo 2'], 10)
-        party_id = conn.query_party(party_name="Test Party")[0][0]
+        party_id = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
+                                      b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
 
         conn.set_suggestions("1", party_id, ["Track 1", "Track 2", "Track 3"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
@@ -177,8 +177,9 @@ def testSetSuggestions(conn):
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Set_Suggestions Failed")
+        logging.fatal(e)
     conn.clear_table("MusicSuggestions")
     conn.clear_table("Parties")
 
@@ -211,8 +212,9 @@ def testQueryParty(conn):
         print("Test 4")
         rows = conn.query_party(start_date="2023-09-05 08:00:00", entry_fee=20)
         print(rows)
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Query_Party Failed")
+        logging.fatal(e)
     conn.clear_table("Parties")
 
 
@@ -254,8 +256,9 @@ def testQueryTags(conn):
         rows = conn.query_tags(tag_subset=["Game", "Tournament"])
         print(rows)
 
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Query_Tags Failed")
+        logging.fatal(e)
     conn.clear_table("Tags")
     conn.clear_table("Parties")
 
@@ -298,8 +301,9 @@ def testQueryLocations(conn):
         rows = conn.query_locations(prov="Prov1", postal_code="PostC2")
         print(rows)
 
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Query_Locations Failed")
+        logging.fatal(e)
     conn.clear_table("PartyLocations")
     conn.clear_table("Parties")
 
@@ -343,8 +347,9 @@ def testQuerySuggestions(conn):
         rows = conn.query_suggestions(guest_id="2", track_subset=["Music4"])
         print(rows)
 
-    except Exception:
+    except Exception as e:
         logging.fatal("Test_Query_Suggestions Failed")
+        logging.fatal(e)
     conn.clear_table("MusicSuggestions")
     conn.clear_table("Parties")
 
@@ -358,7 +363,8 @@ def testQueryTransaction(conn):
         uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
         uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
-        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
+                                 b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.host_party(uid1, pid)
         trans1 = conn.add_new_transaction(uid2, uid1, pid, 5.00, "NULL")
         trans2 = conn.add_new_transaction(uid3, uid1, pid, 4.50, "NULL")
@@ -379,6 +385,7 @@ def testQueryTransaction(conn):
         logging.fatal("ERROR: TEST_QUERY_TRANS FAILED")
         logging.fatal(e)
     conn.clear_table("Users")
+    conn.clear_table("Parties")
     print("********** TEST_QUERY_TRANS ENDS **********")
 
 
@@ -390,7 +397,8 @@ def testAttendParties(conn):
     try:
         uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
-        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
+                                 b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.attend_party(uid1, pid)
         conn.attend_party(uid2, pid)
         rows = conn.show_attendees(pid, show_detail=True)
@@ -414,8 +422,10 @@ def testHostParties(conn):
     print("********** TEST_HOST_PARTIES STARTS **********")
     try:
         uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        pid1 = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
-        pid2 = conn.add_new_party("JM_Chess_Party", "2023-10-04 09:00:00")
+        pid1 = conn.add_new_party("Test Party 1", "'2023-09-05 12:30:00'", 10, "Test Party 1 Description",
+                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
+        pid2 = conn.add_new_party("Test Party 2", "'2023-09-06 12:30:00'", 20, "Test Party 2 Description",
+                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 20)
         conn.host_party(uid1, pid1)
         rows = conn.show_hosted_parties(uid1, show_detail=True)
         print(rows)
@@ -441,36 +451,38 @@ def testHostParties(conn):
 # Hardcoded URL, for POC only
 db_url = "postgresql://yanchen:9gAOcPaBx4tJJ3OAsD7G6A@vibees-db-11486.7tt.cockroachlabs.cloud:26257/VIBEES?sslmode=verify-full"
 connection = DatabaseConnection(db_url)
+# connection.drop_table("Users")
 # connection.drop_table("Parties")
+# connection.drop_table("Transactions")
 # connection.create_tables()
 # breakpoint()
-# testCreateUser(connection)
-# breakpoint()
-# testCreateParty(connection)
-# breakpoint()
-# testCreateTransaction(connection)
-# breakpoint()
+testCreateUser(connection)
+breakpoint()
+testCreateParty(connection)
+breakpoint()
+testCreateTransaction(connection)
+breakpoint()
 
-# testSetTags(connection)
-# breakpoint()
-# testSetLocation(connection)
-# breakpoint()
-# testSetSuggestions(connection)
-# breakpoint()
+testSetTags(connection)
+breakpoint()
+testSetLocation(connection)
+breakpoint()
+testSetSuggestions(connection)
+breakpoint()
 
-# testQueryParty(connection)
-# breakpoint()
-# testQueryTags(connection)
-# breakpoint()
-# testQueryLocations(connection)
-# breakpoint()
-# testQuerySuggestions(connection)
-# breakpoint()
-# testQueryUser(connection)
-# breakpoint()
-# testQueryTransaction(connection)
-# breakpoint()
+testQueryParty(connection)
+breakpoint()
+testQueryTags(connection)
+breakpoint()
+testQueryLocations(connection)
+breakpoint()
+testQuerySuggestions(connection)
+breakpoint()
+testQueryUser(connection)
+breakpoint()
+testQueryTransaction(connection)
+breakpoint()
 
-# testAttendParties(connection)
-# testHostParties(connection)
-
+testAttendParties(connection)
+breakpoint()
+testHostParties(connection)
