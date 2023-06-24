@@ -1,18 +1,12 @@
 debug:
-	@echo "Extracting deps info..."
-	@pip3 freeze > requirements.txt
 	@echo "Running debugging server listening on local network..."
 	@flask run --debug
 
 run-dev:
-	@echo "Extracting deps info..."
-	@pip3 freeze > requirements.txt
 	@echo "Running server listening on local network..."
 	@flask run
 
 run-local:
-	@echo "Extracting deps info..."
-	@pip3 freeze > requirements.txt
 	@echo "Running server listening on all IPs..."
 	@flask run --host=0.0.0.0
 
@@ -22,3 +16,4 @@ install-deps:
 	@. ./.venv/bin/activate
 	@echo "Virtual Env Created..."
 	@pip3 install -r requirements.txt
+	@echo "Please run \". ./.venv/bin/activate\" to start virtual environment"
