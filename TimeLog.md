@@ -30,3 +30,4 @@
 | 20 June  |           |          |                |        | 2         |          | Implement schema, APIs and unit tests for Users and Parties               |
 | 20 June  |           |          |                | 6      |           |          | Set up navigation and skeleton screens                                    |
 | 21 June  |           |          |                |        | 6         |          | Implement schema, APIs and unit tests for Guests, Hosts, and Transactions |
+| 22 June  | 8         |          |                |        |           |          | Implement schema, APIs and unit tests for Tags, Locations and Suggestions as well as update Parties schema|
