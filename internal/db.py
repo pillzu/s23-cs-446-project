@@ -265,10 +265,11 @@ class DatabaseConnection:
     def set_suggestions(self, guest_id, party_id, suggested_tracks):
         try:
             # Check if the party_id exists in the Parties table
-            # TODO: Add a check for guest_id once it becomes a UUID
             party = self.query_party(party_id=party_id)
             if party is None or len(party) == 0:
                 raise Exception(f"Party with ID '{party_id}' does not exist")
+
+            # check if guest attends the party
             attend = self.check_attends(party_id=party_id, guest_id=guest_id)
             if attend is False:
                 raise Exception(f"Guest ('{guest_id}') does not attend party ('{party_id}')")
