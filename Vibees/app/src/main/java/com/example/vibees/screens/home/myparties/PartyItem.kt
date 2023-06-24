@@ -3,6 +3,7 @@ package com.example.vibees.screens.home.myparties
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PartyItem(
     partyinfo: Party,
+    onClick: (id: String) -> Unit
 ) {
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
@@ -36,6 +38,7 @@ fun PartyItem(
             .padding(5.dp)
             .clip(RoundedCornerShape(20.dp))
             .fillMaxWidth()
+            .clickable { onClick("test_id") }
             ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
