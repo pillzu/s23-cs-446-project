@@ -1,5 +1,17 @@
 # VIBEES
 
+## Prerequisites
+
+Please add the `local.properties` file to `Vibes/` for compiling using android
+studio. Copy and paste the following content into the file:
+
+```
+sdk.dir=<path-to-your-android-sdk>
+```
+
+You can find the path to your sdk by going to `Tools->SDK Manager` and searching
+for Android SDK
+
 ## Team Members
 
 - Preenon Chisty (20840916)
