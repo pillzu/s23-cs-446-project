@@ -22,7 +22,11 @@ fun HomeNavGraph(navController: NavHostController) {
             )
         }
         composable(route = BottomBar.MyParties.route) {
-            MyPartiesScreen()
+            MyPartiesScreen(
+                onClick = {id ->
+                    navController.navigate(PartyScreen.Details.passId(id))
+                }
+            )
         }
         composable(route = BottomBar.Host.route) {
             GenericScreen(
@@ -42,6 +46,7 @@ fun HomeNavGraph(navController: NavHostController) {
                 onClick = { }
             )
         }
+        partyNavGraph(navController = navController)
     }
 }
 
