@@ -269,6 +269,9 @@ class DatabaseConnection:
             party = self.query_party(party_id=party_id)
             if party is None or len(party) == 0:
                 raise Exception(f"Party with ID '{party_id}' does not exist")
+            attend = self.check_attends(party_id=party_id, guest_id=guest_id)
+            if attend is False:
+                raise Exception(f"Guest ('{guest_id}') does not attend party ('{party_id}')")
 
             suggested_tracks = str(suggested_tracks)[1:-1]
 
@@ -449,6 +452,25 @@ class DatabaseConnection:
             logging.fatal("Displaying attendees failed")
             logging.fatal(e)
             return None
+
+    """
+    check_attends(party_id, guest_id): Checks if the guest with guest_id attends party with party_id
+        Parameters: 
+            - party_id: the party's id number
+            - guest_id: the guest's user id
+        Returns:
+            - true: if the guest attends the party
+            - false: otherwise
+    """
+    def check_attends(self, party_id, guest_id):
+        try:
+            statement = f"SELECT * FROM Guests g WHERE g.party_id = '{party_id}' AND g.guest_id = '{guest_id}'"
+            return len(self.exec_DML(statement)) != 0
+
+        except Exception as e:
+            logging.fatal("Checking attendance failed")
+            logging.fatal(e)
+            return False
 
 
     """
@@ -824,6 +846,27 @@ class DatabaseConnection:
                         "entry_fee INTEGER)"
             self.exec_DDL(statement)
 
+            # Hosts
+            statement = "CREATE TABLE IF NOT EXISTS Hosts (" \
+                        "host_id UUID, " \
+                        "party_id UUID, " \
+                        "CONSTRAINT host_user_id " \
+                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
+                        "CONSTRAINT host_party_id " \
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
+            # Guests
+            statement = "CREATE TABLE IF NOT EXISTS Guests (" \
+                        "guest_id UUID, " \
+                        "party_id UUID, " \
+                        "UNIQUE(guest_id, party_id), " \
+                        "CONSTRAINT guest_user_id " \
+                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
+                        "CONSTRAINT guest_party_id " \
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
             # Tags
             statement = "CREATE TABLE IF NOT EXISTS Tags (" \
                         "party_id UUID, " \
@@ -847,17 +890,15 @@ class DatabaseConnection:
             self.exec_DDL(statement)
 
             # MusicSuggestions
-            # TODO: Make the Guests table so that we can have
-            # "guest_id UUID, " \
-            # "CONSTRAINT guest_id " \
-            # "FOREIGN KEY (guest_id) REFERENCES Guests(guest_id) ON DELETE CASCADE, " \
             statement = "CREATE TABLE IF NOT EXISTS MusicSuggestions (" \
-                        "guest_id VARCHAR(100) NOT NULL, " \
+                        "guest_id UUID, " \
                         "party_id UUID, " \
                         "UNIQUE(guest_id, party_id), " \
                         "suggested_tracks VARCHAR[] NOT NULL, " \
                         "CONSTRAINT party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE, " \
+                        "CONSTRAINT guest_id " \
+                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
             # Accounts
@@ -875,26 +916,6 @@ class DatabaseConnection:
                         "cvv INTEGER NOT NULL, " \
                         "CONSTRAINT account_credit_card " \
                         "FOREIGN KEY (account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE)"
-            self.exec_DDL(statement)
-
-            # Hosts
-            statement = "CREATE TABLE IF NOT EXISTS Hosts (" \
-                        "host_id UUID, " \
-                        "party_id UUID, " \
-                        "CONSTRAINT host_user_id " \
-                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
-                        "CONSTRAINT host_party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
-            self.exec_DDL(statement)
-
-            # Guests
-            statement = "CREATE TABLE IF NOT EXISTS Guests (" \
-                        "guest_id UUID, " \
-                        "party_id UUID, " \
-                        "CONSTRAINT guest_user_id " \
-                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
-                        "CONSTRAINT guest_party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
             # Transactions

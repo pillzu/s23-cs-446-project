@@ -5,7 +5,8 @@ import logging
 Helper for creating test users
 """
 def createTestUser(conn, username, first_name, last_name, email, uid=None):
-    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave", "Waterloo",
+    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave",
+                            "Waterloo",
                             "ON", "A1B 2C3", email, uid)
     return uid
 
@@ -16,7 +17,8 @@ Test for creating users
 def testCreateUser(conn):
     print("********** TEST_CREATE_USER STARTS **********")
     try:
-        uid = conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo", "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
+        uid = conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo",
+                                "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
         print(uid)
         rows = conn.query_user()
         print(rows)
@@ -159,21 +161,22 @@ def testSetLocation(conn):
 """
 Test for setting music suggestions
 """
-# TODO: Edit the test once the Guests table is complete so that guest_id can be validated as well
 def testSetSuggestions(conn):
     try:
+        user_id = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         party_id = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
                                       b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
+        conn.attend_party(user_id, party_id)
 
-        conn.set_suggestions("1", party_id, ["Track 1", "Track 2", "Track 3"])
+        conn.set_suggestions(user_id, party_id, ["Track 1", "Track 2", "Track 3"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
-        conn.set_suggestions("2", party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
+        conn.set_suggestions(user_id, party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
-        conn.set_suggestions("1", party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
+        conn.set_suggestions(user_id, party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
@@ -311,32 +314,33 @@ def testQueryLocations(conn):
 """
 Test for querying suggestions
 """
-# TODO: Update with actual guest_ids
 def testQuerySuggestions(conn):
     try:
-        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
-                           [b"\x10\x20\x30"], 20)
-        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
-                           [b"\x30\x20\x10"], 15)
-        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01",
-                           [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        pid1 = conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
+                                  [b"\x10\x20\x30"], 20)
+        pid2 = conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
+                                  [b"\x30\x20\x10"], 15)
+        pid3 = conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01",
+                                  [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
 
-        rows = conn.query_party()
-        party_id = conn.query_party(party_name="JM_Poker_Party")[0][0]
-        conn.set_suggestions('1', party_id, ["Music1", "Music2"])
+        conn.attend_party(uid1, pid1)
+        conn.attend_party(uid2, pid2)
+        conn.attend_party(uid2, pid3)
 
-        party_id = conn.query_party(party_name="JM_Chess_Party")[0][0]
-        conn.set_suggestions('2', party_id, ["Music3", "Music4"])
+        conn.set_suggestions(uid1, pid1, ["Music1", "Music2"])
 
-        party_id = conn.query_party(party_name="JM_Music_Party")[0][0]
-        conn.set_suggestions('2', party_id, ["Music1", "Music3"])
+        conn.set_suggestions(uid2, pid2, ["Music3", "Music4"])
+
+        conn.set_suggestions(uid2, pid3, ["Music1", "Music3"])
 
         print("Test 1")
         rows = conn.query_suggestions()
         print(rows)
 
         print("Test 2")
-        rows = conn.query_suggestions(guest_id="1")
+        rows = conn.query_suggestions(guest_id=uid1)
         print(rows)
 
         print("Test 3")
@@ -344,7 +348,7 @@ def testQuerySuggestions(conn):
         print(rows)
 
         print("Test 4")
-        rows = conn.query_suggestions(guest_id="2", track_subset=["Music4"])
+        rows = conn.query_suggestions(guest_id=uid2, track_subset=["Music4"])
         print(rows)
 
     except Exception as e:
@@ -454,8 +458,11 @@ connection = DatabaseConnection(db_url)
 # connection.drop_table("Users")
 # connection.drop_table("Parties")
 # connection.drop_table("Transactions")
+# connection.drop_table("MusicSuggestions")
+# connection.drop_table("Guests")
 # connection.create_tables()
 # breakpoint()
+
 testCreateUser(connection)
 breakpoint()
 testCreateParty(connection)
