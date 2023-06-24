@@ -297,84 +297,49 @@ class DatabaseConnection:
             - created_after: Return parties created after the timestamp created_after.
             - max_capacity: Return parties with maximum capacity greater than or equal to max_capacity.
             - entry_fee: Return parties with entry fee less than or equal to entry_fee.
+            - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result, if stmt is queried successfully
             - None: If the query present no result
-    """
-    def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None, max_capacity=None, entry_fee=None):
+    """  
+    def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None, max_capacity=None, entry_fee=None, limit=50):
         try:
             if self.conn is None:
                 raise Exception("Database Connection Not Initialized")
-
-            statement = "SELECT * FROM Parties p "
-            hasConstraint = False
-            
+    
+            sub_queries = []
+    
             if party_id is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.party_id = '{party_id}' "
-                
+                sub_queries.append(f" p.party_id = '{party_id}'")
+    
             if party_name is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.party_name LIKE '%{party_name}%' "
-
+                sub_queries.append(f" p.party_name LIKE '%{party_name}%'")
+    
             if start_date is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.date_time >= '{start_date}' "
-
+                sub_queries.append(f" p.date_time >= '{start_date}'")
+    
             if end_date is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.date_time <= '{end_date}' "
-
+                sub_queries.append(f" p.date_time <= '{end_date}'")
+    
             if created_after is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                else:
-                    statement += "AND "
-                statement += f"p.created_at >= '{created_after}' "
-
+                sub_queries.append(f" p.created_at >= '{created_after}'")
+    
             if max_capacity is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.max_capacity >= {max_capacity} "
-
+                sub_queries.append(f" p.max_capacity >= {max_capacity}")
+    
             if entry_fee is not None:
-                if not hasConstraint:
-                    statement += "WHERE "
-                    hasConstraint = True
-                else:
-                    statement += "AND "
-                statement += f"p.entry_fee <= {entry_fee} "
-
+                sub_queries.append(f" p.entry_fee <= {entry_fee}")
+    
+            statement = self.__create_query_statement("SELECT * FROM Parties p", sub_queries)
             print(statement)
-            
-            with self.conn.cursor() as cur:
-                cur.execute(statement)
-                self.conn.commit()
-                return cur.fetchmany(50)
-
+    
+            return self.exec_DML(statement, limit)
+    
         except Exception as e:
             logging.fatal("Query parties failed")
             logging.fatal(e)
             return None
+
 
     """
     query_tags(party_id, tag_list): Query tags using some attributes. If an attribute is left blank then its constraint is ignored.
