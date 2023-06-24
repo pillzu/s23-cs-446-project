@@ -1,6 +1,7 @@
 package com.example.vibees.graphs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,7 +10,7 @@ import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 
 @Composable
-fun HomeNavGraph(navController: NavHostController) {
+fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
     NavHost(
         navController = navController,
         route = Graph.HOME,
@@ -25,7 +26,8 @@ fun HomeNavGraph(navController: NavHostController) {
             MyPartiesScreen(
                 onClick = {id ->
                     navController.navigate(PartyScreen.Details.passId(id))
-                }
+                },
+                modifier = modifier
             )
         }
         composable(route = BottomBar.Host.route) {

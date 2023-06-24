@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,24 +26,17 @@ import androidx.wear.compose.material.Text
 @Composable
 fun PartyDetails(
     navController: NavHostController,
-    id: String
+    id: String,
 ) {
     Column(
-
     ) {
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back Arrow",
-            modifier = Modifier
-                .padding(15.dp)
-                .size(40.dp)
-        )
         // QR Code section
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp)
+                .padding(top = 50.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,6 +67,7 @@ fun PartyDetails(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(10.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Face,

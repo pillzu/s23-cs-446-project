@@ -36,11 +36,12 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPartiesScreen(
-    onClick: (id: String) -> Unit
+    onClick: (id: String) -> Unit,
+    modifier: Modifier
 ) {
     Column(
-        modifier = Modifier
-            .padding(15.dp)
+        modifier = modifier
+            .padding(horizontal = 15.dp)
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
