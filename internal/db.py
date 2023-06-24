@@ -158,10 +158,11 @@ class DatabaseConnection:
             timez = pytz.timezone("Canada/Eastern")
    
             photos = str(photos)[1:-1]
-            
+
+            generated_party_id = gen_random_uuid()
             if party_id is None:
                 statement = f"INSERT INTO Parties " \
-                            f"VALUES (gen_random_uuid(), '{party_name}', {date_time}, '{datetime.now(timez)}', " \
+                            f"VALUES ('{generated_party_id}', '{party_name}', {date_time}, '{datetime.now(timez)}', " \
                             f"{max_capacity}, '{description}', {thumbnail}, " \
                             f"ARRAY[{photos}], {entry_fee})"
             else:
@@ -170,12 +171,16 @@ class DatabaseConnection:
                             f"{max_capacity}, '{description}', {thumbnail}, " \
                             f"ARRAY[{photos}], {entry_fee})"
             self.exec_DDL(statement)
-            return True
+
+            if party_id is None:
+                return generated_party_id
+            else:
+                return party_id
 
         except Exception as e:
             logging.fatal("Adding new party to database failed")
             logging.fatal(e)
-            return False
+            return None
 
 
     """
