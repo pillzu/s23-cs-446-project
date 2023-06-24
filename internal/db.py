@@ -509,7 +509,27 @@ class DatabaseConnection:
             logging.fatal("Clearing Tables Failed")
             logging.fatal(e)
             return False
+    """
+    delete_party(party_id): Delete a specified party from the Parties table
+        Parameters: 
+            - party_id: the ID of the party to be deleted
+        Returns:
+            - True: if the party is successfully deleted
+            - False: otherwise
+    """
+    def delete_party(self, party_id):
+        try:
+            if self.conn is None:
+                raise Exception("Database Connection Not Initialized")
 
+            self.exec_DDL(f"DELETE FROM Parties WHERE party_id = '{party_id}'")
+
+            return True
+
+        except Exception as e:
+            logging.fatal("Deleting Party Failed")
+            logging.fatal(e)
+            return False
 
     """
     drop_table(table): Drop the corresponding table in the database.
