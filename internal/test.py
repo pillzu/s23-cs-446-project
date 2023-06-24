@@ -1,23 +1,39 @@
 from db import DatabaseConnection
 import logging
 
+"""
+Helper for creating test users
+"""
+def createTestUser(conn, username, first_name, last_name, email, uid=None):
+    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave", "Waterloo",
+                            "ON", "A1B 2C3", email, uid)
+    return uid
+
+
 '''
 Test for creating users
 '''
 def testCreateUser(conn):
+    print("********** TEST_CREATE_USER STARTS **********")
     try:
-        conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo", "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
-        rows = conn.exec_DML("SELECT * FROM Users")
+        uid = conn.add_new_user("JM_Test", "123456", "Jerry", "Meng", 123456789, "1234 University Ave", "Waterloo", "Ontario", "A1B 2C3", "jerrymeng20@gmail.com")
+        print(uid)
+        rows = conn.query_user()
         print(rows)
-    except Exception:
-        logging.fatal("Test_Create_User Failed")
+        rows = conn.exec_DML("SELECT * FROM Accounts")
+        print(rows)
+    except Exception as e:
+        logging.fatal("ERROR: TEST_CREATE_USER FAILED")
+        logging.fatal(e)
     conn.clear_table("Users")
+    print("********** TEST_CREATE_USER ENDS **********")
 
 
 """
 Test for creating parties
 """
 def testCreateParty(conn):
+    print("********** TEST_CREATE_PARTY STARTS **********")
     try:
         # Create a party with all the fields
         party_name = "JM_Test_Party"
@@ -32,9 +48,63 @@ def testCreateParty(conn):
 
         rows = conn.query_party()
         print(rows)
-    except Exception:
-        logging.fatal("Test_Create_Party Failed")
+    except Exception as e:
+        logging.fatal("ERROR: TEST_CREATE_PARTY FAILED")
+        logging.fatal(e)
     conn.clear_table("Parties")
+    print("********** TEST_CREATE_PARTY ENDS **********")
+
+
+"""
+Test for creating transactions
+"""
+def testCreateTransaction(conn):
+    print("********** TEST_CREATE_TRANS STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.host_party(uid1, pid)
+        conn.add_new_transaction(uid2, uid1, pid, 5.00, "NULL")
+        conn.add_new_transaction(uid3, uid1, pid, 4.50, "NULL")
+        rows = conn.query_transaction()
+        print(rows)
+
+    except Exception as e:
+        logging.fatal("ERROR: TEST_CREATE_TRANS FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    print("********** TEST_CREATE_TRANS ENDS **********")
+
+
+"""
+Test for querying users
+"""
+def testQueryUser(conn):
+    print("********** TEST_QUERY_USER STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        createTestUser(conn, "JM_Test_User_2", "YC", "Meng", "jerry2@gmail.com")
+        createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerrymeng3@gmail.com")
+        createTestUser(conn, "YC_Test_User_4", "YC", "Meng", "ym2023@gmail.com")
+        rows = conn.query_user()
+        print(rows)
+        rows = conn.query_user(user_id=uid1)
+        print(rows)
+        rows = conn.query_user(username="JM")
+        print(rows)
+        rows = conn.query_user(username="JM", first_name="YC")
+        print(rows)
+        rows = conn.query_user(email="jerrymeng")
+        print(rows)
+        rows = conn.query_user(limit=1)
+        print(rows)
+    except Exception as e:
+        logging.fatal("ERROR: TEST_QUERY_USER FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    print("********** TEST_QUERY_USER ENDS **********")
 
 
 """
@@ -42,7 +112,8 @@ Test for setting tags
 """
 def testSetTags(conn):
     try:
-        conn.add_new_party("JM_Bowling_Party", "'2023-07-02 14:30:00'", 60, "Bowling Night", b"\x01\x01\x01\x01\x01", [b"\x11\x22\x33", b"\x44\x55\x66"], 45)
+        conn.add_new_party("JM_Bowling_Party", "'2023-07-02 14:30:00'", 60, "Bowling Night", b"\x01\x01\x01\x01\x01",
+                           [b"\x11\x22\x33", b"\x44\x55\x66"], 45)
         party_id = conn.query_party(party_name="JM_Bowling_Party")[0][0]
 
         conn.set_tags(party_id, ["Bowling", "Pizza"])
@@ -53,19 +124,21 @@ def testSetTags(conn):
         rows = conn.exec_DML("SELECT * FROM Tags")
         print(rows)
 
-        
+
     except Exception:
         logging.fatal("Test_Set_Tags Failed")
     conn.clear_table("Tags")
     conn.clear_table("Parties")
 
+
 """
 Test for setting party locations
-"""  
+"""
 def testSetLocation(conn):
     try:
-        conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description", b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
-        
+        conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description", b'Thumbnail Data',
+                           [b'Photo 1', b'Photo 2'], 10)
+
         party_id = conn.query_party(party_name="Test Party")[0][0]
 
         conn.set_location(party_id, "123 Main St", "City", "Province", "12345")
@@ -75,11 +148,12 @@ def testSetLocation(conn):
         conn.set_location(party_id, "321 Main St", "City", "Province", "12345")
         rows = conn.exec_DML("SELECT * FROM PartyLocations")
         print(rows)
-        
+
     except Exception:
         logging.fatal("Test_Set_Location Failed")
     conn.clear_table("PartyLocations")
     conn.clear_table("Parties")
+
 
 """
 Test for setting music suggestions
@@ -87,7 +161,8 @@ Test for setting music suggestions
 # TODO: Edit the test once the Guests table is complete so that guest_id can be validated as well
 def testSetSuggestions(conn):
     try:
-        conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description", b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
+        conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description", b'Thumbnail Data',
+                           [b'Photo 1', b'Photo 2'], 10)
         party_id = conn.query_party(party_name="Test Party")[0][0]
 
         conn.set_suggestions("1", party_id, ["Track 1", "Track 2", "Track 3"])
@@ -101,20 +176,25 @@ def testSetSuggestions(conn):
         conn.set_suggestions("1", party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
-        
+
     except Exception:
         logging.fatal("Test_Set_Suggestions Failed")
     conn.clear_table("MusicSuggestions")
     conn.clear_table("Parties")
+
+
 """
 Test for querying parties
 """
 def testQueryParty(conn):
     try:
         # Create parties with various attributes
-        conn.add_new_party("JM_Poker_Party", "'2023-10-01 08:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05", [b"\x10\x20\x30"], 20)
-        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01", [b"\x30\x20\x10"], 15)
-        conn.add_new_party("JM_Music_Party", "'2023-12-01 16:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01", [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
+        conn.add_new_party("JM_Poker_Party", "'2023-10-01 08:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
+                           [b"\x10\x20\x30"], 20)
+        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
+                           [b"\x30\x20\x10"], 15)
+        conn.add_new_party("JM_Music_Party", "'2023-12-01 16:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01",
+                           [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
         # Query parties with different constraints
         print("Test 1")
         rows = conn.query_party()
@@ -135,14 +215,18 @@ def testQueryParty(conn):
         logging.fatal("Test_Query_Party Failed")
     conn.clear_table("Parties")
 
+
 """
 Test for querying tags
 """
 def testQueryTags(conn):
     try:
-        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05", [b"\x10\x20\x30"], 20)
-        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01", [b"\x30\x20\x10"], 15)
-        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01", [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
+        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
+                           [b"\x10\x20\x30"], 20)
+        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
+                           [b"\x30\x20\x10"], 15)
+        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01",
+                           [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
 
         rows = conn.query_party()
         party_id = conn.query_party(party_name="JM_Poker_Party")[0][0]
@@ -175,14 +259,18 @@ def testQueryTags(conn):
     conn.clear_table("Tags")
     conn.clear_table("Parties")
 
+
 """
 Test for querying locations
 """
 def testQueryLocations(conn):
     try:
-        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05", [b"\x10\x20\x30"], 20)
-        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01", [b"\x30\x20\x10"], 15)
-        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01", [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
+        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
+                           [b"\x10\x20\x30"], 20)
+        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
+                           [b"\x30\x20\x10"], 15)
+        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01",
+                           [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
 
         rows = conn.query_party()
         party_id = conn.query_party(party_name="JM_Poker_Party")[0][0]
@@ -215,15 +303,19 @@ def testQueryLocations(conn):
     conn.clear_table("PartyLocations")
     conn.clear_table("Parties")
 
+
 """
 Test for querying suggestions
 """
-#TODO: Update with actual guest_ids
+# TODO: Update with actual guest_ids
 def testQuerySuggestions(conn):
     try:
-        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05", [b"\x10\x20\x30"], 20)
-        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01", [b"\x30\x20\x10"], 15)
-        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01", [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
+        conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
+                           [b"\x10\x20\x30"], 20)
+        conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
+                           [b"\x30\x20\x10"], 15)
+        conn.add_new_party("JM_Music_Party", "'2023-12-01 21:30:00'", 40, "Music Festival", b"\x01\x01\x01\x01\x01",
+                           [b"\x11\x22\x33", b"\x44\x55\x66"], 30)
 
         rows = conn.query_party()
         party_id = conn.query_party(party_name="JM_Poker_Party")[0][0]
@@ -246,7 +338,7 @@ def testQuerySuggestions(conn):
         print("Test 3")
         rows = conn.query_suggestions(track_subset=["Music1"])
         print(rows)
-        
+
         print("Test 4")
         rows = conn.query_suggestions(guest_id="2", track_subset=["Music4"])
         print(rows)
@@ -254,35 +346,131 @@ def testQuerySuggestions(conn):
     except Exception:
         logging.fatal("Test_Query_Suggestions Failed")
     conn.clear_table("MusicSuggestions")
-    conn.clear_table("Parties")    
+    conn.clear_table("Parties")
+
+
+"""
+Test for querying transactions
+"""
+def testQueryTransaction(conn):
+    print("********** TEST_QUERY_TRANS STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.host_party(uid1, pid)
+        trans1 = conn.add_new_transaction(uid2, uid1, pid, 5.00, "NULL")
+        trans2 = conn.add_new_transaction(uid3, uid1, pid, 4.50, "NULL")
+        rows = conn.query_transaction()
+        print(rows)
+        rows = conn.query_transaction(trans_id=trans1)
+        print(rows)
+        rows = conn.query_transaction(from_id=uid2, to_id=uid1)
+        print(rows)
+        rows = conn.query_transaction(party_id=pid)
+        print(rows)
+        rows = conn.query_transaction(min_amount=5.00)
+        print(rows)
+        rows = conn.query_transaction(max_amount=4.50)
+        print(rows)
+
+    except Exception as e:
+        logging.fatal("ERROR: TEST_QUERY_TRANS FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    print("********** TEST_QUERY_TRANS ENDS **********")
+
+
+"""
+Test for attending parties
+"""
+def testAttendParties(conn):
+    print("********** TEST_ATTEND_PARTIES STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        pid = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        conn.attend_party(uid1, pid)
+        conn.attend_party(uid2, pid)
+        rows = conn.show_attendees(pid, show_detail=True)
+        print(rows)
+        conn.leave_party(uid1, pid)
+        rows = conn.show_attendees(pid, show_detail=True)
+        print(rows)
+    except Exception as e:
+        logging.fatal("ERROR: TEST_ATTEND_PARTIES FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    conn.clear_table("Parties")
+    conn.clear_table("Guests")
+    print("********** TEST_ATTEND_PARTIES ENDS **********")
+
+
+"""
+Test for hosting parties
+"""
+def testHostParties(conn):
+    print("********** TEST_HOST_PARTIES STARTS **********")
+    try:
+        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        pid1 = conn.add_new_party("JM_Poker_Party", "2023-10-01 08:00:00")
+        pid2 = conn.add_new_party("JM_Chess_Party", "2023-10-04 09:00:00")
+        conn.host_party(uid1, pid1)
+        rows = conn.show_hosted_parties(uid1, show_detail=True)
+        print(rows)
+        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        conn.attend_party(uid2, pid1)
+        conn.attend_party(uid2, pid2)
+        rows = conn.show_attended_parties(uid2, show_detail=True)
+        print(rows)
+        conn.cancel_party(pid1)
+        rows = conn.show_attended_parties(uid2, show_detail=True)
+        print(rows)
+        rows = conn.show_hosted_parties(uid1, show_detail=True)
+        print(rows)
+    except Exception as e:
+        logging.fatal("ERROR: TEST_HOST_PARTIES FAILED")
+        logging.fatal(e)
+    conn.clear_table("Users")
+    conn.clear_table("Parties")
+    conn.clear_table("Guests")
+    print("********** TEST_HOST_PARTIES ENDS **********")
+
+
 # Hardcoded URL, for POC only
-db_url = "postgresql://yanchen:9gAOcPaBx4tJJ3OAsD7G6A@vibees-db-11486.7tt.cockroachlabs.cloud:26257/VIBEES?sslmode=allow"
-#connection = DatabaseConnection(db_url)
-#connection.drop_table("hosts")
-#connection.drop_table("guests")
-#connection.drop_table("transactions")
-#connection.drop_table("tags")
-#connection.drop_table("partylocations")
-#connection.drop_table("musicsuggestions")
-#connection.drop_table("Parties")
-#breakpoint()
-#connection.create_tables()
-#breakpoint()
-#testCreateUser(connection)
-#breakpoint()
-#testCreateParty(connection)
-#breakpoint()
-#testSetTags(connection)
-#breakpoint()
-#testSetLocation(connection)
-#breakpoint()
-#testSetSuggestions(connection)
-#breakpoint()
-#testQueryParty(connection)
-#breakpoint()
-#testQueryTags(connection)
-#breakpoint()
-#testQueryLocations(connection)
-#breakpoint()
-#testQuerySuggestions(connection)
-#breakpoint()
+db_url = "postgresql://yanchen:9gAOcPaBx4tJJ3OAsD7G6A@vibees-db-11486.7tt.cockroachlabs.cloud:26257/VIBEES?sslmode=verify-full"
+connection = DatabaseConnection(db_url)
+# connection.drop_table("Parties")
+# connection.create_tables()
+# breakpoint()
+# testCreateUser(connection)
+# breakpoint()
+# testCreateParty(connection)
+# breakpoint()
+# testCreateTransaction(connection)
+# breakpoint()
+
+# testSetTags(connection)
+# breakpoint()
+# testSetLocation(connection)
+# breakpoint()
+# testSetSuggestions(connection)
+# breakpoint()
+
+# testQueryParty(connection)
+# breakpoint()
+# testQueryTags(connection)
+# breakpoint()
+# testQueryLocations(connection)
+# breakpoint()
+# testQuerySuggestions(connection)
+# breakpoint()
+# testQueryUser(connection)
+# breakpoint()
+# testQueryTransaction(connection)
+# breakpoint()
+
+# testAttendParties(connection)
+# testHostParties(connection)
+
