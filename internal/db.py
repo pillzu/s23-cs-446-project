@@ -143,8 +143,9 @@ class DatabaseConnection:
         - entry_fee: The entry fee of the party (integer)
     
     Returns:
-        - True: If the party is inserted successfully
-        - False: Otherwise
+        - generated_party_id: The uuid of the new party, if there is no initial party ID
+        - party_id: The desired ID of the soon-to-be party, if given
+        - None: If the party is not successfully generated
         
     Throws Exception if:
         - The party's information may have invalid fields
