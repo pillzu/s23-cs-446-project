@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -22,7 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
+import com.simonsickle.compose.barcodes.Barcode
+import com.simonsickle.compose.barcodes.BarcodeType
 
+var URL = "https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran"
 @Composable
 fun PartyDetails(
     navController: NavHostController,
@@ -44,12 +49,14 @@ fun PartyDetails(
                     .background(Color.Yellow)
                     .clip(RoundedCornerShape(15.dp))
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "QR Code",
-                    modifier = Modifier
-                        .size(300.dp)
-                        .padding(20.dp)
+                Barcode(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 20.dp, vertical = 15.dp)
+                        .width(250.dp)
+                        .height(250.dp),
+                    resolutionFactor = 10, // Optionally, increase the resolution of the generated image
+                    type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
+                    value = URL // The textual representation of this code
                 )
                 Text(
                     text = id,
