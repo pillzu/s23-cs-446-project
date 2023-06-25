@@ -1,11 +1,15 @@
 package com.example.vibees.screens.home
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import android.app.TimePickerDialog
 import android.graphics.Bitmap
+import android.media.Image
 import android.net.Uri
+import android.util.Log
 import android.widget.TimePicker
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -33,11 +37,54 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.POST
 
+val url = "http://127.0.0.1:5000"
+data class ResponseClass (val response: String)
+data class RequestModel (
+    val user_id: Int,
+    val party_name: String,
+    val date_time: Date?,
+    val street: String,
+    val city: String,
+    val province: String,
+    val postal_code: String,
+    val type: String,
+    val max_capacity: Int,
+    val entry_fees: Double,
+    val desc: String,
+    val thumbnail: Image?
+    )
 
+interface APIInterface {
+    @POST("/parties/host")
+    fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
+}
+
+object serviceBuilder {
+    private val client = OkHttpClient.Builder().build()
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(url)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
+        .build()
+
+    fun<T> buildService(service: Class<T>): T{
+        return retrofit.create(service)
+    }
+}
+
+@SuppressLint("SimpleDateFormat")
 @Composable
 fun HostScreen(name: String, onClick: () -> Unit) {
 
@@ -50,7 +97,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
     var description by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val bitmap =  remember { mutableStateOf<Bitmap?>(null) }
-//    var partyDateTime: Date? = null
+    val thumbnail: Image? = null
+    var partyDateTimeStr: SimpleDateFormat? = null
+    var partyDateTime: Date? = null
 
     var unitStreet by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -84,7 +133,29 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         imageUri = uri
     }
 
-    Column (modifier = Modifier.fillMaxSize().padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 60.dp)
+    val retrofit = serviceBuilder.buildService(APIInterface::class.java)
+    val obj = RequestModel(1, partyName, partyDateTime, unitStreet, city, province, postalCode,
+                           partyType, maxCapacity, entryFee, description, thumbnail)
+
+    retrofit.requestParty(obj).enqueue(
+        object:Callback<ResponseClass> {
+            override fun onResponse(
+                call: Call<ResponseClass>,
+                response: Response<ResponseClass>
+            ) {
+                Log.d("TAG", "${response.body()?.response}")
+                Toast.makeText(partyContext, "${response.body()?.response}", Toast.LENGTH_LONG).show()
+            }
+
+            override fun onFailure(call: Call<ResponseClass>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+        }
+    )
+
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 60.dp)
         .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.padding(6.dp))
@@ -220,7 +291,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         //Party Capacity Input
         Text("Enter Maximum Capacity")
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
             value = "$maxCapacity",
             onValueChange = { maxCapacity = it.toInt() },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -233,7 +306,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         // Party Entry Fee Input
         Text("Enter Entry Fees")
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
             value = "$entryFee",
             onValueChange = { entryFee = it.toDouble() },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -246,7 +321,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         // Party Description Input
         Text(text = "Description")
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
             value = description,
             onValueChange = { description = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -256,7 +333,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.padding(8.dp))
 
-        Button(onClick = { launcher.launch("image/*") }, modifier = Modifier.fillMaxWidth().padding(10.dp),
+        Button(onClick = { launcher.launch("image/*") }, modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
                colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
             Text(text = "Pick Thumbnail", color = MaterialTheme.colorScheme.primary)
         }
@@ -264,8 +343,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         // Submit Button
         Button(
             onClick = {
-                val partyDateTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-
+                val dateString = "$partyYear-$partyMonth-$partyDay $partyDay:$partyMinute:00"
+                partyDateTimeStr = SimpleDateFormat("yyyy-MM-DD HH:MM:SS")
+                partyDateTime = partyDateTimeStr!!.parse(dateString)
             },
             modifier = Modifier.padding(10.dp),
                colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
