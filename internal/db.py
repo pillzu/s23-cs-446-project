@@ -94,8 +94,6 @@ class DatabaseConnection:
                         f"'{address_postal}', '{email}', 0)"
             self.exec_DDL(statement)
 
-            self.exec_DDL(f"INSERT INTO Accounts VALUES ('{uid}', 0)")
-
             return uid
 
         except Exception as e:
@@ -104,7 +102,7 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_party(party_id, party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee): 
+    add_new_party(party_id, party_name, date_time, max_capacity, description, entry_fee): 
     Insert a new party entry with the given information into the Parties table. 
     The party's creation time will be filled as the current system time.
         Parameters: 
@@ -113,8 +111,6 @@ class DatabaseConnection:
             - date_time: The scheduled date of the party (datetime)
             - max_capacity: The maximum capacity of the guests in the party (integer)
             - description: The description of the party, entered by the host (string)
-            - thumbnail: The thumbnail of the party, submitted by the host (bytes)
-            - photos: A list of photos displayed in the info page of the party (list of bytes)
             - entry_fee: The entry fee of the party (integer)
         Returns:
             - uuid: if the party is inserted successfully, return the party's id
@@ -123,21 +119,20 @@ class DatabaseConnection:
             - the party's information may have invalid fields
     """
 
-    def add_new_party(self, party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee, party_id=None):
+    def add_new_party(self, party_name, date_time, max_capacity, description, entry_fee, party_id=None):
         try:
             timez = pytz.timezone("Canada/Eastern")
-
-            photos = str(photos)[1:-1]
 
             if party_id is None:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     party_id = cur.fetchone()[0]
 
+            # TODO: Remove parties and thumbnail
             statement = f"INSERT INTO Parties " \
-                        f"VALUES ('{party_id}', '{party_name}', {date_time}, '{datetime.now(timez)}', " \
-                        f"{max_capacity}, '{description}', {thumbnail}, " \
-                        f"ARRAY[{photos}], {entry_fee})"
+                        f"VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}', " \
+                        f"{max_capacity}, '{description}', " \
+                        f"{entry_fee})"
 
             self.exec_DDL(statement)
 
@@ -849,8 +844,6 @@ class DatabaseConnection:
                         "created_at TIMESTAMP NOT NULL, " \
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \
-                        "thumbnail BYTEA, " \
-                        "photos BYTEA[], " \
                         "UNIQUE(party_name), " \
                         "entry_fee INTEGER)"
             self.exec_DDL(statement)
@@ -910,22 +903,22 @@ class DatabaseConnection:
                         "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
-            # Accounts
-            statement = "CREATE TABLE IF NOT EXISTS Accounts (" \
-                        "account_id UUID PRIMARY KEY, " \
-                        "balance DECIMAL(10, 2) NOT NULL, " \
-                        "CONSTRAINT user_account " \
-                        "FOREIGN KEY (account_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
-            self.exec_DDL(statement)
-
-            # CreditCards
-            statement = "CREATE TABLE IF NOT EXISTS CreditCards (" \
-                        "account_id UUID, " \
-                        "card_number BIGINT NOT NULL, " \
-                        "cvv INTEGER NOT NULL, " \
-                        "CONSTRAINT account_credit_card " \
-                        "FOREIGN KEY (account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE)"
-            self.exec_DDL(statement)
+            # # Accounts
+            # statement = "CREATE TABLE IF NOT EXISTS Accounts (" \
+            #             "account_id UUID PRIMARY KEY, " \
+            #             "balance DECIMAL(10, 2) NOT NULL, " \
+            #             "CONSTRAINT user_account " \
+            #             "FOREIGN KEY (account_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
+            # self.exec_DDL(statement)
+            #
+            # # CreditCards
+            # statement = "CREATE TABLE IF NOT EXISTS CreditCards (" \
+            #             "account_id UUID, " \
+            #             "card_number BIGINT NOT NULL, " \
+            #             "cvv INTEGER NOT NULL, " \
+            #             "CONSTRAINT account_credit_card " \
+            #             "FOREIGN KEY (account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE)"
+            # self.exec_DDL(statement)
 
             # Transactions
             statement = "CREATE TABLE IF NOT EXISTS Transactions (" \
