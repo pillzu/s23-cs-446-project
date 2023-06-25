@@ -49,7 +49,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-val url = "http://127.0.0.1:5000"
+const val url = "http://127.0.0.1:5000"
 data class ResponseClass (val response: String)
 data class RequestModel (
     val user_id: Int,
@@ -71,7 +71,7 @@ interface APIInterface {
     fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
 }
 
-object serviceBuilder {
+object ServiceBuilder {
     private val client = OkHttpClient.Builder().build()
     private val retrofit = Retrofit.Builder()
         .baseUrl(url)
@@ -133,7 +133,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         imageUri = uri
     }
 
-    val retrofit = serviceBuilder.buildService(APIInterface::class.java)
+    val retrofit = ServiceBuilder.buildService(APIInterface::class.java)
     val obj = RequestModel(1, partyName, partyDateTime, unitStreet, city, province, postalCode,
                            partyType, maxCapacity, entryFee, description, thumbnail)
 
