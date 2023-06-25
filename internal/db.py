@@ -105,7 +105,7 @@ class DatabaseConnection:
 
 
     """
-    add_new_party(party_id, party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee): 
+    add_new_party(party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee): 
     Insert a new party entry with the given information into the Parties table. 
     The party's creation time will be filled as the current system time.
         Parameters: 
@@ -352,9 +352,8 @@ class DatabaseConnection:
             return False
 
     """
-    cancel_party(user_id, party_id): Cancels the party with party_id.
+    cancel_party(party_id): Cancels the party with party_id.
         Parameters: 
-            - user_id: the user's id number
             - party_id: the party's id number
             - force_leave: if set to true, then all attenders will also be forced to leave the party
         Returns:
@@ -456,7 +455,7 @@ class DatabaseConnection:
 
 
     """
-    show_host(party_id): Returns all users that hosts the current party
+    show_host(party_id): Returns the user that hosts the current party
         Parameters: 
             - party_id: the party's id number
             - show_detail: if set to true, then return the details of the host users. Otherwise only return the id.
