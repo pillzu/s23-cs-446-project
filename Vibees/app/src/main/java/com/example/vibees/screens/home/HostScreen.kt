@@ -37,63 +37,63 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import okhttp3.OkHttpClient
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
+import com.example.vibees.Api.APIInterface
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 
-val url = "http://127.0.0.1:5000"
-data class ResponseClass (val response: String)
-data class RequestModel (
-    val user_id: Int,
-    val party_name: String,
-    val date_time: Date?,
-    val street: String,
-    val city: String,
-    val province: String,
-    val postal_code: String,
-    val type: String,
-    val max_capacity: Int,
-    val entry_fees: Double,
-    val desc: String,
-    val thumbnail: Image?
-    )
+//val url = "http://127.0.0.1:5000"
+//data class ResponseClass (val response: String)
+//data class RequestModel (
+//    val user_id: Int,
+//    val party_name: String,
+//    val date_time: Date?,
+//    val street: String,
+//    val city: String,
+//    val province: String,
+//    val postal_code: String,
+//    val type: String,
+//    val max_capacity: Int,
+//    val entry_fees: Double,
+//    val desc: String,
+//    val thumbnail: Image?
+//    )
+//
+//interface APIInterface {
+//    @POST("/parties/host")
+//    fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
+//}
 
-interface APIInterface {
-    @POST("/parties/host")
-    fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
-}
-
-object serviceBuilder {
-    private val client = OkHttpClient.Builder().build()
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(url)
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(client)
-        .build()
-
-    fun<T> buildService(service: Class<T>): T{
-        return retrofit.create(service)
-    }
-}
+//object serviceBuilder {
+//    private val client = OkHttpClient.Builder().build()
+//    private val retrofit = Retrofit.Builder()
+//        .baseUrl(url)
+//        .addConverterFactory(GsonConverterFactory.create())
+//        .client(client)
+//        .build()
+//
+//    fun<T> buildService(service: Class<T>): T{
+//        return retrofit.create(service)
+//    }
+//}
 
 @SuppressLint("SimpleDateFormat")
 @Composable
 fun HostScreen(name: String, onClick: () -> Unit) {
 
+    val apiService = APIInterface()
+
     var partyName by remember { mutableStateOf("") }
     val partyDate = remember { mutableStateOf("") }
     val partyTime = remember { mutableStateOf("") }
     var partyType by remember { mutableStateOf("") }
-    var maxCapacity by remember { mutableIntStateOf(0) }
-    var entryFee by remember { mutableDoubleStateOf(0.0) }
+    var maxCapacity by remember { mutableStateOf("0") }
+    var entryFee by remember { mutableStateOf("0.0") }
     var description by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val bitmap =  remember { mutableStateOf<Bitmap?>(null) }
@@ -133,25 +133,25 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         imageUri = uri
     }
 
-    val retrofit = serviceBuilder.buildService(APIInterface::class.java)
-    val obj = RequestModel(1, partyName, partyDateTime, unitStreet, city, province, postalCode,
-                           partyType, maxCapacity, entryFee, description, thumbnail)
-
-    retrofit.requestParty(obj).enqueue(
-        object:Callback<ResponseClass> {
-            override fun onResponse(
-                call: Call<ResponseClass>,
-                response: Response<ResponseClass>
-            ) {
-                Log.d("TAG", "${response.body()?.response}")
-                Toast.makeText(partyContext, "${response.body()?.response}", Toast.LENGTH_LONG).show()
-            }
-
-            override fun onFailure(call: Call<ResponseClass>, t: Throwable) {
-                TODO("Not yet implemented")
-            }
-        }
-    )
+//    val retrofit = serviceBuilder.buildService(APIInterface::class.java)
+//    val obj = RequestModel(1, partyName, partyDateTime, unitStreet, city, province, postalCode,
+//                           partyType, maxCapacity, entryFee, description, thumbnail)
+//
+//    retrofit.requestParty(obj).enqueue(
+//        object:Callback<ResponseClass> {
+//            override fun onResponse(
+//                call: Call<ResponseClass>,
+//                response: Response<ResponseClass>
+//            ) {
+//                Log.d("TAG", "${response.body()?.response}")
+//                Toast.makeText(partyContext, "${response.body()?.response}", Toast.LENGTH_LONG).show()
+//            }
+//
+//            override fun onFailure(call: Call<ResponseClass>, t: Throwable) {
+//                TODO("Not yet implemented")
+//            }
+//        }
+//    )
 
     Column (modifier = Modifier
         .fillMaxSize()
@@ -294,8 +294,8 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp),
-            value = "$maxCapacity",
-            onValueChange = { maxCapacity = it.toInt() },
+            value = maxCapacity,
+            onValueChange = { maxCapacity = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary
@@ -309,8 +309,8 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp),
-            value = "$entryFee",
-            onValueChange = { entryFee = it.toDouble() },
+            value = entryFee,
+            onValueChange = { entryFee = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary
@@ -346,6 +346,33 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 val dateString = "$partyYear-$partyMonth-$partyDay $partyDay:$partyMinute:00"
                 partyDateTimeStr = SimpleDateFormat("yyyy-MM-DD HH:MM:SS")
                 partyDateTime = partyDateTimeStr!!.parse(dateString)
+
+                val obj = Party(1, partyName, partyDateTime, partyType,  maxCapacity.toInt(),
+                    entryFee.toDouble(), description, unitStreet, city, province, postalCode)
+
+                // call endpoint /parties/host to create a party
+//                try {
+                    val callResponse = apiService.createParty(obj)
+                    val response = callResponse.enqueue(
+                        object: Callback<ResponseMessage> {
+                            override fun onResponse(
+                                call: Call<ResponseMessage>,
+                                response: Response<ResponseMessage>
+                            ) {
+                                Log.d("TAG", "${response.body()?.message}")
+                                Toast.makeText(partyContext, "${response.body()?.message}", Toast.LENGTH_LONG).show()
+                            }
+
+                            override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                                Log.d("TAG", "FAILURE")
+                            }
+                        }
+                    )
+
+
+//                } catch (ex: Exception){
+//
+//                }
             },
             modifier = Modifier.padding(10.dp),
                colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
