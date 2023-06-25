@@ -1,9 +1,12 @@
 from db import DatabaseConnection
+from decouple import config
 import logging
 
 """
 Helper for creating test users
 """
+
+
 def createTestUser(conn, username, first_name, last_name, email, uid=None):
     uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave",
                             "Waterloo",
@@ -14,6 +17,8 @@ def createTestUser(conn, username, first_name, last_name, email, uid=None):
 '''
 Test for creating users
 '''
+
+
 def testCreateUser(conn):
     print("********** TEST_CREATE_USER STARTS **********")
     try:
@@ -34,6 +39,8 @@ def testCreateUser(conn):
 """
 Test for creating parties
 """
+
+
 def testCreateParty(conn):
     print("********** TEST_CREATE_PARTY STARTS **********")
     try:
@@ -43,10 +50,12 @@ def testCreateParty(conn):
         max_capacity = 50
         description = "This is a test party"
         thumbnail = b"\x01\x02\x03\x04\x05"  # Example byte array for thumbnail
-        photos = [b"\x10\x20\x30", b"\x40\x50\x60"]  # Example list of byte arrays for photos
+        # Example list of byte arrays for photos
+        photos = [b"\x10\x20\x30", b"\x40\x50\x60"]
         entry_fee = 10
 
-        conn.add_new_party(party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee)
+        conn.add_new_party(party_name, date_time, max_capacity,
+                           description, thumbnail, photos, entry_fee)
 
         rows = conn.query_party()
         print(rows)
@@ -60,12 +69,17 @@ def testCreateParty(conn):
 """
 Test for creating transactions
 """
+
+
 def testCreateTransaction(conn):
     print("********** TEST_CREATE_TRANS STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
-        uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1",
+                              "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2",
+                              "Jerry", "Meng", "jerry2@gmail.com")
+        uid3 = createTestUser(conn, "JM_Test_User_3",
+                              "Jerry", "Meng", "jerry3@gmail.com")
         pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.host_party(uid1, pid)
@@ -85,13 +99,19 @@ def testCreateTransaction(conn):
 """
 Test for querying users
 """
+
+
 def testQueryUser(conn):
     print("********** TEST_QUERY_USER STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        createTestUser(conn, "JM_Test_User_2", "YC", "Meng", "jerry2@gmail.com")
-        createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerrymeng3@gmail.com")
-        createTestUser(conn, "YC_Test_User_4", "YC", "Meng", "ym2023@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1",
+                              "Jerry", "Meng", "jerry1@gmail.com")
+        createTestUser(conn, "JM_Test_User_2", "YC",
+                       "Meng", "jerry2@gmail.com")
+        createTestUser(conn, "JM_Test_User_3", "Jerry",
+                       "Meng", "jerrymeng3@gmail.com")
+        createTestUser(conn, "YC_Test_User_4", "YC",
+                       "Meng", "ym2023@gmail.com")
         rows = conn.query_user()
         print(rows)
         rows = conn.query_user(user_id=uid1)
@@ -114,6 +134,8 @@ def testQueryUser(conn):
 """
 Test for setting tags
 """
+
+
 def testSetTags(conn):
     try:
         party_id = conn.add_new_party("JM_Bowling_Party", "'2023-07-02 14:30:00'", 60, "Bowling Night",
@@ -127,7 +149,6 @@ def testSetTags(conn):
         rows = conn.exec_DML("SELECT * FROM Tags")
         print(rows)
 
-
     except Exception as e:
         logging.fatal("Test_Set_Tags Failed")
         logging.fatal(e)
@@ -138,6 +159,8 @@ def testSetTags(conn):
 """
 Test for setting party locations
 """
+
+
 def testSetLocation(conn):
     try:
         party_id = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
@@ -161,22 +184,28 @@ def testSetLocation(conn):
 """
 Test for setting music suggestions
 """
+
+
 def testSetSuggestions(conn):
     try:
-        user_id = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        user_id = createTestUser(
+            conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
         party_id = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
                                       b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.attend_party(user_id, party_id)
 
-        conn.set_suggestions(user_id, party_id, ["Track 1", "Track 2", "Track 3"])
+        conn.set_suggestions(user_id, party_id, [
+                             "Track 1", "Track 2", "Track 3"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
-        conn.set_suggestions(user_id, party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
+        conn.set_suggestions(user_id, party_id, [
+                             "Track 4", "Track 5", "Track 6", "Track 7"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
-        conn.set_suggestions(user_id, party_id, ["Track 4", "Track 5", "Track 6", "Track 7"])
+        conn.set_suggestions(user_id, party_id, [
+                             "Track 4", "Track 5", "Track 6", "Track 7"])
         rows = conn.exec_DML("SELECT * FROM MusicSuggestions")
         print(rows)
 
@@ -190,6 +219,8 @@ def testSetSuggestions(conn):
 """
 Test for querying parties
 """
+
+
 def testQueryParty(conn):
     try:
         # Create parties with various attributes
@@ -209,7 +240,8 @@ def testQueryParty(conn):
         print(rows)
 
         print("Test 3")
-        rows = conn.query_party(start_date="2023-10-02", end_date="2024-01-01", max_capacity=25)
+        rows = conn.query_party(start_date="2023-10-02",
+                                end_date="2024-01-01", max_capacity=25)
         print(rows)
 
         print("Test 4")
@@ -224,6 +256,8 @@ def testQueryParty(conn):
 """
 Test for querying tags
 """
+
+
 def testQueryTags(conn):
     try:
         conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
@@ -269,6 +303,8 @@ def testQueryTags(conn):
 """
 Test for querying locations
 """
+
+
 def testQueryLocations(conn):
     try:
         conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
@@ -314,10 +350,14 @@ def testQueryLocations(conn):
 """
 Test for querying suggestions
 """
+
+
 def testQuerySuggestions(conn):
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1",
+                              "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2",
+                              "Jerry", "Meng", "jerry2@gmail.com")
         pid1 = conn.add_new_party("JM_Poker_Party", "'2023-10-01 20:00:00'", 30, "Poker Night", b"\x01\x02\x03\x04\x05",
                                   [b"\x10\x20\x30"], 20)
         pid2 = conn.add_new_party("JM_Chess_Party", "'2023-10-04 09:00:00'", 20, "Chess Tournament", b"\x05\x04\x03\x02\x01",
@@ -361,12 +401,17 @@ def testQuerySuggestions(conn):
 """
 Test for querying transactions
 """
+
+
 def testQueryTransaction(conn):
     print("********** TEST_QUERY_TRANS STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
-        uid3 = createTestUser(conn, "JM_Test_User_3", "Jerry", "Meng", "jerry3@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1",
+                              "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2",
+                              "Jerry", "Meng", "jerry2@gmail.com")
+        uid3 = createTestUser(conn, "JM_Test_User_3",
+                              "Jerry", "Meng", "jerry3@gmail.com")
         pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.host_party(uid1, pid)
@@ -396,11 +441,15 @@ def testQueryTransaction(conn):
 """
 Test for attending parties
 """
+
+
 def testAttendParties(conn):
     print("********** TEST_ATTEND_PARTIES STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
-        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1",
+                              "Jerry", "Meng", "jerry1@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2",
+                              "Jerry", "Meng", "jerry2@gmail.com")
         pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         conn.attend_party(uid1, pid)
@@ -422,10 +471,13 @@ def testAttendParties(conn):
 """
 Test for hosting parties
 """
+
+
 def testHostParties(conn):
     print("********** TEST_HOST_PARTIES STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1", "Jerry", "Meng", "jerry1@gmail.com")
+        uid1 = createTestUser(conn, "JM_Test_User_1",
+                              "Jerry", "Meng", "jerry1@gmail.com")
         pid1 = conn.add_new_party("Test Party 1", "'2023-09-05 12:30:00'", 10, "Test Party 1 Description",
                                   b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
         pid2 = conn.add_new_party("Test Party 2", "'2023-09-06 12:30:00'", 20, "Test Party 2 Description",
@@ -435,7 +487,8 @@ def testHostParties(conn):
         print(rows)
         rows = conn.show_host(pid1, show_detail=True)
         print(rows)
-        uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
+        uid2 = createTestUser(conn, "JM_Test_User_2",
+                              "Jerry", "Meng", "jerry2@gmail.com")
         conn.attend_party(uid2, pid1)
         conn.attend_party(uid2, pid2)
         rows = conn.show_attended_parties(uid2, show_detail=True)
@@ -455,7 +508,7 @@ def testHostParties(conn):
 
 
 # Hardcoded URL, for POC only
-db_url = "postgresql://yanchen:9gAOcPaBx4tJJ3OAsD7G6A@vibees-db-11486.7tt.cockroachlabs.cloud:26257/VIBEES?sslmode=verify-full"
+db_url = config("CDB_URL")
 connection = DatabaseConnection(db_url)
 # connection.drop_table("Users")
 # connection.drop_table("Parties")
