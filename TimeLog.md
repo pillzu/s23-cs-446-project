@@ -31,3 +31,6 @@
 | 20 June  |           |          |                | 6      |           |          | Set up navigation and skeleton screens                                    |
 | 21 June  |           |          |                |        | 6         |          | Implement schema, APIs and unit tests for Guests, Hosts, and Transactions |
 | 22 June  | 8         |          |                |        |           |          | Implement schema, APIs and unit tests for Tags, PartyLocations and MusicSuggestions as well as update Parties schema and associated APIs/tests|
+| 24 June  |           |          |                |        | 4         |          | Merge database branches in preparation for connecting to frontend         |
+| 24 June  | 4         |          |                |        |           |          | Merge database branches in preparation for connecting to frontend         |
+| 24 June  |           |          |                | 20     |           |          | Full frontend implementation of MyParties screen and PartyDetail screen, added navigation graph for Party Details        |

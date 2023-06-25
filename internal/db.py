@@ -15,7 +15,6 @@ class DatabaseConnection:
             logging.fatal("Database Connection Failed")
             logging.fatal(e)
 
-
     """
     exec_DDL(stmt): Executes the given DDL statement.
         Parameters:
@@ -26,6 +25,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the statement has format error
     """
+
     def exec_DDL(self, stmt) -> bool:
         try:
             with self.conn.cursor() as cur:
@@ -38,7 +38,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     exec_DML(stmt, limit): Executes the given DML statement.
         Parameters: 
@@ -50,6 +49,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the statement has format error
     """
+
     def exec_DML(self, stmt, limit=50):
         try:
             with self.conn.cursor() as cur:
@@ -61,7 +61,6 @@ class DatabaseConnection:
             logging.fatal(f"Last Executed Query: {stmt}")
             logging.fatal(e)
             return None
-
 
     """
     add_new_user(username, password, first_name, last_name, phone_no, address, email): Insert a new user with the
@@ -82,6 +81,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the user's information may have invalid fields
     """
+
     def add_new_user(self, username, password, first_name, last_name, phone_no, address_street, address_city, address_prov,
                      address_postal, email, uid=None):
         try:
@@ -103,7 +103,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     add_new_party(party_id, party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee): 
     Insert a new party entry with the given information into the Parties table. 
@@ -123,6 +122,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the party's information may have invalid fields
     """
+
     def add_new_party(self, party_name, date_time, max_capacity, description, thumbnail, photos, entry_fee, party_id=None):
         try:
             timez = pytz.timezone("Canada/Eastern")
@@ -148,7 +148,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     add_new_transaction(from_id, to_id, party_id, amount, qrcode): Insert a new transaction entry with given information
     into the Transactions table. The transaction's creation time will be filled as the current system time
@@ -164,6 +163,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the transaction's information may have invalid fields
     """
+
     def add_new_transaction(self, from_id, to_id, party_id, amount, qrcode, trans_id=None):
         try:
             timez = pytz.timezone("Canada/Eastern")
@@ -183,7 +183,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     set_tags(party_id, tag_list): Sets the tags for a given party in the Tags table.
         Parameters:
@@ -195,6 +194,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the tag's information may have invalid fields or references a non-existing party
     """
+
     def set_tags(self, party_id, tag_list):
         try:
             # Check if the party_id exists in the Parties table
@@ -214,7 +214,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     set_location(party_id, street, city, prov, postal_code): Set the location for a party by adding a new PartyLocation entry to the PartyLocations table.
         Parameters:
@@ -229,6 +228,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the party location information may have invalid fields or references a non-existing party
     """
+
     def set_location(self, party_id, street, city, prov, postal_code):
         try:
             # Check if the party_id exists in the Parties table
@@ -249,7 +249,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     set_suggestions(guest_id, party_id, suggested_tracks): Sets a MusicSuggestions entry in the MusicSuggestions table.
         Parameters:
@@ -262,6 +261,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the music suggestion information may have invalid fields or references a non-existing guest or party
     """
+
     def set_suggestions(self, guest_id, party_id, suggested_tracks):
         try:
             # Check if the party_id exists in the Parties table
@@ -272,7 +272,8 @@ class DatabaseConnection:
             # check if guest attends the party
             attend = self.check_attends(party_id=party_id, guest_id=guest_id)
             if attend is False:
-                raise Exception(f"Guest ('{guest_id}') does not attend party ('{party_id}')")
+                raise Exception(
+                    f"Guest ('{guest_id}') does not attend party ('{party_id}')")
 
             suggested_tracks = str(suggested_tracks)[1:-1]
 
@@ -287,7 +288,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
         Parameters: 
@@ -297,6 +297,7 @@ class DatabaseConnection:
             - True: if the user is registered as a guest successfully
             - False: otherwise
     """
+
     def attend_party(self, user_id, party_id):
         try:
             statement = f"INSERT INTO Guests VALUES ('{user_id}', '{party_id}')"
@@ -307,7 +308,6 @@ class DatabaseConnection:
             logging.fatal("Registering guest to party failed")
             logging.fatal(e)
             return False
-
 
     """
     leave_party(user_id, party_id): Remove the user with user_id from the party with party_id as a guest
@@ -330,7 +330,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     host_party(user_id, party_id): Registers the user with user_id into the party with party_id as a host
         Parameters: 
@@ -340,6 +339,7 @@ class DatabaseConnection:
             - True: if the user is registered as a host successfully
             - False: otherwise
     """
+
     def host_party(self, user_id, party_id):
         try:
             statement = f"INSERT INTO Hosts VALUES ('{user_id}', '{party_id}')"
@@ -376,7 +376,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     show_attended_parties(user_id): Returns all parties that the user with user_id attends
         Parameters: 
@@ -387,6 +386,7 @@ class DatabaseConnection:
             - Parties: the id of the parties that the user attends
             - None: otherwise
     """
+
     def show_attended_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
@@ -402,7 +402,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     show_hosted_parties(user_id): Returns all parties that the user with user_id hosts
         Parameters: 
@@ -413,6 +412,7 @@ class DatabaseConnection:
             - Parties: the id of the parties that the user hosts
             - None: otherwise
     """
+
     def show_hosted_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
@@ -428,7 +428,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     show_attendees(party_id): Returns all users that attends the current party
         Parameters: 
@@ -439,6 +438,7 @@ class DatabaseConnection:
             - Users: the id of the users that attends the party
             - None: otherwise
     """
+
     def show_attendees(self, party_id, show_detail=False, limit=50):
         try:
             if show_detail:
@@ -463,6 +463,7 @@ class DatabaseConnection:
             - true: if the guest attends the party
             - false: otherwise
     """
+
     def check_attends(self, party_id, guest_id):
         try:
             statement = f"SELECT * FROM Guests g WHERE g.party_id = '{party_id}' AND g.guest_id = '{guest_id}'"
@@ -472,7 +473,6 @@ class DatabaseConnection:
             logging.fatal("Checking attendance failed")
             logging.fatal(e)
             return False
-
 
     """
     create_query_statement(main_query, sub_queries): Create a SQL query statement by concatenating sub_queries 
@@ -484,6 +484,7 @@ class DatabaseConnection:
             - row: The query result
             - None: If the query present no result
     """
+
     def __create_query_statement(self, main_query, sub_queries):
         if len(sub_queries) == 0:
             return main_query
@@ -495,7 +496,6 @@ class DatabaseConnection:
             connector = " AND"
 
         return stmt
-
 
     """
     query_user(user_id, username, first_name, last_name, email, limit): Query users using some attributes. If an 
@@ -511,6 +511,7 @@ class DatabaseConnection:
             - row: The query result
             - None: If the query present no result
     """
+
     def query_user(self, user_id=None, username=None, first_name=None, last_name=None, email=None, limit=50):
         try:
             sub_queries = []
@@ -530,7 +531,8 @@ class DatabaseConnection:
             if email is not None:
                 sub_queries.append(f" u.email LIKE '%{email}%'")
 
-            stmt = self.__create_query_statement("SELECT * FROM Users u", sub_queries)
+            stmt = self.__create_query_statement(
+                "SELECT * FROM Users u", sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -539,7 +541,6 @@ class DatabaseConnection:
             logging.fatal("Query users failed")
             logging.fatal(e)
             return None
-
 
     """
     query_transaction(trans_id, from_id, to_id, party_id, min_amount, max_amount, start_date, end_date): Query 
@@ -558,6 +559,7 @@ class DatabaseConnection:
             - row: The query result
             - None: If the query present no result
     """
+
     def query_transaction(self, trans_id=None, from_id=None, to_id=None, party_id=None, min_amount=None,
                           max_amount=None, start_date=None, end_date=None, limit=50):
         try:
@@ -587,7 +589,8 @@ class DatabaseConnection:
             if end_date is not None:
                 sub_queries.append(f" t.time <= '{end_date}'")
 
-            stmt = self.__create_query_statement("SELECT * FROM Transactions t", sub_queries)
+            stmt = self.__create_query_statement(
+                "SELECT * FROM Transactions t", sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -596,7 +599,6 @@ class DatabaseConnection:
             logging.fatal("Query transactions failed")
             logging.fatal(e)
             return None
-
 
     """
     query_party(party_id, party_name, start_date, end_date, created_after, max_capacity, entry_fee):
@@ -615,6 +617,7 @@ class DatabaseConnection:
             - row: The query result, if stmt is queried successfully
             - None: If the query present no result
     """
+
     def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None,
                     max_capacity=None, entry_fee=None, limit=50):
         try:
@@ -641,7 +644,8 @@ class DatabaseConnection:
             if entry_fee is not None:
                 sub_queries.append(f" p.entry_fee <= {entry_fee}")
 
-            statement = self.__create_query_statement("SELECT * FROM Parties p", sub_queries)
+            statement = self.__create_query_statement(
+                "SELECT * FROM Parties p", sub_queries)
             print(statement)
 
             return self.exec_DML(statement, limit)
@@ -650,7 +654,6 @@ class DatabaseConnection:
             logging.fatal("Query parties failed")
             logging.fatal(e)
             return None
-
 
     """
     query_tags(party_id, tag_list): Query tags using some attributes. If an attribute is left blank then its constraint is ignored.
@@ -662,6 +665,7 @@ class DatabaseConnection:
             - row: The query result
             - None: If the query present no result
     """
+
     def query_tags(self, party_id=None, tag_subset=None, limit=50):
         try:
             sub_queries = []
@@ -673,7 +677,8 @@ class DatabaseConnection:
                 tag_subset = str(tag_subset)[1:-1]
                 sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
 
-            stmt = self.__create_query_statement("SELECT * FROM Tags t", sub_queries)
+            stmt = self.__create_query_statement(
+                "SELECT * FROM Tags t", sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -682,7 +687,6 @@ class DatabaseConnection:
             logging.fatal("Query tags failed")
             logging.fatal(e)
             return None
-
 
     """
     query_locations(party_id, street, city, prov, postal_code): Query locations using some attributes.
@@ -698,6 +702,7 @@ class DatabaseConnection:
             - row: The query result
             - None: If the query present no result
     """
+
     def query_locations(self, party_id=None, street=None, city=None, prov=None, postal_code=None, limit=50):
         try:
             sub_queries = []
@@ -717,7 +722,8 @@ class DatabaseConnection:
             if postal_code is not None:
                 sub_queries.append(f" l.postal_code = '{postal_code}'")
 
-            stmt = self.__create_query_statement("SELECT * FROM PartyLocations l", sub_queries)
+            stmt = self.__create_query_statement(
+                "SELECT * FROM PartyLocations l", sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -726,7 +732,6 @@ class DatabaseConnection:
             logging.fatal("Query locations failed")
             logging.fatal(e)
             return None
-
 
     """
     query_suggestions(guest_id, party_id, track_subset): Query music suggestions using some attributes.
@@ -740,6 +745,7 @@ class DatabaseConnection:
             - row: The query result
             - None: If the query present no result
     """
+
     def query_suggestions(self, guest_id=None, party_id=None, track_subset=None, limit=50):
         try:
             sub_queries = []
@@ -752,9 +758,11 @@ class DatabaseConnection:
 
             if track_subset is not None:
                 track_subset = str(track_subset)[1:-1]
-                sub_queries.append(f" m.suggested_tracks @> ARRAY[{track_subset}]")
+                sub_queries.append(
+                    f" m.suggested_tracks @> ARRAY[{track_subset}]")
 
-            stmt = self.__create_query_statement("SELECT * FROM MusicSuggestions m", sub_queries)
+            stmt = self.__create_query_statement(
+                "SELECT * FROM MusicSuggestions m", sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -764,7 +772,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     clear_table(table): Delete all rows from a table
         Parameters: 
@@ -773,6 +780,7 @@ class DatabaseConnection:
             - True: if the table is cleared successfully
             - False: otherwise
     """
+
     def clear_table(self, table):
         try:
             self.exec_DDL(f"DELETE FROM {table}")
@@ -784,7 +792,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     drop_table(table): Drop the corresponding table in the database.
         Parameters: 
@@ -793,6 +800,7 @@ class DatabaseConnection:
             - True: if the table is dropped successfully
             - False: otherwise
     """
+
     def drop_table(self, table):
         try:
             self.exec_DDL(f"DROP TABLE IF EXISTS {table}")
@@ -804,7 +812,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     create_tables(conn): Create all tables in the database.
         Parameters: 
@@ -815,6 +822,7 @@ class DatabaseConnection:
         Throws Exception if:
             - the given database connection is None
     """
+
     def create_tables(self):
         try:
             # Users

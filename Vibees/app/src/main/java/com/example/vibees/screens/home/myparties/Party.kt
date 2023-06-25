@@ -9,5 +9,6 @@ data class Party(
     val time: String,
     val host: String,
     val location: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val entryFee: String
 )
