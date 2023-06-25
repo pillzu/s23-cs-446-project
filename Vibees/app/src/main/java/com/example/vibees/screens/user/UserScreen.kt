@@ -53,7 +53,7 @@ fun UserScreen(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 15.dp)
+            .padding(horizontal = 15.dp, vertical=25.dp)
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
