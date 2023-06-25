@@ -433,6 +433,8 @@ def testHostParties(conn):
         conn.host_party(uid1, pid1)
         rows = conn.show_hosted_parties(uid1, show_detail=True)
         print(rows)
+        rows = conn.show_host(pid1, show_detail=True)
+        print(rows)
         uid2 = createTestUser(conn, "JM_Test_User_2", "Jerry", "Meng", "jerry2@gmail.com")
         conn.attend_party(uid2, pid1)
         conn.attend_party(uid2, pid2)
