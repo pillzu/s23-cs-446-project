@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
+import com.example.vibees.screens.user.UserScreen
 
 @Composable
 fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
@@ -17,9 +18,11 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
         startDestination = BottomBar.Home.route
     ) {
         composable(route = BottomBar.Home.route) {
-            GenericScreen(
-                name = BottomBar.Home.route,
-                onClick = { }
+            UserScreen(
+                onClick = {id ->
+                    navController.navigate(PartyScreen.Details.passId(id))
+                },
+                modifier = modifier
             )
         }
         composable(route = BottomBar.MyParties.route) {
