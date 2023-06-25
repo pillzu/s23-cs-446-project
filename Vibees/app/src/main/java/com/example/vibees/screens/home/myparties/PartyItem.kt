@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PartyItem(
     partyinfo: Party,
+    isMyParty: Boolean,
     onClick: (id: String) -> Unit
 ) {
     Column (
@@ -63,6 +64,19 @@ fun PartyItem(
                         text = partyinfo.time,
                         style = MaterialTheme.typography.bodyLarge,
                     )
+                }
+                if (!isMyParty) {
+                    Row {
+                        Text(
+                            text = "Entry Fee: ",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = partyinfo.entryFee,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
                 }
                 Row {
                     Text(
@@ -110,39 +124,41 @@ fun PartyItem(
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(Color.Yellow)
-                    .padding(5.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "QR Code icon"
-                )
-                Text(
-                    text = "SCAN QR",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(Color.Red)
-                    .padding(5.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Cancel icon"
-                )
-                Text(
-                    text = "CANCEL PARTY",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
+            if (isMyParty) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(Color.Yellow)
+                        .padding(5.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "QR Code icon"
+                    )
+                    Text(
+                        text = "SCAN QR",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(Color.Red)
+                        .padding(5.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Cancel icon"
+                    )
+                    Text(
+                        text = "CANCEL PARTY",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

@@ -1,4 +1,14 @@
-package com.example.vibees.screens.home.myparties
+// To Do:
+// 1. Hook up the search bar to the api and display parties
+// returned by the api
+// 2. Decide final values for the dropdown
+// 3. Tags are specific to user and need to be fetched from
+// the api
+// 4. Entire page should be scrollable and not just the parties
+
+package com.example.vibees.screens.user
+
+import com.example.vibees.screens.home.myparties.PartyItem
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,13 +17,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,12 +39,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.vibees.screens.user.Header
-
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.TextField
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import com.example.vibees.screens.home.myparties.parties
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyPartiesScreen(
+fun UserScreen(
     onClick: (id: String) -> Unit,
     modifier: Modifier
 ) {
@@ -46,11 +57,11 @@ fun MyPartiesScreen(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-        
-        // Header
-        Header(firstLine = "MY", secondLine = "PARTIES")
 
-        // search bar
+        // Header
+        Header(firstLine = "Welcome back", secondLine = "Christian")
+
+        // Search bar
         var searchText by remember { mutableStateOf("")}
         var searchActive by remember { mutableStateOf(false)}
 
@@ -68,7 +79,7 @@ fun MyPartiesScreen(
                 searchActive = it
             },
             placeholder = {
-                Text(text = "Search parties")
+                Text(text = "Search for a party")
             },
             leadingIcon = {
                 Icon(
@@ -95,38 +106,75 @@ fun MyPartiesScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(15.dp)
+                .padding(bottom = 5.dp)
         ) {
 
         }
-        
-        // parties
+
+        // Recommended Header with dropdown
+        val options = listOf("Proximity", "Price", "Date", "Day")
+        var expanded by remember { mutableStateOf(false) }
+        var selectedOptionText by remember { mutableStateOf(options[0]) }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp)
+        ) {
+            Text(
+                text = "Recommended",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier
+                    .width(140.dp)
+                    .padding(bottom = 15.dp)
+
+            ) {
+                TextField(
+                    // The `menuAnchor` modifier must be passed to the text field for correctness.
+                    modifier = Modifier.menuAnchor(),
+                    readOnly = true,
+                    value = selectedOptionText,
+                    onValueChange = {},
+                    label = { Text("Label") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    options.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(selectionOption) },
+                            onClick = {
+                                selectedOptionText = selectionOption
+                                expanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                        )
+                    }
+                }
+            }
+        }
+
+        // User Interest Tags
+        var tagList = listOf("Anime", "EDM", "Board Games", "Fraternity", "FIFA")
+        Tags(tagList = tagList)
+
+        // Parties
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
-            item {
-                Text(
-                    text = "Hosted by Me",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(bottom = 15.dp)
-                )
-            }
             items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
-            }
-            item {
-                Text(
-                    text = "Upcoming Parties",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(15.dp)
-                )
-            }
-            items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
+                PartyItem(partyinfo = parties[it], isMyParty = false, onClick = onClick)
             }
         }
     }
