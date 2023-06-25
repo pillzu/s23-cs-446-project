@@ -347,9 +347,8 @@ class DatabaseConnection:
             return False
 
     """
-    cancel_party(user_id, party_id): Cancels the party with party_id.
+    cancel_party(party_id): Cancels the party with party_id.
         Parameters: 
-            - user_id: the user's id number
             - party_id: the party's id number
             - force_leave: if set to true, then all attenders will also be forced to leave the party
         Returns:
@@ -446,6 +445,31 @@ class DatabaseConnection:
 
         except Exception as e:
             logging.fatal("Displaying attendees failed")
+            logging.fatal(e)
+            return None
+
+    """
+    show_host(party_id): Returns the user that hosts the current party
+        Parameters: 
+            - party_id: the party's id number
+            - show_detail: if set to true, then return the details of the host users. Otherwise only return the id.
+        Returns:
+            - Users: the id of the host
+            - None: otherwise
+    """
+
+    def show_host(self, party_id, show_detail=False):
+        try:
+            if show_detail:
+                statement = f"SELECT u.* FROM Hosts h " \
+                            f"JOIN Users u ON h.host_id = u.user_id " \
+                            f"WHERE h.party_id = '{party_id}'"
+            else:
+                statement = f"SELECT h.host_id FROM Hosts h WHERE h.party_id = '{party_id}'"
+            return self.exec_DML(statement)
+
+        except Exception as e:
+            logging.fatal("Displaying host failed")
             logging.fatal(e)
             return None
 
