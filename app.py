@@ -12,7 +12,7 @@ Parties Endpoints
 '''
 
 
-@app.route("/parties/host", methods=['POST'])
+@app.post("/parties/host")
 def host_party():
     # add a new party
     req = request.json
@@ -74,24 +74,31 @@ def get_tagged_parties():
     return jsonify(party_details), 200
 
 
-@ app.get("/parties/<party_id>")
-def get_party_details(party_id):
-    party = db.query_party(party_id=party_id)
-    if party is None:
-        return {"message": "Party does not exist! Please try again..."}, 404
+# TODO: Don't know if we need this right now
+# @ app.get("/parties/<party_id>")
+# def get_party_details(party_id):
+#     party = db.query_party(party_id=party_id)
+#     if party is None:
+#         return {"message": "Party does not exist! Please try again..."}, 404
+#
+#     location = db.query_locations(party_id=party_id)
+#     if location is None:
+#         return {"message": "Error retrieving party location! Please try again..."}, 500
+#
+#     party = hp.row_to_party(party[0])
+#     location = hp.row_to_location(location[0])
+#
+#     resp = {**party, **location}
+#
+#     return jsonify(resp), 200
+#
 
-    location = db.query_locations(party_id=party_id)
-    if location is None:
-        return {"message": "Error retrieving party location! Please try again..."}, 500
-
-    return {"party": party, "address": location}, 200
-
-
-@ app.route("/parties/<party_id>/attend")
+@app.route("/parties/attend")
 def attend_party(party_id):
+    # get party id
+
     # create transaction
     # add guest
-    #
     pass
 
 
@@ -100,10 +107,11 @@ User Endpoints
 '''
 
 
-@ app.post("/user/parties/attend")
+@app.post("/user/parties/attend")
 def get_user_attend_parties():
     req = request.json
-    parties = db.show_attended_parties(req["user_id"])
+    user_id = req["user_id"]
+    parties = db.show_attended_parties(user_id)
 
     resp = []
     for party_id in parties:
@@ -118,7 +126,9 @@ def get_user_attend_parties():
         party = hp.row_to_party(party[0])
         location = hp.row_to_location(location[0])
 
-        resp.append({**party, **location})
+        qr_endpoint = f"/party/qr/{party_id}/{user_id}"
+
+        resp.append({**party, **location, "qr_endpoint": qr_endpoint})
 
     return jsonify(resp), 200
 
