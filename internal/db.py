@@ -144,14 +144,13 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_transaction(from_id, to_id, party_id, amount, qrcode): Insert a new transaction entry with given information
+    add_new_transaction(from_id, to_id, party_id, amount): Insert a new transaction entry with given information
     into the Transactions table. The transaction's creation time will be filled as the current system time
         Parameters: 
             - from_id: the guest's id number
             - to_id: the host's id number
             - party_id: the party's id number
             - amount: the payment amount
-            - qrcode: the generated qrcode
         Returns:
             - uuid: if the transaction entry is inserted successfully, return the transaction's id
             - None: otherwise
@@ -159,7 +158,7 @@ class DatabaseConnection:
             - the transaction's information may have invalid fields
     """
 
-    def add_new_transaction(self, from_id, to_id, party_id, amount, qrcode, trans_id=None):
+    def add_new_transaction(self, from_id, to_id, party_id, amount, trans_id=None):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -168,7 +167,7 @@ class DatabaseConnection:
                     cur.execute("SELECT gen_random_uuid()")
                     trans_id = cur.fetchone()[0]
             statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{from_id}', " \
-                        f"'{to_id}', '{party_id}', {amount}, {qrcode})"
+                        f"'{to_id}', '{party_id}', {amount})"
 
             self.exec_DDL(statement)
             return trans_id
@@ -952,7 +951,6 @@ class DatabaseConnection:
                         "to_id UUID, " \
                         "party_id UUID, " \
                         "payment_amount DECIMAL(10, 2), " \
-                        "qrcode BYTEA, " \
                         "CONSTRAINT guest_user_id " \
                         "FOREIGN KEY (from_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
                         "CONSTRAINT host_user_id " \

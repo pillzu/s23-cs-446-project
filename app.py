@@ -14,6 +14,7 @@ Parties Endpoints
 
 @app.post("/parties/host")
 def host_party():
+    """Endpoint to host a party"""
     # add a new party
     req = request.json
 
@@ -49,8 +50,11 @@ def host_party():
 
 @app.post("/parties")
 def get_tagged_parties():
+    """Endpoint to get parties with a specific tag"""
+
+    # TODO: Use tags
     # get party id
-    req = request.json
+    # req = request.json
 
     # request for parties ids using tag
     parties = db.query_tags()
@@ -93,13 +97,41 @@ def get_tagged_parties():
 #     return jsonify(resp), 200
 #
 
-@app.route("/parties/attend")
+@app.post("/parties/attend/<party_id>")
 def attend_party(party_id):
-    # get party id
+    """Endpoint to register attendee to a party"""
+    req = request.json
+    user_id = req.get("user_id", None)
+
+    if user_id is None:
+        return {"message": "No user id provided! Please try again..."}, 400
+
+    # get host details
+    host = db.show_host(party_id)
+    if host is None:
+        return {"message": "Failed to verify host of party! Please contact help"}, 500
+
+    host = host[0][0]
 
     # create transaction
+    transaction = db.add_new_transaction(user_id, host, party_id, 0)
+    if not transaction:
+        return {"message": "Unable to add transaction! Please try again..."}, 500
+
     # add guest
-    pass
+    if not db.attend_party(user_id, party_id):
+        return {"message": "Unable to add user as an attendee! Please call help..."}, 500
+
+    return {"message": "User registered successfully!"}, 200
+
+
+@app.get("/party/qr/<party_id>/<guest_id>")
+def check_party_attendee(party_id, guest_id):
+    """Endpoint to confirm attendee to a party"""
+    isAttendee = db.check_attends(party_id, guest_id)
+    if isAttendee:
+        return {"message": "Successfully verified user is an attendee"}, 200
+    return {"message": "Failed to verify user! Please contact help"}, 401
 
 
 '''
@@ -108,9 +140,13 @@ User Endpoints
 
 
 @app.post("/user/parties/attend")
-def get_user_attend_parties():
+def get_user_attendee_parties():
+    """Endpoint to retrieve user's attendee parties"""
     req = request.json
-    user_id = req["user_id"]
+    user_id = req.get("user_id", None)
+    if user_id is None:
+        return {"message": "No user id provided! Please try again..."}, 400
+
     parties = db.show_attended_parties(user_id)
 
     resp = []
@@ -135,6 +171,7 @@ def get_user_attend_parties():
 
 @ app.post("/user/parties/host")
 def get_user_host_parties():
+    """Endpoint to retrieve user's hosted parties"""
     req = request.json
     parties = db.show_hosted_parties(req["user_id"])
 
@@ -163,7 +200,7 @@ if __name__ == "__main__":
     db = DatabaseConnection(DB_URL)
 
     if db is None:
-        logging.fatal("Did not work")
+        logging.fatal("Unable to initialize Database! Please try again...")
         exit(1)
 
     db.create_tables()
