@@ -1,14 +1,7 @@
-debug:
-	@echo "Running debugging server listening on local network..."
-	@flask run --debug
-
-run-dev:
+run:
+	@. ./.venv/bin/activate
 	@echo "Running server listening on local network..."
-	@flask run
-
-run-local:
-	@echo "Running server listening on all IPs..."
-	@flask run --host=0.0.0.0
+	@python3 app.py
 
 install-deps:
 	@echo "Creating virtual env and installing deps..."
