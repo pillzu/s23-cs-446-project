@@ -68,7 +68,6 @@ def get_tagged_parties():
         location = hp.row_to_location(location[0])
 
         resp = {**party, **location}
-        print(resp)
 
         party_details.append(resp)
 
@@ -105,14 +104,46 @@ User Endpoints
 def get_user_attend_parties():
     req = request.json
     parties = db.show_attended_parties(req["user_id"])
-    return parties
+
+    resp = []
+    for party_id in parties:
+        party_id = party_id[0]
+        party = db.query_party(party_id=party_id)
+        location = db.query_locations(party_id=party_id)
+
+        if not len(parties) or not len(location):
+            logging.warn(f"Failed to fetch party with {party_id}...")
+            continue
+
+        party = hp.row_to_party(party[0])
+        location = hp.row_to_location(location[0])
+
+        resp.append({**party, **location})
+
+    return jsonify(resp), 200
 
 
-@ app.route("/user/parties/host")
+@ app.post("/user/parties/host")
 def get_user_host_parties():
     req = request.json
     parties = db.show_hosted_parties(req["user_id"])
-    return parties
+
+    resp = []
+    for party_id in parties:
+        party_id = party_id[0]
+        party = db.query_party(party_id=party_id)
+        location = db.query_locations(party_id=party_id)
+
+        if not len(parties) or not len(location):
+            logging.warn(f"Failed to fetch party with {party_id}...")
+            continue
+
+        party = hp.row_to_party(party[0])
+        location = hp.row_to_location(location[0])
+
+        resp.append({**party, **location})
+
+    return jsonify(resp), 200
 
 
 if __name__ == "__main__":
