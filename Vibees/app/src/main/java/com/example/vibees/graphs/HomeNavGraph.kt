@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
+import com.example.vibees.screens.home.HostScreen
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
 
@@ -34,7 +35,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(route = BottomBar.Host.route) {
-            GenericScreen(
+            HostScreen(
                 name = BottomBar.Host.route,
                 onClick = { }
             )
