@@ -33,7 +33,7 @@ import com.example.vibees.ui.theme.Yellow
 
 @Composable
 fun PartyItem(
-    partyinfo: Party,
+    partyInfo: Party,
     isMyParty: Boolean,
     onClick: (id: String) -> Unit
 ) {
@@ -45,7 +45,7 @@ fun PartyItem(
             .padding(15.dp)
             .clip(RoundedCornerShape(10.dp))
             .fillMaxWidth()
-            .clickable { onClick("test_id") }
+            .clickable { onClick(partyInfo.party_id!!) }
             ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -56,7 +56,7 @@ fun PartyItem(
         ) {
             Column {
                 Text(
-                    text = partyinfo.name!!,
+                    text = partyInfo.name!!,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom=10.dp)
@@ -68,7 +68,7 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.date_time.toString(),
+                        text = partyInfo.date_time.toString(),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -80,7 +80,7 @@ fun PartyItem(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = partyinfo.entry_fee.toString(),
+                            text = partyInfo.entry_fee.toString(),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
@@ -92,7 +92,7 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.host_name!!,
+                        text = partyInfo.host_name!!,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -103,7 +103,7 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.street,
+                        text = partyInfo.street,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }

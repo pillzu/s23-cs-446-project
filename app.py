@@ -18,8 +18,13 @@ def host_party():
     # add a new party
     req = request.json
 
+    print(req)
+
+    # host_date = req["date_time"]
+    # datetime_obj = datetime.strptime(host_date, "%a %b %d %H:%M:%S %Z %Y")
+
     # create a party
-    party_id = db.add_new_party(req["party_name"], req["date_time"],
+    party_id = db.add_new_party(req["name"], req["date_time"],
                                 req["max_cap"], req["desc"],
                                 req["entry_fee"])
 

@@ -168,7 +168,7 @@ fun MyPartiesScreen(
                 )
             }
             items(hostingParties.size) {
-                PartyItem(partyinfo = hostingParties[it], isMyParty = true, onClick = onClick)
+                PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
             }
             item {
                 Text(
@@ -180,7 +180,7 @@ fun MyPartiesScreen(
                 )
             }
             items(attendingParties.size) {
-                PartyItem(partyinfo = attendingParties[it], isMyParty = true, onClick = onClick,)
+                PartyItem(partyInfo = attendingParties[it], isMyParty = true, onClick = onClick,)
             }
         }
     }

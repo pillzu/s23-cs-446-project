@@ -45,7 +45,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -94,8 +96,8 @@ fun HostScreen(name: String, onClick: () -> Unit) {
     var userID by GlobalAppState::UserID
 
     var partyName by remember { mutableStateOf("") }
-    val partyDate = remember { mutableStateOf("") }
-    val partyTime = remember { mutableStateOf("") }
+    val partyDate = remember { mutableStateOf<LocalDate>(LocalDate.now()) }
+    val partyTime = remember { mutableStateOf<LocalTime>(LocalTime.now()) }
     var partyType by remember { mutableStateOf("") }
     var maxCapacity by remember { mutableStateOf("0") }
     var entryFee by remember { mutableStateOf("0.0") }
@@ -120,7 +122,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
     val partyDatePickerDialog = DatePickerDialog(
         partyContext,
         { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            partyDate.value = "$mDayOfMonth/${mMonth+1}/$mYear"
+            partyDate.value = LocalDate.of(mYear, mMonth, mDayOfMonth)
         }, partyYear, partyMonth, partyDay
     )
 
@@ -129,7 +131,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
     val partyTimePickerDialog = TimePickerDialog(
         partyContext,
         { _: TimePicker, hour: Int, minute: Int ->
-            partyTime.value = "$hour:$minute"
+            partyTime.value = LocalTime.of(hour, minute)
         }, partyHour, partyMinute, false
     )
 
@@ -348,7 +350,8 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         // Submit Button
         Button(
             onClick = {
-                var host_date = LocalDateTime.of(partyYear, partyMonth, partyDay, partyHour, partyMinute)
+                var host_date = partyDate.value.atTime(partyTime.value)
+                Log.d("TAG", host_date.toString())
                 var dateString = host_date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
                 val obj = Party(userID, partyName, dateString, partyType,  maxCapacity.toInt(),

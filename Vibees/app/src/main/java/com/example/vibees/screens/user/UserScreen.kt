@@ -218,7 +218,7 @@ fun UserScreen(
         ) {
             Log.d("TAG", parties.toString())
             items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = false, onClick = onClick)
+                PartyItem(partyInfo = parties[it], isMyParty = false, onClick = onClick)
             }
         }
     }
