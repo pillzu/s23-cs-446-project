@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home.myparties
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
+import com.example.vibees.GlobalAppState
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import com.example.vibees.graphs.PartyScreen
@@ -36,7 +38,44 @@ fun PartyDetails(
     navController: NavHostController,
     id: String,
 ) {
+    var partyDetails by GlobalAppState::PartyDetails
+
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+        // QR Code section
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+                .padding(top = 50.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.Yellow)
+                    .clip(RoundedCornerShape(15.dp))
+            ) {
+                Barcode(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 20.dp, vertical = 15.dp)
+                        .width(250.dp)
+                        .height(250.dp),
+                    resolutionFactor = 10, // Optionally, increase the resolution of the generated image
+                    type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
+                    value = URL // The textual representation of this code
+                )
+                Text(
+                    text = id,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .padding(15.dp)
+                )
+            }
+        }
         Row(horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
@@ -154,41 +193,6 @@ fun PartyDetails(
                 androidx.compose.material.Text(
                     text = "Attend Party",
                     color = Color.Black
-                )
-            }
-        }
-
-        // QR Code section
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .padding(top = 50.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .background(Color.Yellow)
-                    .clip(RoundedCornerShape(15.dp))
-            ) {
-                Barcode(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(horizontal = 20.dp, vertical = 15.dp)
-                        .width(250.dp)
-                        .height(250.dp),
-                    resolutionFactor = 10, // Optionally, increase the resolution of the generated image
-                    type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
-                    value = URL // The textual representation of this code
-                )
-                Text(
-                    text = id,
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier
-                        .padding(15.dp)
                 )
             }
         }

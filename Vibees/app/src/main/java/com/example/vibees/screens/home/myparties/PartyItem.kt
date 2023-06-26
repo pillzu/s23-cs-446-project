@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.ui.theme.Yellow
 
@@ -37,6 +38,7 @@ fun PartyItem(
     isMyParty: Boolean,
     onClick: (id: String) -> Unit
 ) {
+    var partyDetails by GlobalAppState::PartyDetails
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -45,7 +47,9 @@ fun PartyItem(
             .padding(15.dp)
             .clip(RoundedCornerShape(10.dp))
             .fillMaxWidth()
-            .clickable { onClick(partyInfo.party_id!!) }
+            .clickable {
+                partyDetails = partyInfo
+                onClick(partyInfo.party_id!!) }
             ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

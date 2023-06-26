@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
+import com.example.vibees.GlobalAppState
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import com.example.vibees.graphs.PartyScreen
@@ -35,10 +36,9 @@ fun PartyViewing(
     navController: NavHostController,
     id: String,
 ) {
+
+    var partyDetails by GlobalAppState::PartyDetails
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-
-
-
         Row(horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
