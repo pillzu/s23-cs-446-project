@@ -28,14 +28,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
 import com.example.vibees.ui.theme.Yellow
 
 @Composable
 fun PartyItem(
-    partyinfo: Party,
+    partyInfo: Party,
     isMyParty: Boolean,
     onClick: (id: String) -> Unit
 ) {
+    var partyDetails by GlobalAppState::PartyDetails
     Column (
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -44,7 +47,9 @@ fun PartyItem(
             .padding(15.dp)
             .clip(RoundedCornerShape(10.dp))
             .fillMaxWidth()
-            .clickable { onClick("test_id") }
+            .clickable {
+                partyDetails = partyInfo
+                onClick(partyInfo.party_id!!) }
             ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -55,19 +60,19 @@ fun PartyItem(
         ) {
             Column {
                 Text(
-                    text = partyinfo.title,
+                    text = partyInfo.name!!,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom=10.dp)
                 )
                 Row {
                     Text(
-                        text = "Time: ",
+                        text = "Date-Time: ",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.time,
+                        text = partyInfo.date_time.toString(),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -79,7 +84,7 @@ fun PartyItem(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = partyinfo.entryFee,
+                            text = partyInfo.entry_fee.toString(),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
@@ -91,7 +96,7 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.host,
+                        text = partyInfo.host_name!!,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -102,27 +107,10 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.location,
+                        text = partyInfo.street,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
-            }
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = partyinfo.date,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(bottom=20.dp)
-                )
-                Image(
-                    imageVector = partyinfo.icon,
-                    contentDescription = "Party icon",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(50.dp)
-                )
             }
         }
         Row(
