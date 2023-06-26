@@ -12,7 +12,8 @@ class APIInterface {
     private val apiService: ApiService
 
     init {
-        val url = "http://localhost:5000"
+        val url = "http://192.168.0.179:5000"
+
 
         val retrofit = Retrofit.Builder()
             .baseUrl(url)

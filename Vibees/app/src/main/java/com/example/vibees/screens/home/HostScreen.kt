@@ -347,7 +347,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 partyDateTimeStr = SimpleDateFormat("yyyy-MM-DD HH:MM:SS")
                 partyDateTime = partyDateTimeStr!!.parse(dateString)
 
-                val obj = Party(1, partyName, partyDateTime, partyType,  maxCapacity.toInt(),
+                val obj = Party("5bdfc21f-ea15-43b3-9654-093f15d63ba7", partyName, partyDateTime, partyType,  maxCapacity.toInt(),
                     entryFee.toDouble(), description, unitStreet, city, province, postalCode)
 
                 // call endpoint /parties/host to create a party
@@ -365,6 +365,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
 
                             override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
                                 Log.d("TAG", "FAILURE")
+                                Log.d("TAG", t.message.toString())
                             }
                         }
                     )
