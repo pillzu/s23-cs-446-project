@@ -172,7 +172,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 text = "Host Party!",
                 fontSize = MaterialTheme.typography.headlineMedium.fontSize,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+                color =Color.Black,
             )
         }
         Spacer(modifier = Modifier.padding(12.dp))
@@ -187,7 +187,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { partyName = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -199,7 +199,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 .padding(10.dp),
                 onClick = {
                     partyDatePickerDialog.show()
-                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
+                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
                 Text(text = "Schedule Date*", color = MaterialTheme.colorScheme.primary)
             }
             Text("Selected Date: ${partyDate.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp))
@@ -213,7 +213,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 .padding(10.dp),
                 onClick = {
                     partyTimePickerDialog.show()
-                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
+                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
                 Text(text = "Schedule Time*", color = MaterialTheme.colorScheme.primary)
             }
             Text("Selected Time: ${partyTime.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp))
@@ -230,7 +230,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { unitStreet = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -245,7 +245,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { city = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -260,7 +260,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { province = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -275,7 +275,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { postalCode = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -290,7 +290,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { partyType = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -305,7 +305,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { maxCapacity = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -320,7 +320,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { entryFee = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
@@ -335,18 +335,18 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             onValueChange = { description = it },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Gray,
             )
         )
         Spacer(modifier = Modifier.padding(8.dp))
 
-        Button(onClick = { launcher.launch("image/*") }, modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
-            Text(text = "Pick Thumbnail", color = MaterialTheme.colorScheme.primary)
-        }
-
+//        Button(onClick = { launcher.launch("image/*") }, modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(10.dp),
+//            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
+//            Text(text = "Pick Thumbnail", color = MaterialTheme.colorScheme.primary)
+//        }
+//
         // Submit Button
         Button(
             onClick = {
@@ -378,8 +378,8 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 )
             },
             modifier = Modifier.padding(10.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {
-            Text(text = "Create Party!", color = MaterialTheme.colorScheme.primary)
+            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
+            Text(text = "Create Party!", color = Color.Black)
         }
     }
 }
