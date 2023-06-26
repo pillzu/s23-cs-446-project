@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home.myparties
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,10 +27,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
+import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.Models.User
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import com.example.vibees.graphs.PartyScreen
+import com.example.vibees.screens.bottombar.BottomBar
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @Composable
 fun PartyViewing(
@@ -37,6 +46,8 @@ fun PartyViewing(
     id: String,
 ) {
 
+    var userID by GlobalAppState::UserID
+    val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Row(horizontalArrangement = Arrangement.Center,
@@ -56,7 +67,7 @@ fun PartyViewing(
             .padding(10.dp),
             horizontalArrangement = Arrangement.Center) {
             androidx.compose.material3.Text(
-                text = "Party Name",
+                text = partyDetails?.name!!,
                 fontSize = MaterialTheme.typography.headlineMedium.fontSize,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -66,7 +77,7 @@ fun PartyViewing(
             .fillMaxWidth()
             .padding(10.dp),
             horizontalArrangement = Arrangement.Center) {
-            Text("Hosted by Hostname", fontWeight = FontWeight.Bold, color = Color.Black)
+            Text("Hosted by ${partyDetails?.host_name}", fontWeight = FontWeight.Bold, color = Color.Black)
         }
 
         Row(horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,7 +91,7 @@ fun PartyViewing(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    Text(color = Color.Black, text = "20 August 2023")
+                    Text(color = Color.Black, text = partyDetails?.date_time!!)
                 }
                 Column (modifier = Modifier.padding(20.dp)) {
                     Text(
@@ -88,9 +99,9 @@ fun PartyViewing(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    Text(color = Color.Black, text = "1201-1200 University Ave W")
-                    Text(color = Color.Black, text = "Waterloo, Ontario")
-                    Text(color = Color.Black, text = "N2L 6C5")
+                    Text(color = Color.Black, text = partyDetails?.street!!)
+                    Text(color = Color.Black, text = "${partyDetails?.city}, ${partyDetails?.prov}")
+                    Text(color = Color.Black, text = partyDetails?.postal_code!!)
                 }
                 Column (modifier = Modifier.padding(20.dp)) {
                     Text(
@@ -98,26 +109,18 @@ fun PartyViewing(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    Text(color = Color.Black, text = "35")
+                    Text(color = Color.Black, text = partyDetails?.max_cap.toString())
                 }
             }
 
             Column{
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
-                        text = "Time",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(color = Color.Black, text = "12:30 PM")
-                }
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
                         text = "Type",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(color = Color.Black, text = "Board-game")
+                    Text(color = Color.Black, text = "EDM")
                     Text(color = Color.Black, text = "Alcohol-free")
                     Text("")
                 }
@@ -127,7 +130,7 @@ fun PartyViewing(
                         color = Color.Black,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(color = Color.Black, text = "10.0")
+                    Text(color = Color.Black, text = partyDetails?.entry_fee.toString())
                 }
             }
         }
@@ -140,7 +143,7 @@ fun PartyViewing(
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
                 )
-                Text(color = Color.Black, text = "This is a Board-game party for all Board-game lovers! Join us for a chill night of enjoyment.")
+                Text(color = Color.Black, text = partyDetails?.desc!!)
             }
         }
 
@@ -149,7 +152,25 @@ fun PartyViewing(
             .padding(10.dp),
             horizontalArrangement = Arrangement.Center) {
             androidx.compose.material.Button(
-                onClick = { navController.navigate(PartyScreen.Details.passId(id)) },
+                onClick = {
+                    val callResponse = apiService.attendParty(partyDetails?.party_id!!, User(userID))
+                    val response = callResponse.enqueue(
+                        object: Callback<ResponseMessage> {
+                            override fun onResponse(
+                                call: Call<ResponseMessage>,
+                                response: Response<ResponseMessage>
+                            ) {
+                                Log.d("TAG", "${response.body()?.message}")
+                                navController.navigate(BottomBar.MyParties.route)
+                            }
+
+                            override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                                Log.d("TAG", "FAILURE")
+                                Log.d("TAG", t.printStackTrace().toString())
+                            }
+                        }
+                    )
+                },
                 modifier = Modifier.padding(20.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
             ) {

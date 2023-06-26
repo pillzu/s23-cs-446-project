@@ -7,6 +7,8 @@ import com.example.vibees.Models.User
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService  {
 
@@ -21,4 +23,7 @@ interface ApiService  {
 
     @POST("/user/parties/host")
     fun requestMyPartiesHosting(@Body requestModel: User): Call<List<Party>>
+
+    @POST("/parties/attend/{party_id}")
+    fun registerUserForParty(@Path("party_id") party_id: String, @Body requestModel: User): Call<ResponseMessage>
 }
