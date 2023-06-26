@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,10 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vibees.ui.theme.Yellow
 
 @Composable
 fun PartyItem(
@@ -37,8 +40,8 @@ fun PartyItem(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .border(1.dp, Color.Black,RoundedCornerShape(10.dp))
-            .padding(5.dp)
+            .shadow(elevation = 1.dp, shape = RoundedCornerShape(4.dp))
+            .padding(15.dp)
             .clip(RoundedCornerShape(10.dp))
             .fillMaxWidth()
             .clickable { onClick("test_id") }
