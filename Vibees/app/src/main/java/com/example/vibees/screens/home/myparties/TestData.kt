@@ -2,6 +2,7 @@ package com.example.vibees.screens.home.myparties
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Face
 
 val parties = listOf(
     Party(
@@ -10,7 +11,7 @@ val parties = listOf(
         time = "23:00",
         host = "Eren",
         location = "123 Waterloo",
-        icon = Icons.Default.Add,
+        icon = Icons.Default.Face,
         entryFee = "$5"
     ),
     Party(
@@ -19,7 +20,7 @@ val parties = listOf(
         time = "23:00",
         host = "Armin",
         location = "123 Waterloo",
-        icon = Icons.Default.Add,
+        icon = Icons.Default.Face,
         entryFee = "$5"
     ),
     Party(
@@ -28,7 +29,7 @@ val parties = listOf(
         time = "23:00",
         host = "Mikasa",
         location = "123 Waterloo",
-        icon = Icons.Default.Add,
+        icon = Icons.Default.Face,
         entryFee = "$5"
     ),
     Party(
@@ -37,7 +38,7 @@ val parties = listOf(
         time = "23:00",
         host = "Erwin",
         location = "123 Waterloo",
-        icon = Icons.Default.Add,
+        icon = Icons.Default.Face,
         entryFee = "$5"
     ),
     Party(
@@ -46,7 +47,7 @@ val parties = listOf(
         time = "23:00",
         host = "Levi",
         location = "123 Waterloo",
-        icon = Icons.Default.Add,
+        icon = Icons.Default.Face,
         entryFee = "$5"
     ),
 )

@@ -143,7 +143,6 @@ fun UserScreen(
                 onExpandedChange = { expanded = !expanded },
                 modifier = Modifier
                     .width(140.dp)
-                    .height(5.dp)
                     .padding(bottom = 15.dp)
 
             ) {

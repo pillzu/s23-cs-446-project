@@ -57,7 +57,8 @@ fun PartyItem(
                 Text(
                     text = partyinfo.title,
                     style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom=10.dp)
                 )
                 Row {
                     Text(
@@ -71,7 +72,7 @@ fun PartyItem(
                     )
                 }
                 if (!isMyParty) {
-                    Row {
+                Row {
                         Text(
                             text = "Entry Fee: ",
                             style = MaterialTheme.typography.bodyLarge,
@@ -112,7 +113,8 @@ fun PartyItem(
             ) {
                 Text(
                     text = partyinfo.date,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom=20.dp)
                 )
                 Image(
                     imageVector = partyinfo.icon,
