@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -154,7 +155,7 @@ fun MyPartiesScreen(
         
         // parties
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(30.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
             item {
@@ -163,7 +164,7 @@ fun MyPartiesScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(bottom = 15.dp)
+                        .padding(bottom = 5.dp, top=10.dp)
                 )
             }
             items(hostingParties.size) {
@@ -175,7 +176,7 @@ fun MyPartiesScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(15.dp)
+                        .padding(bottom = 5.dp, top=10.dp)
                 )
             }
             items(attendingParties.size) {
