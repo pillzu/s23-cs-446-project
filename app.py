@@ -63,15 +63,18 @@ def get_tagged_parties():
     for party_id, tags in parties:
         party = db.query_party(party_id=party_id)
         location = db.query_locations(party_id=party_id)
+        host = db.show_host(party_id, True)
 
-        if not len(parties) or not len(location):
+        if not len(parties) or not len(location) or not len(host):
             logging.warn(f"Failed to fetch party with {party_id}...")
             continue
 
+        host = hp.row_to_user(host[0])
         party = hp.row_to_party(party[0])
         location = hp.row_to_location(location[0])
 
-        resp = {**party, **location}
+        resp = {**party, **location,
+                "host_name": f" {host['first_name']} {host['last_name']}"}
 
         party_details.append(resp)
 

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,9 +38,9 @@ fun PartyItem(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .border(1.dp, Color.Black,RoundedCornerShape(20.dp))
+            .border(1.dp, Color.Black,RoundedCornerShape(10.dp))
             .padding(5.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(10.dp))
             .fillMaxWidth()
             .clickable { onClick("test_id") }
             ) {
@@ -129,35 +131,40 @@ fun PartyItem(
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(25.dp))
-                        .background(Color.Yellow)
-                        .padding(5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "QR Code icon"
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "QR Code icon",
+                        modifier = Modifier.size(20.dp).padding(horizontal = 2.dp)
                     )
                     Text(
                         text = "SCAN QR",
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(25.dp))
+                        .clip(RoundedCornerShape(5.dp))
                         .background(Color.Red)
-                        .padding(5.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Cancel icon"
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Cancel icon",
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(20.dp).padding(horizontal = 2.dp)
                     )
                     Text(
-                        text = "CANCEL PARTY",
+                        text = "CANCEL",
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.tertiary,
+
                     )
                 }
             }

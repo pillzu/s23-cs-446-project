@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,9 +25,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.vibees.screens.user.Header
+import com.example.vibees.ui.theme.GrayWhite
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +62,7 @@ fun MyPartiesScreen(
 
             },
             active = searchActive,
+            colors = SearchBarDefaults.colors(containerColor = GrayWhite),
             onActiveChange = {
                 searchActive = it
             },
@@ -96,7 +100,7 @@ fun MyPartiesScreen(
         
         // parties
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(30.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
             item {
@@ -121,7 +125,7 @@ fun MyPartiesScreen(
                 )
             }
             items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
+                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick,)
             }
         }
     }

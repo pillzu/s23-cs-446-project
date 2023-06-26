@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -47,9 +48,12 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.TextField
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.ui.graphics.Color
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.ui.theme.GrayWhite
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -108,6 +112,8 @@ fun UserScreen(
             onActiveChange = {
                 searchActive = it
             },
+
+            colors = SearchBarDefaults.colors(containerColor = GrayWhite),
             placeholder = {
                 Text(text = "Search for a party")
             },
@@ -172,10 +178,13 @@ fun UserScreen(
                     readOnly = true,
                     value = selectedOptionText,
                     onValueChange = {},
-                    label = { Text("Label") },
+                    label = { Text("Sort") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                )
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(
+                        unfocusedContainerColor = GrayWhite,
+                        focusedContainerColor = GrayWhite,
+                        focusedLabelColor = Color.Black,
+                ))
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
@@ -200,7 +209,7 @@ fun UserScreen(
 
         // Parties
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(30.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
             Log.d("TAG", parties.toString())

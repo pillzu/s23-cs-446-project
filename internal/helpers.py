@@ -11,6 +11,23 @@ def row_to_party(party):
     }
 
 
+def row_to_user(user):
+    return {
+        "user_id": user[0],
+        "username": user[1],
+        "password": user[2],
+        "first_name": user[3],
+        "last_name": user[4],
+        "phone_no": user[5],
+        "street": user[6],
+        "city": user[7],
+        "prov": user[8],
+        "postal_code": user[9],
+        "email": user[10],
+        "party_points": user[11],
+    }
+
+
 def row_to_location(location):
     return {
         "party_id": location[0],
