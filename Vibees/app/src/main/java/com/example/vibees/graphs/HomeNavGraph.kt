@@ -21,7 +21,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
         composable(route = BottomBar.Home.route) {
             UserScreen(
                 onClick = {id ->
-                    navController.navigate(PartyScreen.Details.passId(id))
+                    navController.navigate(PartyScreen.ViewingDetails.passId(id))
                 },
                 modifier = modifier
             )

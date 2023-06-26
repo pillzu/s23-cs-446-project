@@ -3,6 +3,7 @@ package com.example.vibees.Api
 import android.content.Context
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.Models.User
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import retrofit2.Call
@@ -33,5 +34,13 @@ class APIInterface {
 
     fun getAllParties(): Call<List<Party>> {
         return apiService.requestAllParties()
+    }
+
+    fun getMyPartiesAttending(requestModel: User): Call<List<Party>> {
+        return apiService.requestMyPartiesAttending(requestModel)
+    }
+
+    fun getMyPartiesHosting(requestModel: User): Call<List<Party>> {
+        return apiService.requestMyPartiesHosting(requestModel)
     }
 }

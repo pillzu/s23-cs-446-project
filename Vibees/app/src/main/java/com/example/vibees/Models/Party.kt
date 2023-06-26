@@ -16,5 +16,6 @@ data class Party (
     val prov: String,
     val postal_code: String,
     val party_id: String?,
-    val host_name: String?
+    val host_name: String?,
+    val qr_endpoint: String?,
 )

@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home.myparties
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,8 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vibees.Api.APIInterface
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.User
 import com.example.vibees.screens.user.Header
 import com.example.vibees.ui.theme.GrayWhite
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +51,52 @@ fun MyPartiesScreen(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-        
+
+        var attendingParties by remember { mutableStateOf(listOf<Party>()) }
+        var hostingParties by remember { mutableStateOf(listOf<Party>()) }
+        // fetch all parties from endpoint /parties
+        val apiService = APIInterface()
+
+        // Parties being attended by the user
+        val callResponseAttending = apiService.getMyPartiesAttending(User("5bdfc21f-ea15-43b3-9654-093f15d63ba7"))
+        val responseAttending = callResponseAttending.enqueue(
+            object: Callback<List<Party>> {
+                override fun onResponse(
+                    call: Call<List<Party>>,
+                    response: Response<List<Party>>
+                ) {
+                    Log.d("TAG", "success")
+                    attendingParties = response.body()!!
+                    Log.d("TAG", parties.toString())
+                }
+
+                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.printStackTrace().toString())
+                }
+            }
+        )
+
+        // Parties being hosted by the user
+        val callResponseHosting = apiService.getMyPartiesHosting(User("5bdfc21f-ea15-43b3-9654-093f15d63ba7"))
+        val responseHosting = callResponseHosting.enqueue(
+            object: Callback<List<Party>> {
+                override fun onResponse(
+                    call: Call<List<Party>>,
+                    response: Response<List<Party>>
+                ) {
+                    Log.d("TAG", "success")
+                    hostingParties = response.body()!!
+                    Log.d("TAG", parties.toString())
+                }
+
+                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.printStackTrace().toString())
+                }
+            }
+        )
+
         // Header
         Header(firstLine = "MY", secondLine = "PARTIES")
 
@@ -112,8 +164,8 @@ fun MyPartiesScreen(
                         .padding(bottom = 15.dp)
                 )
             }
-            items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
+            items(attendingParties.size) {
+                PartyItem(partyinfo = attendingParties[it], isMyParty = true, onClick = onClick)
             }
             item {
                 Text(
@@ -124,8 +176,8 @@ fun MyPartiesScreen(
                         .padding(15.dp)
                 )
             }
-            items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick,)
+            items(hostingParties.size) {
+                PartyItem(partyinfo = hostingParties[it], isMyParty = true, onClick = onClick,)
             }
         }
     }

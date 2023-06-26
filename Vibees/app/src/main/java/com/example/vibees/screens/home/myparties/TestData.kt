@@ -22,7 +22,8 @@ val parties = listOf(
         prov = "ON",
         postal_code = "M2KJ16",
         party_id = "12312",
-        host_name = "Jeremy James"
+        host_name = "Jeremy James",
+        qr_endpoint = null
     ),
     Party(
         user_id = "23564786358nbfbwg4327rbfygfd",
@@ -37,7 +38,8 @@ val parties = listOf(
         prov = "ON",
         postal_code = "M2KJ16",
         party_id = "12312",
-        host_name = "Jeremy James"
+        host_name = "Jeremy James",
+        qr_endpoint = null
     ),
     Party(
         user_id = "23564786358nbfbwg4327rbfygfd",
@@ -52,7 +54,8 @@ val parties = listOf(
         prov = "ON",
         postal_code = "M2KJ16",
         party_id = "12312",
-        host_name = "Jeremy James"
+        host_name = "Jeremy James",
+        qr_endpoint = null
     ),
     Party(
         user_id = "23564786358nbfbwg4327rbfygfd",
@@ -67,7 +70,8 @@ val parties = listOf(
         prov = "ON",
         postal_code = "M2KJ16",
         party_id = "12312",
-        host_name = "Jeremy James"
+        host_name = "Jeremy James",
+        qr_endpoint = null
     ),
     Party(
         user_id = "23564786358nbfbwg4327rbfygfd",
@@ -82,7 +86,8 @@ val parties = listOf(
         prov = "ON",
         postal_code = "M2KJ16",
         party_id = "12312",
-        host_name = "Jeremy James"
+        host_name = "Jeremy James",
+        qr_endpoint = null
     ),
     Party(
         user_id = "23564786358nbfbwg4327rbfygfd",
@@ -97,7 +102,8 @@ val parties = listOf(
         prov = "ON",
         postal_code = "M2KJ16",
         party_id = "12312",
-        host_name = "Jeremy James"
+        host_name = "Jeremy James",
+        qr_endpoint = null
     ),
 
 )
