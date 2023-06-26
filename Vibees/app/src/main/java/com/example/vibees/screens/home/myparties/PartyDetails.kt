@@ -5,11 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,14 +26,141 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
+import com.simonsickle.compose.barcodes.Barcode
+import com.simonsickle.compose.barcodes.BarcodeType
+import com.example.vibees.graphs.PartyScreen
 
+var URL = "https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran"
 @Composable
 fun PartyDetails(
     navController: NavHostController,
     id: String,
 ) {
-    Column(
-    ) {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+
+
+        Row(horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)) {
+            Icon(
+                imageVector = Icons.Default.Face,
+                contentDescription = "Party Icon",
+                modifier = Modifier
+                    .size(100.dp)
+            )
+        }
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+            horizontalArrangement = Arrangement.Center) {
+            androidx.compose.material3.Text(
+                text = "Party Name",
+                fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+            horizontalArrangement = Arrangement.Center) {
+            Text("Hosted by Hostname", fontWeight = FontWeight.Bold, color = Color.Black)
+        }
+
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp)) {
+            Column{
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Date",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(color = Color.Black, text = "20 August 2023")
+                }
+                Column (modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Location",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(color = Color.Black, text = "1201-1200 University Ave W")
+                    Text(color = Color.Black, text = "Waterloo, Ontario")
+                    Text(color = Color.Black, text = "N2L 6C5")
+                }
+                Column (modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Maximum Capacity",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(color = Color.Black, text = "35")
+                }
+            }
+
+            Column{
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Time",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(color = Color.Black, text = "12:30 PM")
+                }
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Type",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(color = Color.Black, text = "Board-game")
+                    Text(color = Color.Black, text = "Alcohol-free")
+                    Text("")
+                }
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Entry Fees",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(color = Color.Black, text = "10.0")
+                }
+            }
+        }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = "Description",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(color = Color.Black, text = "This is a Board-game party for all Board-game lovers! Join us for a chill night of enjoyment.")
+            }
+        }
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp), 
+            horizontalArrangement = Arrangement.Center) {
+            androidx.compose.material.Button(
+                onClick = { navController.navigate(PartyScreen.Details.passId(id)) },
+                modifier = Modifier.padding(20.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
+            ) {
+                androidx.compose.material.Text(
+                    text = "Attend Party",
+                    color = Color.Black
+                )
+            }
+        }
+
         // QR Code section
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -44,12 +175,15 @@ fun PartyDetails(
                     .background(Color.Yellow)
                     .clip(RoundedCornerShape(15.dp))
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "QR Code",
+                Barcode(
                     modifier = Modifier
-                        .size(300.dp)
-                        .padding(20.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 20.dp, vertical = 15.dp)
+                        .width(250.dp)
+                        .height(250.dp),
+                    resolutionFactor = 10, // Optionally, increase the resolution of the generated image
+                    type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
+                    value = URL // The textual representation of this code
                 )
                 Text(
                     text = id,
@@ -59,79 +193,6 @@ fun PartyDetails(
                     modifier = Modifier
                         .padding(15.dp)
                 )
-            }
-        }
-
-
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = "Party Icon",
-                modifier = Modifier
-                    .size(100.dp)
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp)
-        ) {
-            Column{
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        text = "Date",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(color = Color.Black, text = "20 August 2023")
-                }
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        text = "Location",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(color = Color.Black, text = "1200 University Ave Waterloo")
-                }
-
-            }
-
-            Column{
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        text = "Time",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(color = Color.Black, text = "12:30 PM")
-                }
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        text = "Host",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(color = Color.Black, text = "Samuel Smith")
-                }
             }
         }
     }

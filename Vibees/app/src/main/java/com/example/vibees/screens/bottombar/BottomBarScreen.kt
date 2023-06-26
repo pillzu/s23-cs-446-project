@@ -1,19 +1,29 @@
 package com.example.vibees.screens.bottombar
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.wear.compose.material.ContentAlpha
+import com.example.vibees.ui.theme.Yellow
 
 @Composable
 fun BottomBarScreen(navController: NavHostController) {
@@ -29,7 +39,7 @@ fun BottomBarScreen(navController: NavHostController) {
 
     val bottomBarDestination = screens.any { it.route == currentDestination?.route }
     if (bottomBarDestination) {
-        BottomNavigation(backgroundColor = Color.Yellow) {
+        BottomNavigation(backgroundColor = Color.White) {
             screens.forEach { screen ->
                 AddItem(
                     screen = screen,
@@ -41,6 +51,7 @@ fun BottomBarScreen(navController: NavHostController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowScope.AddItem(
     screen: BottomBar,
@@ -48,13 +59,16 @@ fun RowScope.AddItem(
     navController: NavHostController
 ) {
     BottomNavigationItem(
+        modifier = Modifier
+            .padding(vertical=5.dp),
         label = {
-            Text(text = screen.title)
+            Text(text = screen.title, fontSize=14.sp)
         },
         icon = {
             Icon(
                 imageVector = screen.icon,
-                contentDescription = "Navigation Icon"
+                contentDescription = "Navigation Icon",
+                tint=Color.Black
             )
         },
         selected = currentDestination?.hierarchy?.any {
