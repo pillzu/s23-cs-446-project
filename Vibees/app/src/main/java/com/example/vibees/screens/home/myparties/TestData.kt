@@ -1,52 +1,103 @@
 package com.example.vibees.screens.home.myparties
+import com.example.vibees.Models.Party
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import java.time.LocalDate
+import java.util.Date
+
+val dt = Date(2023, 8, 22, 9, 30)
 
 val parties = listOf(
     Party(
-        title = "Party 1",
-        date = "1 January 2023",
-        time = "23:00",
-        host = "Eren",
-        location = "123 Waterloo",
-        icon = Icons.Default.Add,
-        entryFee = "$5"
+        user_id = "23564786358nbfbwg4327rbfygfd",
+        name = "House Warming",
+        date_time = dt,
+        type = "EDM",
+        max_cap = 50,
+        entry_fee = 3.25,
+        desc = "The ultimate edm experience.",
+        street = "Albert Street",
+        city = "Waterloo",
+        prov = "ON",
+        postal_code = "M2KJ16",
+        party_id = "12312",
+        host_name = "Jeremy James"
     ),
     Party(
-        title = "Party 2",
-        date = "2 January 2023",
-        time = "23:00",
-        host = "Armin",
-        location = "123 Waterloo",
-        icon = Icons.Default.Add,
-        entryFee = "$5"
+        user_id = "23564786358nbfbwg4327rbfygfd",
+        name = "House Warming",
+        date_time = dt,
+        type = "EDM",
+        max_cap = 50,
+        entry_fee = 3.25,
+        desc = "The ultimate edm experience.",
+        street = "Albert Street",
+        city = "Waterloo",
+        prov = "ON",
+        postal_code = "M2KJ16",
+        party_id = "12312",
+        host_name = "Jeremy James"
     ),
     Party(
-        title = "Party 3",
-        date = "3 January 2023",
-        time = "23:00",
-        host = "Mikasa",
-        location = "123 Waterloo",
-        icon = Icons.Default.Add,
-        entryFee = "$5"
+        user_id = "23564786358nbfbwg4327rbfygfd",
+        name = "House Warming",
+        date_time = dt,
+        type = "EDM",
+        max_cap = 50,
+        entry_fee = 3.25,
+        desc = "The ultimate edm experience.",
+        street = "Albert Street",
+        city = "Waterloo",
+        prov = "ON",
+        postal_code = "M2KJ16",
+        party_id = "12312",
+        host_name = "Jeremy James"
     ),
     Party(
-        title = "Party 4",
-        date = "4 January 2023",
-        time = "23:00",
-        host = "Erwin",
-        location = "123 Waterloo",
-        icon = Icons.Default.Add,
-        entryFee = "$5"
+        user_id = "23564786358nbfbwg4327rbfygfd",
+        name = "House Warming",
+        date_time = dt,
+        type = "EDM",
+        max_cap = 50,
+        entry_fee = 3.25,
+        desc = "The ultimate edm experience.",
+        street = "Albert Street",
+        city = "Waterloo",
+        prov = "ON",
+        postal_code = "M2KJ16",
+        party_id = "12312",
+        host_name = "Jeremy James"
     ),
     Party(
-        title = "Party 5",
-        date = "5 January 2023",
-        time = "23:00",
-        host = "Levi",
-        location = "123 Waterloo",
-        icon = Icons.Default.Add,
-        entryFee = "$5"
+        user_id = "23564786358nbfbwg4327rbfygfd",
+        name = "House Warming",
+        date_time = dt,
+        type = "EDM",
+        max_cap = 50,
+        entry_fee = 3.25,
+        desc = "The ultimate edm experience.",
+        street = "Albert Street",
+        city = "Waterloo",
+        prov = "ON",
+        postal_code = "M2KJ16",
+        party_id = "12312",
+        host_name = "Jeremy James"
     ),
+    Party(
+        user_id = "23564786358nbfbwg4327rbfygfd",
+        name = "House Warming",
+        date_time = dt,
+        type = "EDM",
+        max_cap = 50,
+        entry_fee = 3.25,
+        desc = "The ultimate edm experience.",
+        street = "Albert Street",
+        city = "Waterloo",
+        prov = "ON",
+        postal_code = "M2KJ16",
+        party_id = "12312",
+        host_name = "Jeremy James"
+    ),
+
 )

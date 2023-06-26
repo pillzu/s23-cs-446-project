@@ -348,7 +348,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 partyDateTime = partyDateTimeStr!!.parse(dateString)
 
                 val obj = Party("5bdfc21f-ea15-43b3-9654-093f15d63ba7", partyName, partyDateTime, partyType,  maxCapacity.toInt(),
-                    entryFee.toDouble(), description, unitStreet, city, province, postalCode)
+                    entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "")
 
                 // call endpoint /parties/host to create a party
 //                try {
@@ -369,11 +369,6 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                             }
                         }
                     )
-
-
-//                } catch (ex: Exception){
-//
-//                }
             },
             modifier = Modifier.padding(10.dp),
                colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)) {

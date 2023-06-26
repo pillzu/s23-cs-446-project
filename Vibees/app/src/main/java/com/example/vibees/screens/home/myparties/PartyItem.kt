@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vibees.Models.Party
 
 @Composable
 fun PartyItem(
@@ -50,18 +51,18 @@ fun PartyItem(
         ) {
             Column {
                 Text(
-                    text = partyinfo.title,
+                    text = partyinfo.name!!,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Row {
                     Text(
-                        text = "Time: ",
+                        text = "Date-Time: ",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.time,
+                        text = partyinfo.date_time.toString(),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -73,7 +74,7 @@ fun PartyItem(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = partyinfo.entryFee,
+                            text = partyinfo.entry_fee.toString(),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
@@ -85,7 +86,7 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.host,
+                        text = partyinfo.host_name!!,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -96,27 +97,27 @@ fun PartyItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = partyinfo.location,
+                        text = partyinfo.street,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
             }
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = partyinfo.date,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Image(
-                    imageVector = partyinfo.icon,
-                    contentDescription = "Party icon",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(50.dp)
-                )
-            }
+//            Column(
+//                verticalArrangement = Arrangement.SpaceEvenly,
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//            ) {
+//                Text(
+//                    text = partyinfo.date,
+//                    style = MaterialTheme.typography.bodyLarge
+//                )
+//                Image(
+//                    imageVector = partyinfo.icon,
+//                    contentDescription = "Party icon",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier
+//                        .size(50.dp)
+//                )
+//            }
         }
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,

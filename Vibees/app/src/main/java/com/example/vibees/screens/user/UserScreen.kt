@@ -8,6 +8,8 @@
 
 package com.example.vibees.screens.user
 
+import android.util.Log
+import android.widget.Toast
 import com.example.vibees.screens.home.myparties.PartyItem
 
 import androidx.compose.foundation.layout.Arrangement
@@ -45,7 +47,12 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.TextField
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
-import com.example.vibees.screens.home.myparties.parties
+import com.example.vibees.Api.APIInterface
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +66,27 @@ fun UserScreen(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
+        var parties by remember { mutableStateOf(listOf<Party>()) }
+        // fetch all parties from endpoint /parties
+        val apiService = APIInterface()
+        val callResponse = apiService.getAllParties()
+        val response = callResponse.enqueue(
+            object: Callback<List<Party>> {
+                override fun onResponse(
+                    call: Call<List<Party>>,
+                    response: Response<List<Party>>
+                ) {
+                    Log.d("TAG", "success")
+                    parties = response.body()!!
+                    Log.d("TAG", parties.toString())
+                }
+
+                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.printStackTrace().toString())
+                }
+            }
+        )
 
         // Header
         Header(firstLine = "Welcome back", secondLine = "Christian")
@@ -175,6 +203,7 @@ fun UserScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
+            Log.d("TAG", parties.toString())
             items(parties.size) {
                 PartyItem(partyinfo = parties[it], isMyParty = false, onClick = onClick)
             }

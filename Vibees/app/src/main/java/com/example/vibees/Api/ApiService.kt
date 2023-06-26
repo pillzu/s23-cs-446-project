@@ -11,4 +11,7 @@ interface ApiService  {
 
     @POST("/parties/host")
     fun requestParty(@Body requestModel: Party): Call<ResponseMessage>
+
+    @POST("/parties")
+    fun requestAllParties(): Call<List<Party>>
 }
