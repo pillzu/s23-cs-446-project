@@ -157,17 +157,20 @@ def get_user_attendee_parties():
         party_id = party_id[0]
         party = db.query_party(party_id=party_id)
         location = db.query_locations(party_id=party_id)
+        host = db.show_host(party_id, True)
 
-        if not len(parties) or not len(location):
+        if not len(parties) or not len(location) or not len(host):
             logging.warn(f"Failed to fetch party with {party_id}...")
             continue
 
+        host = hp.row_to_user(host[0])
         party = hp.row_to_party(party[0])
         location = hp.row_to_location(location[0])
 
         qr_endpoint = f"/party/qr/{party_id}/{user_id}"
 
-        resp.append({**party, **location, "qr_endpoint": qr_endpoint})
+        resp.append({**party, **location, "qr_endpoint": qr_endpoint,
+                     "host_name": f" {host['first_name']} {host['last_name']}"})
 
     return jsonify(resp), 200
 
@@ -183,15 +186,18 @@ def get_user_host_parties():
         party_id = party_id[0]
         party = db.query_party(party_id=party_id)
         location = db.query_locations(party_id=party_id)
+        host = db.show_host(party_id, True)
 
-        if not len(parties) or not len(location):
+        if not len(parties) or not len(location) or not len(host):
             logging.warn(f"Failed to fetch party with {party_id}...")
             continue
 
+        host = hp.row_to_user(host[0])
         party = hp.row_to_party(party[0])
         location = hp.row_to_location(location[0])
 
-        resp.append({**party, **location})
+        resp.append({**party, **location,
+                     "host_name": f" {host['first_name']} {host['last_name']}"})
 
     return jsonify(resp), 200
 

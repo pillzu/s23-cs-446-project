@@ -53,6 +53,8 @@ import androidx.compose.ui.graphics.Color
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.GlobalAppState
+import com.example.vibees.screens.home.myparties.parties
 import com.example.vibees.ui.theme.GrayWhite
 import retrofit2.Call
 import retrofit2.Callback
@@ -64,6 +66,8 @@ fun UserScreen(
     onClick: (id: String) -> Unit,
     modifier: Modifier
 ) {
+    var userID by GlobalAppState::UserID
+    var userName by GlobalAppState::UserName
     Column(
         modifier = modifier
             .padding(horizontal = 15.dp, vertical=25.dp)
@@ -93,7 +97,7 @@ fun UserScreen(
         )
 
         // Header
-        Header(firstLine = "Welcome back", secondLine = "Christian")
+        Header(firstLine = "Welcome back", secondLine = userName)
 
         // Search bar
         var searchText by remember { mutableStateOf("")}

@@ -37,9 +37,6 @@ fun PartyDetails(
     id: String,
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-
-
-
         Row(horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
