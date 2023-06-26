@@ -8,6 +8,7 @@
 
 package com.example.vibees.screens.user
 
+import androidx.compose.foundation.background
 import com.example.vibees.screens.home.myparties.PartyItem
 
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +45,10 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.TextField
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.ui.graphics.Color
 import com.example.vibees.screens.home.myparties.parties
+import com.example.vibees.ui.theme.GrayWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +83,7 @@ fun UserScreen(
             onActiveChange = {
                 searchActive = it
             },
+            colors = SearchBarDefaults.colors(containerColor = GrayWhite),
             placeholder = {
                 Text(text = "Search for a party")
             },
@@ -143,10 +148,13 @@ fun UserScreen(
                     readOnly = true,
                     value = selectedOptionText,
                     onValueChange = {},
-                    label = { Text("Label") },
+                    label = { Text("Sort") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                )
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(
+                        unfocusedContainerColor = GrayWhite,
+                        focusedContainerColor = GrayWhite,
+                        focusedLabelColor = Color.Black,
+                ))
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },

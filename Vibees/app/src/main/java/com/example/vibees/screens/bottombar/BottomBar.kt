@@ -16,27 +16,27 @@ sealed class BottomBar(
 ) {
     object Home: BottomBar(
         route = "HOME",
-        title = "HOME",
+        title = "Home",
         icon = Icons.Default.Home
     )
     object MyParties: BottomBar(
         route = "MYPARTIES",
-        title = "MYPARTIES",
+        title = "Parties",
         icon = Icons.Default.Favorite
     )
     object Host: BottomBar(
         route = "HOST",
-        title = "HOST",
+        title = "Host",
         icon = Icons.Default.AddCircle
     )
     object Settings: BottomBar(
         route = "SETTINGS",
-        title = "SETTINGS",
+        title = "Setting",
         icon = Icons.Default.Settings
     )
     object Help: BottomBar(
         route = "HELP",
-        title = "HELP",
+        title = "Help",
         icon = Icons.Default.Info
     )
 }
