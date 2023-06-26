@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import retrofit2.Call
@@ -45,6 +46,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 
@@ -89,6 +91,7 @@ import java.util.Date
 fun HostScreen(name: String, onClick: () -> Unit) {
 
     val apiService = APIInterface()
+    var userID by GlobalAppState::UserID
 
     var partyName by remember { mutableStateOf("") }
     val partyDate = remember { mutableStateOf("") }
@@ -346,8 +349,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         Button(
             onClick = {
                 var host_date = LocalDateTime.of(partyYear, partyMonth, partyDay, partyHour, partyMinute)
+                var dateString = host_date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
-                val obj = Party("5bdfc21f-ea15-43b3-9654-093f15d63ba7", partyName, host_date.toString(), partyType,  maxCapacity.toInt(),
+                val obj = Party(userID, partyName, dateString, partyType,  maxCapacity.toInt(),
                     entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
                 Log.d("TAG", obj.toString())
 
