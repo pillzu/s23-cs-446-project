@@ -108,23 +108,6 @@ fun PartyItem(
                     )
                 }
             }
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = partyinfo.date,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(bottom=20.dp)
-                )
-                Image(
-                    imageVector = partyinfo.icon,
-                    contentDescription = "Party icon",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(50.dp)
-                )
-            }
         }
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
