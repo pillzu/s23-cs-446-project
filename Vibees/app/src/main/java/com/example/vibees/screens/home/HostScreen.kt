@@ -44,8 +44,10 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Date
+
 
 //val url = "http://127.0.0.1:5000"
 //data class ResponseClass (val response: String)
@@ -343,15 +345,13 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         // Submit Button
         Button(
             onClick = {
-                val dateString = "$partyYear-$partyMonth-$partyDay $partyDay:$partyMinute:00"
-                partyDateTimeStr = SimpleDateFormat("yyyy-MM-DD HH:MM:SS")
-                partyDateTime = partyDateTimeStr!!.parse(dateString)
+                var host_date = LocalDateTime.of(partyYear, partyMonth, partyDay, partyHour, partyMinute)
 
-                val obj = Party("5bdfc21f-ea15-43b3-9654-093f15d63ba7", partyName, partyDateTime, partyType,  maxCapacity.toInt(),
+                val obj = Party("5bdfc21f-ea15-43b3-9654-093f15d63ba7", partyName, host_date.toString(), partyType,  maxCapacity.toInt(),
                     entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
+                Log.d("TAG", obj.toString())
 
                 // call endpoint /parties/host to create a party
-//                try {
                 val callResponse = apiService.createParty(obj)
                 val response = callResponse.enqueue(
                     object: Callback<ResponseMessage> {
