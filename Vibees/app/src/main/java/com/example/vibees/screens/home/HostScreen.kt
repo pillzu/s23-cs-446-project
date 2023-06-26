@@ -7,9 +7,7 @@ import android.app.TimePickerDialog
 import android.graphics.Bitmap
 import android.media.Image
 import android.net.Uri
-import android.util.Log
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -37,52 +35,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
-
-const val url = "http://127.0.0.1:5000"
-data class ResponseClass (val response: String)
-data class RequestModel (
-    val user_id: Int,
-    val party_name: String,
-    val date_time: Date?,
-    val street: String,
-    val city: String,
-    val province: String,
-    val postal_code: String,
-    val type: String,
-    val max_capacity: Int,
-    val entry_fees: Double,
-    val desc: String,
-    val thumbnail: Image?
-    )
-
-interface APIInterface {
-    @POST("/parties/host")
-    fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
-}
-
-object ServiceBuilder {
-    private val client = OkHttpClient.Builder().build()
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(url)
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(client)
-        .build()
-
-    fun<T> buildService(service: Class<T>): T{
-        return retrofit.create(service)
-    }
-}
 
 @SuppressLint("SimpleDateFormat")
 @Composable
@@ -132,26 +87,6 @@ fun HostScreen(name: String, onClick: () -> Unit) {
     ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
     }
-
-    val retrofit = ServiceBuilder.buildService(APIInterface::class.java)
-    val obj = RequestModel(1, partyName, partyDateTime, unitStreet, city, province, postalCode,
-                           partyType, maxCapacity, entryFee, description, thumbnail)
-
-    retrofit.requestParty(obj).enqueue(
-        object:Callback<ResponseClass> {
-            override fun onResponse(
-                call: Call<ResponseClass>,
-                response: Response<ResponseClass>
-            ) {
-                Log.d("TAG", "${response.body()?.response}")
-                Toast.makeText(partyContext, "${response.body()?.response}", Toast.LENGTH_LONG).show()
-            }
-
-            override fun onFailure(call: Call<ResponseClass>, t: Throwable) {
-                TODO("Not yet implemented")
-            }
-        }
-    )
 
     Column (modifier = Modifier
         .fillMaxSize()

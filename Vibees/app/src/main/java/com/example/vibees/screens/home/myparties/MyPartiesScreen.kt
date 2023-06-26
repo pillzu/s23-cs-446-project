@@ -105,7 +105,7 @@ fun MyPartiesScreen(
         
         // parties
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(30.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
             item {
@@ -130,7 +130,7 @@ fun MyPartiesScreen(
                 )
             }
             items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
+                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick,)
             }
         }
     }
