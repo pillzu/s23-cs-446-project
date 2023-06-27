@@ -8,6 +8,7 @@
 | 19 May   |           |          |                | 2      |           |          | Discuss the app idea                                                      |
 | 19 May   |           |          |                |        | 2         |          | Discuss the app idea                                                      |
 | 19 May   | 2         |          |                |        |           |          | Discuss the app idea                                                      |
+| 25 May   |           | 1        |                |        |           |          | Create presentation and add skeleton slides for layout with content       |
 | 27 May   |           |          |                |        |           | 2        | Intitialize and Build Presentation                                        |
 | 28 May   | 1.5       |          |                |        |           |          | Finish Presentation                                                       |
 | 28 May   |           | 1.5      |                |        |           |          | Finish Presentation                                                       |
