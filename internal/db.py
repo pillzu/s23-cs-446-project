@@ -102,13 +102,13 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_party(party_id, party_name, date_time, max_capacity, description, entry_fee): 
+    add_new_party(party_name, date_time, host_id, max_capacity, description, entry_fee): 
     Insert a new party entry with the given information into the Parties table. 
     The party's creation time will be filled as the current system time.
         Parameters: 
-            - party_id: The party's id number (integer)
             - party_name: The party's name (string)
             - date_time: The scheduled date of the party (datetime)
+            - host_id: The user id of the host
             - max_capacity: The maximum capacity of the guests in the party (integer)
             - description: The description of the party, entered by the host (string)
             - entry_fee: The entry fee of the party (integer)
@@ -119,7 +119,7 @@ class DatabaseConnection:
             - the party's information may have invalid fields
     """
 
-    def add_new_party(self, party_name, date_time, max_capacity, description, entry_fee, party_id=None):
+    def add_new_party(self, party_name, date_time, host_id, max_capacity, description, entry_fee, party_id=None):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -130,7 +130,7 @@ class DatabaseConnection:
 
             # TODO: Remove parties and thumbnail
             statement = f"INSERT INTO Parties " \
-                        f"VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}', " \
+                        f"VALUES ('{party_id}', '{party_name}', '{date_time}', '{host_id}', '{datetime.now(timez)}', " \
                         f"{max_capacity}, '{description}', " \
                         f"{entry_fee})"
 
@@ -173,7 +173,7 @@ class DatabaseConnection:
             return trans_id
 
         except Exception as e:
-            logging.fatal("Adding new party to database failed")
+            logging.fatal("Adding new transaction to database failed")
             logging.fatal(e)
             return None
 
@@ -325,43 +325,19 @@ class DatabaseConnection:
             return False
 
     """
-    host_party(user_id, party_id): Registers the user with user_id into the party with party_id as a host
-        Parameters: 
-            - user_id: the user's id number
-            - party_id: the party's id number
-        Returns:
-            - True: if the user is registered as a host successfully
-            - False: otherwise
-    """
-
-    def host_party(self, user_id, party_id):
-        try:
-            statement = f"INSERT INTO Hosts VALUES ('{user_id}', '{party_id}')"
-            self.exec_DDL(statement)
-            return True
-
-        except Exception as e:
-            logging.fatal("Registering host to party failed")
-            logging.fatal(e)
-            return False
-
-    """
     cancel_party(party_id): Cancels the party with party_id.
         Parameters: 
             - party_id: the party's id number
-            - force_leave: if set to true, then all attenders will also be forced to leave the party
         Returns:
             - True: if the party is cancelled successfully
             - False: otherwise
     """
 
-    def cancel_party(self, party_id, force_leave=True):
+    def cancel_party(self, party_id):
         try:
-            statement = f"DELETE FROM Hosts h WHERE h.party_id = '{party_id}'"
+            statement = f"DELETE FROM Parties p WHERE p.party_id = '{party_id}';\n " \
+                        f"DELETE FROM guests g WHERE g.party_id = '{party_id}';"
             self.exec_DDL(statement)
-            if force_leave:
-                statement = f"DELETE FROM guests g WHERE g.party_id = '{party_id}'"
-                self.exec_DDL(statement)
             return True
 
         except Exception as e:
@@ -409,11 +385,9 @@ class DatabaseConnection:
     def show_hosted_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT p.* FROM Hosts h " \
-                            f"JOIN Parties p ON h.party_id = p.party_id " \
-                            f"WHERE h.host_id = '{user_id}'"
+                statement = f"SELECT * FROM Parties p WHERE p.host_id = '{user_id}'"
             else:
-                statement = f"SELECT h.party_id FROM Hosts h WHERE h.host_id = '{user_id}'"
+                statement = f"SELECT p.party_id FROM Parties p WHERE p.host_id = '{user_id}'"
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -444,31 +418,6 @@ class DatabaseConnection:
 
         except Exception as e:
             logging.fatal("Displaying attendees failed")
-            logging.fatal(e)
-            return None
-
-    """
-    show_host(party_id): Returns the user that hosts the current party
-        Parameters: 
-            - party_id: the party's id number
-            - show_detail: if set to true, then return the details of the host users. Otherwise only return the id.
-        Returns:
-            - Users: the id of the host
-            - None: otherwise
-    """
-
-    def show_host(self, party_id, show_detail=False):
-        try:
-            if show_detail:
-                statement = f"SELECT u.* FROM Hosts h " \
-                            f"JOIN Users u ON h.host_id = u.user_id " \
-                            f"WHERE h.party_id = '{party_id}'"
-            else:
-                statement = f"SELECT h.host_id FROM Hosts h WHERE h.party_id = '{party_id}'"
-            return self.exec_DML(statement)
-
-        except Exception as e:
-            logging.fatal("Displaying host failed")
             logging.fatal(e)
             return None
 
@@ -864,21 +813,14 @@ class DatabaseConnection:
                         "party_id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " \
                         "party_name VARCHAR(50) NOT NULL, " \
                         "date_time TIMESTAMP NOT NULL, " \
+                        "host_id UUID NOT NULL" \
                         "created_at TIMESTAMP NOT NULL, " \
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \
                         "UNIQUE(party_name), " \
-                        "entry_fee INTEGER)"
-            self.exec_DDL(statement)
-
-            # Hosts
-            statement = "CREATE TABLE IF NOT EXISTS Hosts (" \
-                        "host_id UUID, " \
-                        "party_id UUID, " \
+                        "entry_fee INTEGER, " \
                         "CONSTRAINT host_user_id " \
-                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
-                        "CONSTRAINT host_party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL)"
             self.exec_DDL(statement)
 
             # Guests
