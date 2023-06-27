@@ -76,14 +76,15 @@ class DatabaseConnection:
             - email: the user's email address (String with len <= 50)
             - uid: the user's uuid. If left blank then will use gen_random_uuid() (Integer)
         Returns:
-            - uuid: if the user is inserted successfully, return the user's uuid
+            - uuid: if exec_stmt=True and the user is inserted successfully, return the user's uuid
+            - statement, uuid: if exec_stmt=False, return the generated uid and the SQL statement to be executed
             - None: otherwise
         Throws Exception if:
             - the user's information may have invalid fields
     """
 
     def add_new_user(self, username, password, first_name, last_name, phone_no, address_street, address_city, address_prov,
-                     address_postal, email, uid=None):
+                     address_postal, email, uid=None, exec_stmt=True):
         try:
             if uid is None:
                 with self.conn.cursor() as cur:
@@ -91,10 +92,12 @@ class DatabaseConnection:
                     uid = cur.fetchone()[0]
             statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
                         f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
-                        f"'{address_postal}', '{email}', 0)"
-            self.exec_DDL(statement)
-
-            return uid
+                        f"'{address_postal}', '{email}', 0);\n"
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return uid
+            else:
+                return statement, uid
 
         except Exception as e:
             logging.fatal("Adding new user to database failed")
@@ -113,13 +116,15 @@ class DatabaseConnection:
             - description: The description of the party, entered by the host (string)
             - entry_fee: The entry fee of the party (integer)
         Returns:
-            - uuid: if the party is inserted successfully, return the party's id
+            - uuid: if exec_stmt=True and the party is inserted successfully, return the party's id
+            - statement, uuid: if exec_stmt=False, return the SQL statement to be executed and the generated party id 
             - None: otherwise
         Throws Exception if:
             - the party's information may have invalid fields
     """
 
-    def add_new_party(self, party_name, date_time, host_id, max_capacity, description, entry_fee, party_id=None):
+    def add_new_party(self, party_name, date_time, host_id, max_capacity, description, entry_fee, party_id=None,
+                      exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -132,11 +137,13 @@ class DatabaseConnection:
             statement = f"INSERT INTO Parties " \
                         f"VALUES ('{party_id}', '{party_name}', '{date_time}', '{host_id}', '{datetime.now(timez)}', " \
                         f"{max_capacity}, '{description}', " \
-                        f"{entry_fee})"
+                        f"{entry_fee});\n"
 
-            self.exec_DDL(statement)
-
-            return party_id
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return party_id
+            else:
+                return statement, party_id
 
         except Exception as e:
             logging.fatal("Adding new party to database failed")
@@ -151,13 +158,14 @@ class DatabaseConnection:
             - party_id: the party's id number
             - amount: the payment amount
         Returns:
-            - uuid: if the transaction entry is inserted successfully, return the transaction's id
+            - uuid: if exec_stmt=True and the transaction entry is inserted successfully, return the transaction's id
+            - statement, uuid: if exec_stmt=False, return the SQL statement to be executed and the generated id
             - None: otherwise
         Throws Exception if:
             - the transaction's information may have invalid fields
     """
 
-    def add_new_transaction(self, guest_id, party_id, amount, trans_id=None):
+    def add_new_transaction(self, guest_id, party_id, amount, trans_id=None, exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -166,10 +174,13 @@ class DatabaseConnection:
                     cur.execute("SELECT gen_random_uuid()")
                     trans_id = cur.fetchone()[0]
             statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{guest_id}', " \
-                        f"'{party_id}', {amount})"
+                        f"'{party_id}', {amount});\n"
 
-            self.exec_DDL(statement)
-            return trans_id
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return trans_id
+            else:
+                return statement, trans_id
 
         except Exception as e:
             logging.fatal("Adding new transaction to database failed")
@@ -182,13 +193,14 @@ class DatabaseConnection:
             - party_id: the ID of the party associated with the tag list
             - tag_list: the list of tags to be associated with the party
         Returns:
-            - True: if the tag list is inserted successfully
+            - True: if exec_stmt=True and the tag list is inserted successfully
+            - statement: if exec_stmt=False, return the SQL statement to be executed
             - False: otherwise
         Throws Exception if:
             - the tag's information may have invalid fields or references a non-existing party
     """
 
-    def set_tags(self, party_id, tag_list):
+    def set_tags(self, party_id, tag_list, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
             party = self.query_party(party_id=party_id)
@@ -197,10 +209,13 @@ class DatabaseConnection:
 
             tag_list = str(tag_list)[1:-1]
             statement = f"INSERT INTO Tags VALUES ('{party_id}', ARRAY[{tag_list}]) " \
-                        f"ON CONFLICT (party_id) DO UPDATE SET tag_list = ARRAY[{tag_list}]"
+                        f"ON CONFLICT (party_id) DO UPDATE SET tag_list = ARRAY[{tag_list}];\n"
 
-            self.exec_DDL(statement)
-            return True
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return True
+            else:
+                return statement
 
         except Exception as e:
             logging.fatal("Setting tags failed")
@@ -216,13 +231,14 @@ class DatabaseConnection:
             - prov: the province/state of the party location 
             - postal_code: the postal code of the party location 
         Returns:
-            - True: if the party location is set successfully
+            - True: if exec_stmt=True the party location is set successfully
+            - statement: if exec_stmt=False, return the SQL statement to be executed
             - False: otherwise
         Throws Exception if:
             - the party location information may have invalid fields or references a non-existing party
     """
 
-    def set_location(self, party_id, street, city, prov, postal_code):
+    def set_location(self, party_id, street, city, prov, postal_code, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
             party = self.query_party(party_id=party_id)
@@ -232,10 +248,13 @@ class DatabaseConnection:
             location = self.query_locations
             statement = f"INSERT INTO PartyLocations VALUES ('{party_id}', '{street}', '{city}', '{prov}', '{postal_code}') " \
                         f"ON CONFLICT (party_id) DO UPDATE " \
-                        f"SET (street, city, prov, postal_code) = ('{street}', '{city}', '{prov}', '{postal_code}')"
+                        f"SET (street, city, prov, postal_code) = ('{street}', '{city}', '{prov}', '{postal_code}');\n"
 
-            self.exec_DDL(statement)
-            return True
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return True
+            else:
+                return statement
 
         except Exception as e:
             logging.fatal("Setting party location failed")
@@ -249,14 +268,16 @@ class DatabaseConnection:
             - party_id: the ID of the party associated with the music suggestions 
             - suggested_tracks: a list of suggested tracks 
         Returns:
-            - True: if the music suggestions are set successfully
+            - True: if exec_stmt=True and the music suggestions are set successfully
+            - statement: if exec_stmt=False, return the SQL statement to be executed
             - False: otherwise
         Throws Exception if:
             - the music suggestion information may have invalid fields or references a non-existing guest or party
     """
 
-    def set_suggestions(self, guest_id, party_id, suggested_tracks):
+    def set_suggestions(self, guest_id, party_id, suggested_tracks, exec_stmt=True):
         try:
+            # TODO: Do we need to verify this? We may add constraints to avoid these verifications
             # Check if the party_id exists in the Parties table
             party = self.query_party(party_id=party_id)
             if party is None or len(party) == 0:
@@ -271,33 +292,16 @@ class DatabaseConnection:
             suggested_tracks = str(suggested_tracks)[1:-1]
 
             statement = f"INSERT INTO MusicSuggestions VALUES ('{guest_id}', '{party_id}', ARRAY[{suggested_tracks}]) " \
-                        f"ON CONFLICT (guest_id, party_id) DO UPDATE SET suggested_tracks = ARRAY[{suggested_tracks}]"
+                        f"ON CONFLICT (guest_id, party_id) DO UPDATE SET suggested_tracks = ARRAY[{suggested_tracks}];\n"
 
-            self.exec_DDL(statement)
-            return True
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return True
+            else:
+                return statement
 
         except Exception as e:
             logging.fatal("Setting music suggestions failed")
-            logging.fatal(e)
-            return False
-
-    """
-    attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
-        Parameters: 
-            - user_id: the user's id number
-            - party_id: the party's id number
-        Returns:
-            - True: if the user is registered as a guest successfully
-            - False: otherwise
-    """
-
-    def attend_party(self, user_id, party_id, entry_fee):
-        try:
-            self.add_new_transaction(user_id, party_id, entry_fee)
-            return True
-
-        except Exception as e:
-            logging.fatal("Registering guest to party failed")
             logging.fatal(e)
             return False
 
@@ -736,6 +740,58 @@ class DatabaseConnection:
             logging.fatal("Query locations failed")
             logging.fatal(e)
             return None
+
+
+    """
+    exec_attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
+        Parameters: 
+            - user_id: the user's id number
+            - party_id: the party's id number
+        Returns:
+            - True: if the user is registered as a guest successfully
+            - False: otherwise
+    """
+
+    def exec_attend_party(self, user_id, party_id, entry_fee):
+        try:
+            self.add_new_transaction(user_id, party_id, entry_fee)
+            return True
+
+        except Exception as e:
+            logging.fatal("Attending party failed")
+            logging.fatal(e)
+            return False
+
+
+    """
+    exec_host_party(party_name, date_time, host_id, max_capacity, description, entry_fee, street, city, prov, 
+    postal_code, tag_list): Adds the party into the database, sets its location and tags
+        Parameters:
+            - party_name, date_time, host_id, max_capacity, description, entry_fee: identifies a party
+            - street, city, prov, postal_code: identifies a party location
+            - tag_list: a list of party tags
+        Returns:
+            - True: if the party is hosted successfully
+            - False: otherwise
+    """
+
+    def exec_host_party(self, party_name, date_time, host_id, max_capacity, description, entry_fee, street, city,
+                        prov, postal_code, tag_list):
+        try:
+            statements = ""
+            add_party = self.add_new_party(party_name, date_time, host_id, max_capacity, description,
+                                           entry_fee, exec_stmt=False)
+            statements += add_party[0]
+            party_id = add_party[1]
+            statements += self.set_location(party_id, street, city, prov, postal_code, exec_stmt=False)
+            statements += self.set_tags(party_id, tag_list, exec_stmt=False)
+            self.exec_DDL(statements)
+            return True
+
+        except Exception as e:
+            logging.fatal("Hosting party failed")
+            logging.fatal(e)
+            return False
 
 
     """
