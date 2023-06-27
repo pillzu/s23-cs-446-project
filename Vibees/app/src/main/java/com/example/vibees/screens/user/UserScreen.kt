@@ -8,6 +8,8 @@
 
 package com.example.vibees.screens.user
 
+import android.util.Log
+import android.widget.Toast
 import com.example.vibees.screens.home.myparties.PartyItem
 
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +17,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -43,7 +49,16 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.TextField
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
-import com.example.vibees.screens.home.myparties.parties
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.ui.graphics.Color
+import com.example.vibees.Api.APIInterface
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.GlobalAppState
+import com.example.vibees.ui.theme.GrayWhite
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,15 +66,38 @@ fun UserScreen(
     onClick: (id: String) -> Unit,
     modifier: Modifier
 ) {
+    var userID by GlobalAppState::UserID
+    var userName by GlobalAppState::UserName
     Column(
         modifier = modifier
             .padding(horizontal = 15.dp, vertical=25.dp)
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
+        var parties by remember { mutableStateOf(listOf<Party>()) }
+        // fetch all parties from endpoint /parties
+        val apiService = APIInterface()
+        val callResponse = apiService.getAllParties()
+        val response = callResponse.enqueue(
+            object: Callback<List<Party>> {
+                override fun onResponse(
+                    call: Call<List<Party>>,
+                    response: Response<List<Party>>
+                ) {
+                    Log.d("TAG", "success")
+                    parties = response.body()!!
+                    Log.d("TAG", parties.toString())
+                }
+
+                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.printStackTrace().toString())
+                }
+            }
+        )
 
         // Header
-        Header(firstLine = "Welcome back", secondLine = "Christian")
+        Header(firstLine = "Welcome back", secondLine = userName)
 
         // Search bar
         var searchText by remember { mutableStateOf("")}
@@ -78,6 +116,8 @@ fun UserScreen(
             onActiveChange = {
                 searchActive = it
             },
+
+            colors = SearchBarDefaults.colors(containerColor = GrayWhite),
             placeholder = {
                 Text(text = "Search for a party")
             },
@@ -142,10 +182,13 @@ fun UserScreen(
                     readOnly = true,
                     value = selectedOptionText,
                     onValueChange = {},
-                    label = { Text("Label") },
+                    label = { Text("Sort") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                )
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(
+                        unfocusedContainerColor = GrayWhite,
+                        focusedContainerColor = GrayWhite,
+                        focusedLabelColor = Color.Black,
+                ))
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
@@ -170,11 +213,12 @@ fun UserScreen(
 
         // Parties
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(30.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
+            Log.d("TAG", parties.toString())
             items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = false, onClick = onClick)
+                PartyItem(partyInfo = parties[it], isMyParty = false, onClick = onClick)
             }
         }
     }

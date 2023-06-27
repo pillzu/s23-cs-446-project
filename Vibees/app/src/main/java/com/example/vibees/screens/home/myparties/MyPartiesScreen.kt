@@ -1,37 +1,44 @@
 package com.example.vibees.screens.home.myparties
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vibees.Api.APIInterface
+import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.User
 import com.example.vibees.screens.user.Header
+import com.example.vibees.ui.theme.GrayWhite
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +53,53 @@ fun MyPartiesScreen(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-        
+
+        var userID by GlobalAppState::UserID
+        var attendingParties by remember { mutableStateOf(listOf<Party>()) }
+        var hostingParties by remember { mutableStateOf(listOf<Party>()) }
+        // fetch all parties from endpoint /parties
+        val apiService = APIInterface()
+
+        // Parties being attended by the user
+        val callResponseAttending = apiService.getMyPartiesAttending(User(userID))
+        val responseAttending = callResponseAttending.enqueue(
+            object: Callback<List<Party>> {
+                override fun onResponse(
+                    call: Call<List<Party>>,
+                    response: Response<List<Party>>
+                ) {
+                    Log.d("TAG", "success")
+                    attendingParties = response.body()!!
+                    Log.d("TAG", attendingParties.toString())
+                }
+
+                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.printStackTrace().toString())
+                }
+            }
+        )
+
+        // Parties being hosted by the user
+        val callResponseHosting = apiService.getMyPartiesHosting(User(userID))
+        val responseHosting = callResponseHosting.enqueue(
+            object: Callback<List<Party>> {
+                override fun onResponse(
+                    call: Call<List<Party>>,
+                    response: Response<List<Party>>
+                ) {
+                    Log.d("TAG", "success")
+                    hostingParties = response.body()!!
+                    Log.d("TAG", hostingParties.toString())
+                }
+
+                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.printStackTrace().toString())
+                }
+            }
+        )
+
         // Header
         Header(firstLine = "MY", secondLine = "PARTIES")
 
@@ -64,6 +117,7 @@ fun MyPartiesScreen(
 
             },
             active = searchActive,
+            colors = SearchBarDefaults.colors(containerColor = GrayWhite),
             onActiveChange = {
                 searchActive = it
             },
@@ -101,7 +155,7 @@ fun MyPartiesScreen(
         
         // parties
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
         ) {
             item {
@@ -110,11 +164,11 @@ fun MyPartiesScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(bottom = 15.dp)
+                        .padding(bottom = 5.dp, top=10.dp)
                 )
             }
-            items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
+            items(hostingParties.size) {
+                PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
             }
             item {
                 Text(
@@ -122,11 +176,11 @@ fun MyPartiesScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(15.dp)
+                        .padding(bottom = 5.dp, top=10.dp)
                 )
             }
-            items(parties.size) {
-                PartyItem(partyinfo = parties[it], isMyParty = true, onClick = onClick)
+            items(attendingParties.size) {
+                PartyItem(partyInfo = attendingParties[it], isMyParty = true, onClick = onClick,)
             }
         }
     }
