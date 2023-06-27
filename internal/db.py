@@ -144,11 +144,10 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_transaction(from_id, to_id, party_id, amount): Insert a new transaction entry with given information
+    add_new_transaction(guest_id, party_id, amount): Insert a new transaction entry with given information
     into the Transactions table. The transaction's creation time will be filled as the current system time
         Parameters: 
-            - from_id: the guest's id number
-            - to_id: the host's id number
+            - guest_id: the guest's id number
             - party_id: the party's id number
             - amount: the payment amount
         Returns:
@@ -158,7 +157,7 @@ class DatabaseConnection:
             - the transaction's information may have invalid fields
     """
 
-    def add_new_transaction(self, from_id, to_id, party_id, amount, trans_id=None):
+    def add_new_transaction(self, guest_id, party_id, amount, trans_id=None):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -166,8 +165,8 @@ class DatabaseConnection:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     trans_id = cur.fetchone()[0]
-            statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{from_id}', " \
-                        f"'{to_id}', '{party_id}', {amount})"
+            statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{guest_id}', " \
+                        f"'{party_id}', {amount})"
 
             self.exec_DDL(statement)
             return trans_id
@@ -292,10 +291,9 @@ class DatabaseConnection:
             - False: otherwise
     """
 
-    def attend_party(self, user_id, party_id):
+    def attend_party(self, user_id, party_id, entry_fee):
         try:
-            statement = f"INSERT INTO Guests VALUES ('{user_id}', '{party_id}')"
-            self.exec_DDL(statement)
+            self.add_new_transaction(user_id, party_id, entry_fee)
             return True
 
         except Exception as e:
@@ -315,7 +313,7 @@ class DatabaseConnection:
 
     def leave_party(self, user_id, party_id):
         try:
-            statement = f"DELETE FROM Guests g WHERE g.guest_id = '{user_id}' AND g.party_id = '{party_id}'"
+            statement = f"DELETE FROM Transactions t WHERE t.guest_id = '{user_id}' AND t.party_id = '{party_id}'"
             self.exec_DDL(statement)
             return True
 
@@ -336,7 +334,7 @@ class DatabaseConnection:
     def cancel_party(self, party_id):
         try:
             statement = f"DELETE FROM Parties p WHERE p.party_id = '{party_id}';\n " \
-                        f"DELETE FROM guests g WHERE g.party_id = '{party_id}';"
+                        f"DELETE FROM Transactions t WHERE t.party_id = '{party_id}';"
             self.exec_DDL(statement)
             return True
 
@@ -359,11 +357,11 @@ class DatabaseConnection:
     def show_attended_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT p.* FROM Guests g " \
-                            f"JOIN Parties p ON g.party_id = p.party_id " \
-                            f"WHERE g.guest_id = '{user_id}'"
+                statement = f"SELECT p.* FROM Transactions t " \
+                            f"JOIN Parties p ON t.party_id = p.party_id " \
+                            f"WHERE t.guest_id = '{user_id}'"
             else:
-                statement = f"SELECT g.party_id FROM Guests g WHERE g.guest_id = '{user_id}'"
+                statement = f"SELECT t.party_id FROM Transactions t WHERE t.guest_id = '{user_id}'"
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -409,11 +407,11 @@ class DatabaseConnection:
     def show_attendees(self, party_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT u.* FROM Guests g " \
-                            f"JOIN Users u ON g.guest_id = u.user_id " \
-                            f"WHERE g.party_id = '{party_id}'"
+                statement = f"SELECT u.* FROM Transactions t " \
+                            f"JOIN Users u ON t.guest_id = u.user_id " \
+                            f"WHERE t.party_id = '{party_id}'"
             else:
-                statement = f"SELECT g.guest_id FROM Guests g WHERE g.party_id = '{party_id}'"
+                statement = f"SELECT t.guest_id FROM Transactions t WHERE t.party_id = '{party_id}'"
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -422,7 +420,7 @@ class DatabaseConnection:
             return None
 
     """
-    check_attends(party_id, guest_id): Checks if the guest with guest_id attends party with party_id
+    check_attends(party_id, guest_id): Checks if the user with guest_id attends party with party_id
         Parameters: 
             - party_id: the party's id number
             - guest_id: the guest's user id
@@ -433,7 +431,7 @@ class DatabaseConnection:
 
     def check_attends(self, party_id, guest_id):
         try:
-            statement = f"SELECT * FROM Guests g WHERE g.party_id = '{party_id}' AND g.guest_id = '{guest_id}'"
+            statement = f"SELECT * FROM Transactions t WHERE t.party_id = '{party_id}' AND t.guest_id = '{guest_id}'"
             return len(self.exec_DML(statement)) != 0
 
         except Exception as e:
@@ -510,12 +508,11 @@ class DatabaseConnection:
             return None
 
     """
-    query_transaction(trans_id, from_id, to_id, party_id, min_amount, max_amount, start_date, end_date): Query 
+    query_transaction(trans_id, guest_id, party_id, min_amount, max_amount, start_date, end_date): Query 
     transactions using some attributes. If an attribute is left blank then its constraint is ignored.
         Parameters: 
             - trans_id: return the transaction with the matching transaction_id
-            - from_id: return all transactions with paid by user with from_id
-            - to_id: return all transactions with paid to user with to_id
+            - guest_id: return all transactions with paid by user with guest_id
             - party_id: return all transactions associated with the party with party_id
             - min_amount: return all transactions with payment amount >= min_amount
             - max_amount: return all transactions with payment amount <= max_amount
@@ -527,7 +524,7 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_transaction(self, trans_id=None, from_id=None, to_id=None, party_id=None, min_amount=None,
+    def query_transaction(self, trans_id=None, guest_id=None, party_id=None, min_amount=None,
                           max_amount=None, start_date=None, end_date=None, limit=50):
         try:
             sub_queries = []
@@ -535,11 +532,8 @@ class DatabaseConnection:
             if trans_id is not None:
                 sub_queries.append(f" t.transaction_id = '{trans_id}'")
 
-            if from_id is not None:
-                sub_queries.append(f" t.from_id = '{from_id}'")
-
-            if to_id is not None:
-                sub_queries.append(f" t.to_id = '{to_id}'")
+            if guest_id is not None:
+                sub_queries.append(f" t.guest_id = '{guest_id}'")
 
             if party_id is not None:
                 sub_queries.append(f" t.party_id = '{party_id}'")
@@ -576,6 +570,7 @@ class DatabaseConnection:
             - party_name: Return parties where party_name is a substring of the party's name.
             - start_date: Return parties with scheduled dates later than start_date.
             - end_date: Return parties with scheduled dates earlier than end_date.
+            - hosted_by: Return parties that are hosted by this uid
             - created_after: Return parties created after the timestamp created_after.
             - max_capacity: Return parties with maximum capacity greater than or equal to max_capacity.
             - entry_fee: Return parties with entry fee less than or equal to entry_fee.
@@ -585,8 +580,8 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None,
-                    max_capacity=None, entry_fee=None, limit=50):
+    def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, hosted_by=None,
+                    created_after=None, max_capacity=None, entry_fee=None, limit=50):
         try:
             sub_queries = []
 
@@ -601,6 +596,9 @@ class DatabaseConnection:
 
             if end_date is not None:
                 sub_queries.append(f" p.date_time <= '{end_date}'")
+
+            if hosted_by is not None:
+                sub_queries.append(f" p.host_id = '{hosted_by}'")
 
             if created_after is not None:
                 sub_queries.append(f" p.created_at >= '{created_after}'")
@@ -739,6 +737,7 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
+
     """
     clear_table(table): Delete all rows from a table
         Parameters: 
@@ -823,17 +822,6 @@ class DatabaseConnection:
                         "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL)"
             self.exec_DDL(statement)
 
-            # Guests
-            statement = "CREATE TABLE IF NOT EXISTS Guests (" \
-                        "guest_id UUID, " \
-                        "party_id UUID, " \
-                        "UNIQUE(guest_id, party_id), " \
-                        "CONSTRAINT guest_user_id " \
-                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
-                        "CONSTRAINT guest_party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
-            self.exec_DDL(statement)
-
             # Tags
             statement = "CREATE TABLE IF NOT EXISTS Tags (" \
                         "party_id UUID, " \
@@ -889,8 +877,7 @@ class DatabaseConnection:
             statement = "CREATE TABLE IF NOT EXISTS Transactions (" \
                         "transaction_id UUID PRIMARY KEY, " \
                         "time TIMESTAMP, " \
-                        "from_id UUID, " \
-                        "to_id UUID, " \
+                        "guest_id UUID, " \
                         "party_id UUID, " \
                         "payment_amount DECIMAL(10, 2), " \
                         "CONSTRAINT guest_user_id " \

@@ -114,20 +114,8 @@ def attend_party(party_id):
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
 
-    # get host details
-    host = db.show_host(party_id)
-    if host is None:
-        return {"message": "Failed to verify host of party! Please contact help"}, 500
-
-    host = host[0][0]
-
-    # create transaction
-    transaction = db.add_new_transaction(user_id, host, party_id, 0)
-    if not transaction:
-        return {"message": "Unable to add transaction! Please try again..."}, 500
-
     # add guest
-    if not db.attend_party(user_id, party_id):
+    if not db.attend_party(user_id, party_id, 0):
         return {"message": "Unable to add user as an attendee! Please call help..."}, 500
 
     return {"message": "User registered successfully!"}, 200
