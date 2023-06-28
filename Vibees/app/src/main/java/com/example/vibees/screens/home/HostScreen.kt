@@ -19,7 +19,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
@@ -28,15 +31,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
@@ -44,6 +51,7 @@ import com.example.vibees.Models.ResponseMessage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.Normalizer.Form
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -88,6 +96,74 @@ import java.util.Date
 //    }
 //}
 
+@Composable
+fun AppTextField(
+    modifier: Modifier = Modifier,
+    text: String,
+    placeholder: String,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    onChange: (String) -> Unit = {},
+    imeAction: ImeAction = ImeAction.Next,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    keyBoardActions: KeyboardActions = KeyboardActions(),
+    isEnabled: Boolean = true
+) {
+    OutlinedTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        value = text,
+        onValueChange = onChange,
+        leadingIcon = leadingIcon,
+        textStyle = TextStyle(fontSize = 18.sp),
+        keyboardOptions = KeyboardOptions(imeAction = imeAction, keyboardType = keyboardType),
+        keyboardActions = keyBoardActions,
+        enabled = isEnabled,
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Black,
+            unfocusedBorderColor = Color.Gray,
+            disabledBorderColor = Color.Gray,
+            disabledTextColor = Color.Black
+        ),
+        placeholder = {
+            Text(text = placeholder, style = TextStyle(fontSize = 18.sp, color = Color.LightGray))
+        }
+    )
+}
+
+@Composable
+fun FlexibleTextField(
+    modifier: Modifier = Modifier.padding(10.dp),
+    text: String,
+    placeholder: String,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    onChange: (String) -> Unit = {},
+    imeAction: ImeAction = ImeAction.Next,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    keyBoardActions: KeyboardActions = KeyboardActions(),
+    isEnabled: Boolean = true
+) {
+    OutlinedTextField(
+        modifier = modifier.size(200.dp, 56.dp),
+        value = text,
+        onValueChange = onChange,
+        leadingIcon = leadingIcon,
+        textStyle = TextStyle(fontSize = 18.sp),
+        keyboardOptions = KeyboardOptions(imeAction = imeAction, keyboardType = keyboardType),
+        keyboardActions = keyBoardActions,
+        enabled = isEnabled,
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Black,
+            unfocusedBorderColor = Color.Gray,
+            disabledBorderColor = Color.Gray,
+            disabledTextColor = Color.Black
+        ),
+        placeholder = {
+            Text(text = placeholder, style = TextStyle(fontSize = 18.sp, color = Color.LightGray))
+        }
+    )
+}
+
 @SuppressLint("SimpleDateFormat")
 @Composable
 fun HostScreen(name: String, onClick: () -> Unit) {
@@ -99,8 +175,8 @@ fun HostScreen(name: String, onClick: () -> Unit) {
     val partyDate = remember { mutableStateOf<LocalDate>(LocalDate.now()) }
     val partyTime = remember { mutableStateOf<LocalTime>(LocalTime.now()) }
     var partyType by remember { mutableStateOf("") }
-    var maxCapacity by remember { mutableStateOf("0") }
-    var entryFee by remember { mutableStateOf("0.0") }
+    var maxCapacity by remember { mutableStateOf("") }
+    var entryFee by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val bitmap =  remember { mutableStateOf<Bitmap?>(null) }
@@ -140,6 +216,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         imageUri = uri
     }
 
+
 //    val retrofit = serviceBuilder.buildService(APIInterface::class.java)
 //    val obj = RequestModel(1, partyName, partyDateTime, unitStreet, city, province, postalCode,
 //                           partyType, maxCapacity, entryFee, description, thumbnail)
@@ -165,6 +242,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 60.dp)
         .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally) {
+
+        val focusManager = LocalFocusManager.current
+
         Spacer(modifier = Modifier.padding(6.dp))
         Row {
             androidx.compose.material3.Text(
@@ -177,20 +257,20 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.padding(12.dp))
 
-        // Party Name Input
-        Text("Party Name*")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = partyName,
-            onValueChange = { partyName = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
+        AppTextField(
+            text = partyName,
+            placeholder = "Party Name*",
+            onChange = {
+                partyName = it
+            },
+            imeAction = ImeAction.Next,//Show next as IME button
+            keyboardType = KeyboardType.Text, //Plain text keyboard
+            keyBoardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
             )
         )
-        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Date Input
         Column {
@@ -220,125 +300,262 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.padding(8.dp))
 
-        // Party Street Addr Input
-        Text("Enter Address (Unit/Apt/Suite and Street Number)*")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = unitStreet,
-            onValueChange = { unitStreet = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
+        AppTextField(
+            text = unitStreet,
+            placeholder = "Unit and Street Number*",
+            onChange = {
+                unitStreet = it
+            },
+            imeAction = ImeAction.Next,//Show next as IME button
+            keyboardType = KeyboardType.Text, //Plain text keyboard
+            keyBoardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
             )
         )
-        Spacer(modifier = Modifier.padding(8.dp))
+
+        Row {
+                FlexibleTextField (
+                    text = city,
+                    placeholder = "City*",
+                    onChange = {
+                        city = it
+                    },
+                    imeAction = ImeAction.Next,//Show next as IME button
+                    keyboardType = KeyboardType.Text, //Plain text keyboard
+                    keyBoardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
+                    )
+                )
+                FlexibleTextField(
+                    text = province,
+                    placeholder = "Province*",
+                    onChange = {
+                        province = it
+                    },
+                    imeAction = ImeAction.Next,//Show next as IME button
+                    keyboardType = KeyboardType.Text, //Plain text keyboard
+                    keyBoardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
+                    )
+                )
+        }
+
+        AppTextField(
+            text = postalCode,
+            placeholder = "Postal Code*",
+            onChange = {
+                postalCode = it
+            },
+            imeAction = ImeAction.Next,//Show next as IME button
+            keyboardType = KeyboardType.Text, //Plain text keyboard
+            keyBoardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
+        )
+
+        AppTextField(
+            text = partyType,
+            placeholder = "Party Type*",
+            onChange = {
+                partyType = it
+            },
+            imeAction = ImeAction.Next,//Show next as IME button
+            keyboardType = KeyboardType.Text, //Plain text keyboard
+            keyBoardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
+        )
+
+        Row {
+            FlexibleTextField (
+                text = maxCapacity,
+                placeholder = "Max Capacity",
+                onChange = {
+                    maxCapacity = it
+                },
+                imeAction = ImeAction.Next,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+                keyBoardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
+                )
+            )
+            FlexibleTextField (
+                text = entryFee,
+                placeholder = "Fees",
+                onChange = {
+                    entryFee = it
+                },
+                imeAction = ImeAction.Next,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+                keyBoardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
+                )
+            )
+        }
+
+        AppTextField(
+            text = description,
+            placeholder = "Party Description",
+            onChange = {
+                description = it
+            },
+            imeAction = ImeAction.Next,//Show next as IME button
+            keyboardType = KeyboardType.Text, //Plain text keyboard
+            keyBoardActions = KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
+        )
+
+        // Party Name Input
+//        Text("Party Name*")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = partyName,
+//            onValueChange = { partyName = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
+
+        // Party Street Addr Input
+//        Text("Enter Address (Unit/Apt/Suite and Street Number)*")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = unitStreet,
+//            onValueChange = { unitStreet = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party City Input
-        Text("Enter City*")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = city,
-            onValueChange = { city = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text("Enter City*")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = city,
+//            onValueChange = { city = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Province Input
-        Text("Enter Province*")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = province,
-            onValueChange = { province = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text("Enter Province*")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = province,
+//            onValueChange = { province = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Postal Code Input
-        Text("Enter Postal Code*")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = postalCode,
-            onValueChange = { postalCode = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text("Enter Postal Code*")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = postalCode,
+//            onValueChange = { postalCode = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Type Input
-        Text("Party Type*")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = partyType,
-            onValueChange = { partyType = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text("Party Type*")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = partyType,
+//            onValueChange = { partyType = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         //Party Capacity Input
-        Text("Enter Maximum Capacity")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = maxCapacity,
-            onValueChange = { maxCapacity = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text("Enter Maximum Capacity")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = maxCapacity,
+//            onValueChange = { maxCapacity = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Entry Fee Input
-        Text("Enter Entry Fees")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = entryFee,
-            onValueChange = { entryFee = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text("Enter Entry Fees")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = entryFee,
+//            onValueChange = { entryFee = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Description Input
-        Text(text = "Description")
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            value = description,
-            onValueChange = { description = it },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Gray,
-            )
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+//        Text(text = "Description")
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//            value = description,
+//            onValueChange = { description = it },
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                unfocusedBorderColor = Color.Gray,
+//            )
+//        )
+//        Spacer(modifier = Modifier.padding(8.dp))
 
 //        Button(onClick = { launcher.launch("image/*") }, modifier = Modifier
 //            .fillMaxWidth()
@@ -347,6 +564,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
 //            Text(text = "Pick Thumbnail", color = MaterialTheme.colorScheme.primary)
 //        }
 //
+
         // Submit Button
         Button(
             onClick = {
