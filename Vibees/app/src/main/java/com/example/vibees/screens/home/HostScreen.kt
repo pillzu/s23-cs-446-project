@@ -12,19 +12,27 @@ import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +52,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
@@ -95,6 +104,45 @@ import java.util.Date
 //        return retrofit.create(service)
 //    }
 //}
+
+
+@Composable
+fun DropdownDemo() {
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf("AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC", "SK", "YT")
+    var selectedIndex by remember { mutableStateOf(0) }
+    Box(modifier = Modifier
+        .padding(10.dp)
+        .size(200.dp, 56.dp)
+        .wrapContentSize(Alignment.TopStart)
+        ) {
+        Text("Province*: ${items[selectedIndex]}", modifier = Modifier
+            .size(200.dp, 56.dp)
+            .padding(5.dp)
+            .clickable(onClick = { expanded = true })
+            .background(
+                MaterialTheme.colorScheme.primary
+            ), fontSize = 18.sp,
+            fontWeight = FontWeight.Bold)
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(
+                    Color.White
+                )
+        ) {
+            items.forEachIndexed { index, s ->
+                DropdownMenuItem(onClick = {
+                    selectedIndex = index
+                    expanded = false
+                }) {Text(s, fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    fontWeight = FontWeight.Bold)}
+            }
+        }
+    }
+}
+
 
 @Composable
 fun AppTextField(
@@ -276,25 +324,29 @@ fun HostScreen(name: String, onClick: () -> Unit) {
 
         // Party Date Input
         Row {
-            Button(modifier = Modifier
-                .size(200.dp, 48.dp),
-                onClick = {
-                    partyDatePickerDialog.show()
-                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
-                Text(text = "Schedule Date*", color = MaterialTheme.colorScheme.primary, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
+            Column(modifier = Modifier.fillMaxWidth(0.45f)) {
+                Button(modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        partyDatePickerDialog.show()
+                    }, colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
+                    Text(text = "Schedule Date*", color = Color.Black, fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                         fontWeight = FontWeight.Bold)
+                }
             }
-            androidx.compose.material3.Text(
-                modifier = Modifier.padding(10.dp),
-                text = "${partyDate.value}",
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-            )
+            Column(modifier = Modifier.fillMaxWidth(0.55f), horizontalAlignment = Alignment.CenterHorizontally) {
+                androidx.compose.material3.Text(
+                    modifier = Modifier.padding(10.dp),
+                    text = "${partyDate.value}",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                )
+            }
 //                Text("${partyDate.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp), fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.padding(8.dp))
-//        Column {
-
+//        Column { modifier = Modifier
+//                    .size(200.dp, 48.dp),
 //        }
 //        Spacer(modifier = Modifier.padding(8.dp))
 
@@ -319,20 +371,25 @@ fun HostScreen(name: String, onClick: () -> Unit) {
 //        }
 
         Row {
-            Button(modifier = Modifier
-                .size(200.dp, 48.dp),
-                onClick = {
-                    partyTimePickerDialog.show()
-                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
-                Text(text = "Schedule Time*", color = MaterialTheme.colorScheme.primary)
+//            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Time", Modifier.size(20.dp))
+            Column(modifier = Modifier.fillMaxWidth(0.45f)) {
+                Button( modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        partyTimePickerDialog.show()
+                    }, colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
+                    Text(text = "Schedule Time*", color = Color.Black, fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                         fontWeight = FontWeight.Bold)
+                }
             }
-            androidx.compose.material3.Text(
-                modifier = Modifier.padding(10.dp),
-                text = "${partyTime.value}",
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-            )
+            Column(modifier = Modifier.fillMaxWidth(0.55f), horizontalAlignment = Alignment.CenterHorizontally) {
+                androidx.compose.material3.Text(
+                    modifier = Modifier.padding(10.dp),
+                    text = "${partyTime.value}",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                )
+            }
         }
 
 //        Column {
@@ -380,22 +437,23 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     width = 200,
                     height = 56
                 )
-                FlexibleTextField(
-                    text = province,
-                    placeholder = "Province*",
-                    onChange = {
-                        province = it
-                    },
-                    imeAction = ImeAction.Next,//Show next as IME button
-                    keyboardType = KeyboardType.Text, //Plain text keyboard
-                    keyBoardActions = KeyboardActions(
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        }
-                    ),
-                    width = 200,
-                    height = 56
-                )
+                DropdownDemo()
+//                FlexibleTextField(
+//                    text = province,
+//                    placeholder = "Province*",
+//                    onChange = {
+//                        province = it
+//                    },
+//                    imeAction = ImeAction.Next,//Show next as IME button
+//                    keyboardType = KeyboardType.Text, //Plain text keyboard
+//                    keyBoardActions = KeyboardActions(
+//                        onNext = {
+//                            focusManager.moveFocus(FocusDirection.Down)
+//                        }
+//                    ),
+//                    width = 200,
+//                    height = 56
+//                )
         }
 
         AppTextField(
@@ -431,7 +489,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         Row {
             FlexibleTextField (
                 text = maxCapacity,
-                placeholder = "Max Capacity",
+                placeholder = "Max Capacity eg: 0.0",
                 onChange = {
                     maxCapacity = it
                 },
@@ -447,7 +505,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
             )
             FlexibleTextField (
                 text = entryFee,
-                placeholder = "Fees",
+                placeholder = "Fees eg: 0",
                 onChange = {
                     entryFee = it
                 },
