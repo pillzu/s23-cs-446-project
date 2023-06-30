@@ -141,10 +141,12 @@ fun FlexibleTextField(
     imeAction: ImeAction = ImeAction.Next,
     keyboardType: KeyboardType = KeyboardType.Text,
     keyBoardActions: KeyboardActions = KeyboardActions(),
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
+    width: Int,
+    height: Int
 ) {
     OutlinedTextField(
-        modifier = modifier.size(200.dp, 56.dp),
+        modifier = modifier.size(width.dp, height.dp),
         value = text,
         onValueChange = onChange,
         leadingIcon = leadingIcon,
@@ -273,32 +275,78 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         )
 
         // Party Date Input
-        Column {
+        Row {
             Button(modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
+                .size(200.dp, 48.dp),
                 onClick = {
                     partyDatePickerDialog.show()
                 }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
-                Text(text = "Schedule Date*", color = MaterialTheme.colorScheme.primary)
+                Text(text = "Schedule Date*", color = MaterialTheme.colorScheme.primary, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
             }
-            Text("Selected Date: ${partyDate.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp))
+            androidx.compose.material3.Text(
+                modifier = Modifier.padding(10.dp),
+                text = "${partyDate.value}",
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+            )
+//                Text("${partyDate.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp), fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.padding(8.dp))
+//        Column {
+
+//        }
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         // Party Time Input
-        Column {
+//        Row {
+//            Button(modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//                onClick = {
+//                    partyTimePickerDialog.show()
+//                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
+//                Text(text = "Schedule Time*", color = MaterialTheme.colorScheme.primary)
+//            }
+//            androidx.compose.material3.Text(
+//                modifier = Modifier.padding(10.dp),
+//                text = "${partyTime.value}",
+//                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+//                fontWeight = FontWeight.Bold,
+//                color = Color.Black,
+//            )
+////                Text("${partyDate.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp), fontWeight = FontWeight.Bold)
+//        }
+
+        Row {
             Button(modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
+                .size(200.dp, 48.dp),
                 onClick = {
                     partyTimePickerDialog.show()
                 }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
                 Text(text = "Schedule Time*", color = MaterialTheme.colorScheme.primary)
             }
-            Text("Selected Time: ${partyTime.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp))
+            androidx.compose.material3.Text(
+                modifier = Modifier.padding(10.dp),
+                text = "${partyTime.value}",
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+            )
         }
-        Spacer(modifier = Modifier.padding(8.dp))
+
+//        Column {
+//            Button(modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(10.dp),
+//                onClick = {
+//                    partyTimePickerDialog.show()
+//                }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
+//                Text(text = "Schedule Time*", color = MaterialTheme.colorScheme.primary)
+//            }
+//            Text("Selected Time: ${partyTime.value}", textAlign = TextAlign.Center, modifier = Modifier.padding(10.dp))
+//        }
+//        Spacer(modifier = Modifier.padding(8.dp))
 
         AppTextField(
             text = unitStreet,
@@ -328,7 +376,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                         onNext = {
                             focusManager.moveFocus(FocusDirection.Down)
                         }
-                    )
+                    ),
+                    width = 200,
+                    height = 56
                 )
                 FlexibleTextField(
                     text = province,
@@ -342,7 +392,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                         onNext = {
                             focusManager.moveFocus(FocusDirection.Down)
                         }
-                    )
+                    ),
+                    width = 200,
+                    height = 56
                 )
         }
 
@@ -389,7 +441,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     onNext = {
                         focusManager.moveFocus(FocusDirection.Down)
                     }
-                )
+                ),
+                width = 200,
+                height = 56
             )
             FlexibleTextField (
                 text = entryFee,
@@ -403,7 +457,9 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     onNext = {
                         focusManager.moveFocus(FocusDirection.Down)
                     }
-                )
+                ),
+                width = 200,
+                height = 56
             )
         }
 
