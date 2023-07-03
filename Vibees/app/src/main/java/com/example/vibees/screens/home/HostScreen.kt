@@ -12,8 +12,10 @@ import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -107,7 +112,7 @@ import java.util.Date
 
 
 @Composable
-fun DropdownDemo() {
+fun dropdownProvinceMenu(): String {
     var expanded by remember { mutableStateOf(false) }
     val items = listOf("AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC", "SK", "YT")
     var selectedIndex by remember { mutableStateOf(0) }
@@ -116,9 +121,10 @@ fun DropdownDemo() {
         .size(200.dp, 56.dp)
         .wrapContentSize(Alignment.TopStart)
         ) {
-        Text("Province*: ${items[selectedIndex]}", modifier = Modifier
+        Text(" Province*: ${items[selectedIndex]}", modifier = Modifier
             .size(200.dp, 56.dp)
             .padding(5.dp)
+            .clip(RoundedCornerShape(5.dp))
             .clickable(onClick = { expanded = true })
             .background(
                 MaterialTheme.colorScheme.primary
@@ -141,6 +147,7 @@ fun DropdownDemo() {
             }
         }
     }
+    return items[selectedIndex]
 }
 
 
@@ -437,7 +444,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     width = 200,
                     height = 56
                 )
-                DropdownDemo()
+                province = dropdownProvinceMenu()
 //                FlexibleTextField(
 //                    text = province,
 //                    placeholder = "Province*",
