@@ -43,7 +43,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
         composable(route = BottomBar.Settings.route) {
             GenericScreen(
                 name = BottomBar.Settings.route,
-                onClick = { }
+                onClick = { navController.navigate(SettingsScreen.Setting1.route) }
             )
         }
         composable(route = BottomBar.Help.route) {
@@ -53,6 +53,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         partyNavGraph(navController = navController)
+        settingsNavGraph(navController = navController)
     }
 }
 
