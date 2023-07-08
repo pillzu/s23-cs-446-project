@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
@@ -73,43 +74,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
-
-
-//val url = "http://127.0.0.1:5000"
-//data class ResponseClass (val response: String)
-//data class RequestModel (
-//    val user_id: Int,
-//    val party_name: String,
-//    val date_time: Date?,
-//    val street: String,
-//    val city: String,
-//    val province: String,
-//    val postal_code: String,
-//    val type: String,
-//    val max_capacity: Int,
-//    val entry_fees: Double,
-//    val desc: String,
-//    val thumbnail: Image?
-//    )
-//
-//interface APIInterface {
-//    @POST("/parties/host")
-//    fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
-//}
-
-//object serviceBuilder {
-//    private val client = OkHttpClient.Builder().build()
-//    private val retrofit = Retrofit.Builder()
-//        .baseUrl(url)
-//        .addConverterFactory(GsonConverterFactory.create())
-//        .client(client)
-//        .build()
-//
-//    fun<T> buildService(service: Class<T>): T{
-//        return retrofit.create(service)
-//    }
-//}
-
 
 @Composable
 fun dropdownProvinceMenu(): String {
@@ -227,6 +191,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
+    val vibeesApi = VibeesApi()
 
     var partyName by remember { mutableStateOf("") }
     val partyDate = remember { mutableStateOf<LocalDate>(LocalDate.now()) }
@@ -697,24 +662,20 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
                 Log.d("TAG", obj.toString())
 
-                // call endpoint /parties/host to create a party
-                val callResponse = apiService.createParty(obj)
-                val response = callResponse.enqueue(
-                    object: Callback<ResponseMessage> {
-                        override fun onResponse(
-                            call: Call<ResponseMessage>,
-                            response: Response<ResponseMessage>
-                        ) {
-                            Log.d("TAG", "${response.body()?.message}")
-                            Toast.makeText(partyContext, "${response.body()?.message}", Toast.LENGTH_LONG).show()
-                        }
+                // Successful request
+                val successfn: (ResponseMessage) -> Unit = { response ->
+                    Log.d("TAG", "${response.message}")
+                    Toast.makeText(partyContext, "${response.message}", Toast.LENGTH_LONG).show()
+                }
 
-                        override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                            Log.d("TAG", "FAILURE")
-                            Log.d("TAG", t.message.toString())
-                        }
-                    }
-                )
+                // failed request
+                val failurefn: (Throwable) -> Unit = { t ->
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.message.toString())
+                }
+
+                // call endpoint /parties/host to create a party
+                val callResponse = vibeesApi.createParty(successfn, failurefn, obj)
             },
             modifier = Modifier.padding(10.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {
