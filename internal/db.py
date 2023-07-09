@@ -769,7 +769,7 @@ class DatabaseConnection:
 
 
     """
-    exec_host_party(party_name, date_time, host_id, max_capacity, description, entry_fee, street, city, prov, 
+    exec_host_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description, entry_fee, street, city, prov, 
     postal_code, tag_list): Adds the party into the database, sets its location and tags
         Parameters:
             - party_name, date_time, host_id, max_capacity, description, entry_fee: identifies a party
@@ -780,11 +780,11 @@ class DatabaseConnection:
             - False: otherwise
     """
 
-    def exec_host_party(self, party_name, date_time, host_id, max_capacity, description, entry_fee, street, city,
+    def exec_host_party(self, party_name, party_avatar_url, date_time, host_id, max_capacity, description, entry_fee, street, city,
                         prov, postal_code, tag_list):
         try:
             statements = ""
-            add_party = self.add_new_party(party_name, date_time, host_id, max_capacity, description,
+            add_party = self.add_new_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description,
                                            entry_fee, exec_stmt=False)
             statements += add_party[0]
             party_id = add_party[1]
