@@ -12,8 +12,10 @@ import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -54,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
@@ -69,45 +75,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 
-
-//val url = "http://127.0.0.1:5000"
-//data class ResponseClass (val response: String)
-//data class RequestModel (
-//    val user_id: Int,
-//    val party_name: String,
-//    val date_time: Date?,
-//    val street: String,
-//    val city: String,
-//    val province: String,
-//    val postal_code: String,
-//    val type: String,
-//    val max_capacity: Int,
-//    val entry_fees: Double,
-//    val desc: String,
-//    val thumbnail: Image?
-//    )
-//
-//interface APIInterface {
-//    @POST("/parties/host")
-//    fun requestParty(@Body requestModel: RequestModel): Call<ResponseClass>
-//}
-
-//object serviceBuilder {
-//    private val client = OkHttpClient.Builder().build()
-//    private val retrofit = Retrofit.Builder()
-//        .baseUrl(url)
-//        .addConverterFactory(GsonConverterFactory.create())
-//        .client(client)
-//        .build()
-//
-//    fun<T> buildService(service: Class<T>): T{
-//        return retrofit.create(service)
-//    }
-//}
-
-
 @Composable
-fun DropdownDemo() {
+fun dropdownProvinceMenu(): String {
     var expanded by remember { mutableStateOf(false) }
     val items = listOf("AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC", "SK", "YT")
     var selectedIndex by remember { mutableStateOf(0) }
@@ -116,9 +85,10 @@ fun DropdownDemo() {
         .size(200.dp, 56.dp)
         .wrapContentSize(Alignment.TopStart)
         ) {
-        Text("Province*: ${items[selectedIndex]}", modifier = Modifier
+        Text(" Province*: ${items[selectedIndex]}", modifier = Modifier
             .size(200.dp, 56.dp)
             .padding(5.dp)
+            .clip(RoundedCornerShape(5.dp))
             .clickable(onClick = { expanded = true })
             .background(
                 MaterialTheme.colorScheme.primary
@@ -141,6 +111,7 @@ fun DropdownDemo() {
             }
         }
     }
+    return items[selectedIndex]
 }
 
 
@@ -220,6 +191,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
+    val vibeesApi = VibeesApi()
 
     var partyName by remember { mutableStateOf("") }
     val partyDate = remember { mutableStateOf<LocalDate>(LocalDate.now()) }
@@ -437,7 +409,7 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     width = 200,
                     height = 56
                 )
-                DropdownDemo()
+                province = dropdownProvinceMenu()
 //                FlexibleTextField(
 //                    text = province,
 //                    placeholder = "Province*",
@@ -690,24 +662,20 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                     entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
                 Log.d("TAG", obj.toString())
 
-                // call endpoint /parties/host to create a party
-                val callResponse = apiService.createParty(obj)
-                val response = callResponse.enqueue(
-                    object: Callback<ResponseMessage> {
-                        override fun onResponse(
-                            call: Call<ResponseMessage>,
-                            response: Response<ResponseMessage>
-                        ) {
-                            Log.d("TAG", "${response.body()?.message}")
-                            Toast.makeText(partyContext, "${response.body()?.message}", Toast.LENGTH_LONG).show()
-                        }
+                // Successful request
+                val successfn: (ResponseMessage) -> Unit = { response ->
+                    Log.d("TAG", "${response.message}")
+                    Toast.makeText(partyContext, "${response.message}", Toast.LENGTH_LONG).show()
+                }
 
-                        override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                            Log.d("TAG", "FAILURE")
-                            Log.d("TAG", t.message.toString())
-                        }
-                    }
-                )
+                // failed request
+                val failurefn: (Throwable) -> Unit = { t ->
+                    Log.d("TAG", "FAILURE")
+                    Log.d("TAG", t.message.toString())
+                }
+
+                // call endpoint /parties/host to create a party
+                val callResponse = vibeesApi.createParty(successfn, failurefn, obj)
             },
             modifier = Modifier.padding(10.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {

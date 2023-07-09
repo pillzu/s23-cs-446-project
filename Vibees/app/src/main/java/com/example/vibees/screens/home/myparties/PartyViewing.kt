@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
@@ -49,6 +50,20 @@ fun PartyViewing(
     var userID by GlobalAppState::UserID
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
+    val vibeesApi = VibeesApi()
+
+    // Successful request
+    val successfn: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG", "${response.message}")
+        navController.navigate(BottomBar.MyParties.route)
+    }
+
+    // failed request
+    val failurefn: (Throwable) -> Unit = { t ->
+        Log.d("TAG", "FAILURE")
+        Log.d("TAG", t.printStackTrace().toString())
+    }
+
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Row(horizontalArrangement = Arrangement.Center,
             modifier = Modifier
@@ -153,23 +168,7 @@ fun PartyViewing(
             horizontalArrangement = Arrangement.Center) {
             androidx.compose.material.Button(
                 onClick = {
-                    val callResponse = apiService.attendParty(partyDetails?.party_id!!, User(userID))
-                    val response = callResponse.enqueue(
-                        object: Callback<ResponseMessage> {
-                            override fun onResponse(
-                                call: Call<ResponseMessage>,
-                                response: Response<ResponseMessage>
-                            ) {
-                                Log.d("TAG", "${response.body()?.message}")
-                                navController.navigate(BottomBar.MyParties.route)
-                            }
-
-                            override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                                Log.d("TAG", "FAILURE")
-                                Log.d("TAG", t.printStackTrace().toString())
-                            }
-                        }
-                    )
+                    val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
                 },
                 modifier = Modifier.padding(20.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)

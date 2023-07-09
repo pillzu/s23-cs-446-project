@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.User
@@ -60,45 +61,31 @@ fun MyPartiesScreen(
         // fetch all parties from endpoint /parties
         val apiService = APIInterface()
 
-        // Parties being attended by the user
-        val callResponseAttending = apiService.getMyPartiesAttending(User(userID))
-        val responseAttending = callResponseAttending.enqueue(
-            object: Callback<List<Party>> {
-                override fun onResponse(
-                    call: Call<List<Party>>,
-                    response: Response<List<Party>>
-                ) {
-                    Log.d("TAG", "success")
-                    attendingParties = response.body()!!
-                    Log.d("TAG", attendingParties.toString())
-                }
+        val vibeesApi = VibeesApi()
 
-                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
-                    Log.d("TAG", "FAILURE")
-                    Log.d("TAG", t.printStackTrace().toString())
-                }
-            }
-        )
+        // Successful request
+        val successfn_attending: (List<Party>) -> Unit = { response ->
+            Log.d("TAG", "success")
+            attendingParties = response
+            Log.d("TAG", attendingParties.toString())
+        }
 
-        // Parties being hosted by the user
-        val callResponseHosting = apiService.getMyPartiesHosting(User(userID))
-        val responseHosting = callResponseHosting.enqueue(
-            object: Callback<List<Party>> {
-                override fun onResponse(
-                    call: Call<List<Party>>,
-                    response: Response<List<Party>>
-                ) {
-                    Log.d("TAG", "success")
-                    hostingParties = response.body()!!
-                    Log.d("TAG", hostingParties.toString())
-                }
+        // failed request
+        val failurefn_attending: (Throwable) -> Unit = { t ->
+            Log.d("TAG", "FAILURE")
+            Log.d("TAG", t.printStackTrace().toString())
+        }
 
-                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
-                    Log.d("TAG", "FAILURE")
-                    Log.d("TAG", t.printStackTrace().toString())
-                }
-            }
-        )
+        val responseAttending = vibeesApi.getPartiesAttending(successfn_attending, failurefn_attending)
+
+        // Successful request
+        val successfn_hosting: (List<Party>) -> Unit = { response ->
+            Log.d("TAG", "success")
+            hostingParties = response
+            Log.d("TAG", hostingParties.toString())
+        }
+
+        val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_attending)
 
         // Header
         Header(firstLine = "MY", secondLine = "PARTIES")

@@ -10,7 +10,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-val url = "http://192.168.0.179:5000"
+val url = " http://172.22.11.70:5000"
 
 class APIInterface {
     private val apiService: ApiService
