@@ -105,7 +105,8 @@ fun AppName() {
 fun LoginScreen(
     onClick: () -> Unit,
     onSignUpClick: () -> Unit,
-    onForgotClick: () -> Unit
+    onForgotClick: () -> Unit,
+    onCreateAccountClick: () -> Unit
 ) {
     var userID by GlobalAppState::UserID
     var userName by GlobalAppState::UserName
@@ -190,7 +191,7 @@ fun LoginScreen(
               fontWeight = FontWeight.Bold)
 
         androidx.compose.material.Button(
-            onClick = { onSignUpClick() },
+            onClick = { onCreateAccountClick() },
             modifier = Modifier,
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
         ) {
