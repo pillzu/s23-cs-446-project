@@ -39,6 +39,7 @@ import com.example.vibees.screens.bottombar.BottomBar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun PartyViewing(
@@ -91,7 +92,9 @@ fun PartyViewing(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    Text(color = Color.Black, text = partyDetails?.date_time!!)
+                    Text(color = Color.Black, text = partyDetails?.date_time!!.format(
+                            DateTimeFormatter.ISO_DATE)
+                    )
                 }
                 Column (modifier = Modifier.padding(20.dp)) {
                     Text(

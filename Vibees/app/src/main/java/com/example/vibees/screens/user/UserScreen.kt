@@ -27,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -59,6 +60,7 @@ import com.example.vibees.ui.theme.GrayWhite
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +76,25 @@ fun UserScreen(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-        var parties by remember { mutableStateOf(listOf<Party>()) }
+        var parties by remember { mutableStateOf(listOf<Party>(
+            Party(
+                user_id = "12345",
+                name = "Summer Bash",
+                date_time = LocalDateTime.now(),
+                type = "Outdoor",
+                max_cap = 100,
+                entry_fee = 10.99,
+                desc = "Join us for a fun summer party!",
+                street = "123 Main St",
+                city = "Exampleville",
+                prov = "Exampleland",
+                postal_code = "12345",
+                party_id = "abc123",
+                host_name = "John Doe",
+                qr_endpoint = "https://example.com/qrcode"
+            )
+        )) }
+
         // fetch all parties from endpoint /parties
         val apiService = APIInterface()
         val callResponse = apiService.getAllParties()
