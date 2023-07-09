@@ -64,13 +64,15 @@ fun PartyCardAttribute(
         Text(
             text = "$key: ",
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
         )
         if (value != null) {
             Text(
                 text = value,
                 maxLines = 1,
                 style = MaterialTheme.typography.bodyLarge,
+                color = Color.Black,
                 overflow = TextOverflow.Ellipsis,
             )
         }
@@ -93,11 +95,11 @@ fun PartyItem(
         ),
         shape = CardDefaults.elevatedShape,
         modifier = Modifier
-            .fillMaxWidth().
-                clickable {
-                    partyDetails = partyInfo
-                    onClick(partyInfo.party_id!!)
-                }
+            .fillMaxWidth()
+            .clickable {
+                partyDetails = partyInfo
+                onClick(partyInfo.party_id!!)
+            }
     ) {
         Column(
             modifier = Modifier
@@ -114,11 +116,13 @@ fun PartyItem(
                     text = partyInfo.name!!,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
+                    color = Color.Black,
                 )
                 Text(
                     text = "${partyInfo.date_time!!.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))}",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(end = 15.dp)
+                    modifier = Modifier.padding(end = 15.dp),
+                    color = Color.Black
                 )
             }
             Row(
