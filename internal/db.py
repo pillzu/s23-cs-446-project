@@ -917,23 +917,6 @@ class DatabaseConnection:
                         "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
-            # # Accounts
-            # statement = "CREATE TABLE IF NOT EXISTS Accounts (" \
-            #             "account_id UUID PRIMARY KEY, " \
-            #             "balance DECIMAL(10, 2) NOT NULL, " \
-            #             "CONSTRAINT user_account " \
-            #             "FOREIGN KEY (account_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
-            # self.exec_DDL(statement)
-            #
-            # # CreditCards
-            # statement = "CREATE TABLE IF NOT EXISTS CreditCards (" \
-            #             "account_id UUID, " \
-            #             "card_number BIGINT NOT NULL, " \
-            #             "cvv INTEGER NOT NULL, " \
-            #             "CONSTRAINT account_credit_card " \
-            #             "FOREIGN KEY (account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE)"
-            # self.exec_DDL(statement)
-
             # Transactions
             statement = "CREATE TABLE IF NOT EXISTS Transactions (" \
                         "transaction_id UUID PRIMARY KEY, " \
