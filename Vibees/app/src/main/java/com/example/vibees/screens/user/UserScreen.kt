@@ -138,7 +138,6 @@ fun UserScreen(
                 searchActive = it
             },
             colors = SearchBarDefaults.colors(containerColor = SubtleWhite),
-            tonalElevation = 50.dp,
             placeholder = {
                 Text(text = "Search for a party")
             },
@@ -168,9 +167,9 @@ fun UserScreen(
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp)
                 .padding(bottom = 20.dp, top = 20.dp)
-                .shadow(10.dp, RoundedCornerShape(35.dp))
+                .shadow(5.dp, RoundedCornerShape(25.dp))
+//                .padding(bottom=5.dp, start=5.dp, end=5.dp)
         ) {
 
         }

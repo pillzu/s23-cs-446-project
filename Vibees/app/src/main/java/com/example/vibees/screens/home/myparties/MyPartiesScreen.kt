@@ -149,9 +149,9 @@ fun MyPartiesScreen(
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp)
                 .padding(bottom = 20.dp, top = 20.dp)
-                .shadow(10.dp, RoundedCornerShape(35.dp))
+                .shadow(5.dp, RoundedCornerShape(25.dp))
+                .padding(bottom=5.dp, start=5.dp, end=5.dp)
         ) {
 
         }
@@ -173,7 +173,9 @@ fun MyPartiesScreen(
             if (hostingParties.isEmpty()) {
                 item {
                     Row(
-                        modifier = Modifier.fillMaxSize().height(200.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(200.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -198,7 +200,9 @@ fun MyPartiesScreen(
             if (attendingParties.isEmpty()) {
                 item {
                     Row(
-                        modifier = Modifier.fillMaxSize().height(200.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(200.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
