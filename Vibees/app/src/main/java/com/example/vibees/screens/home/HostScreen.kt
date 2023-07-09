@@ -655,12 +655,11 @@ fun HostScreen(name: String, onClick: () -> Unit) {
         Button(
             onClick = {
                 var host_date = partyDate.value.atTime(partyTime.value)
-                Log.d("TAG", host_date.toString())
                 var dateString = host_date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+//                dateString = LocalDate.now()
 
-                val obj = Party(userID, partyName, dateString, partyType,  maxCapacity.toInt(),
+                val obj = Party(userID, partyName, LocalDateTime.now(), partyType,  maxCapacity.toInt(),
                     entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
-                Log.d("TAG", obj.toString())
 
                 // Successful request
                 val successfn: (ResponseMessage) -> Unit = { response ->

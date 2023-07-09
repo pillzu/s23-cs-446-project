@@ -143,6 +143,6 @@ class MainActivity : ComponentActivity() {
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
         // updateUI(currentUser)
-        Log.d(ContentValues.TAG, currentUser?.phoneNumber!!)
+//        Log.d(ContentValues.TAG, currentUser?.phoneNumber!!)
     }
 }

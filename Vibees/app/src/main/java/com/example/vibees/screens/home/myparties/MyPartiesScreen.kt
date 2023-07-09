@@ -4,15 +4,20 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,7 +31,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +44,7 @@ import com.example.vibees.Models.Party
 import com.example.vibees.Models.User
 import com.example.vibees.screens.user.Header
 import com.example.vibees.ui.theme.GrayWhite
+import com.example.vibees.ui.theme.SubtleWhite
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -50,7 +58,7 @@ fun MyPartiesScreen(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 15.dp, vertical=25.dp)
+            .padding(horizontal = 15.dp, vertical = 25.dp)
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
@@ -76,8 +84,6 @@ fun MyPartiesScreen(
             Log.d("TAG", t.printStackTrace().toString())
         }
 
-        val responseAttending = vibeesApi.getPartiesAttending(successfn_attending, failurefn_attending)
-
         // Successful request
         val successfn_hosting: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
@@ -87,12 +93,15 @@ fun MyPartiesScreen(
 
         val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_attending)
 
+        val responseAttending =
+            vibeesApi.getPartiesAttending(successfn_attending, failurefn_attending)
+
         // Header
         Header(firstLine = "MY", secondLine = "PARTIES")
 
-        // search bar
-        var searchText by remember { mutableStateOf("")}
-        var searchActive by remember { mutableStateOf(false)}
+        // Search bar
+        var searchText by remember { mutableStateOf("") }
+        var searchActive by remember { mutableStateOf(false) }
 
         SearchBar(
             query = searchText,
@@ -101,20 +110,19 @@ fun MyPartiesScreen(
             },
             onSearch = {
                 searchActive = false
-
             },
-            active = searchActive,
-            colors = SearchBarDefaults.colors(containerColor = GrayWhite),
+            active = false,
             onActiveChange = {
                 searchActive = it
             },
+            colors = SearchBarDefaults.colors(containerColor = SubtleWhite),
+            tonalElevation = 50.dp,
             placeholder = {
-                Text(text = "Search parties")
+                Text(text = "Search for a party")
             },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Icon"
+                    imageVector = Icons.Default.Search, contentDescription = "Search Icon"
                 )
             },
             trailingIcon = {
@@ -122,24 +130,31 @@ fun MyPartiesScreen(
                     IconButton(onClick = {
                         searchText = ""
                     }, content = {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close Icon")
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "Close Icon"
+                        )
                     })
                 } else if (searchActive) {
                     IconButton(onClick = {
                         searchActive = false
                     }, content = {
-                        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = "Up Icon")
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close Icon"
+                        )
                     })
                 }
             },
-            shape = RoundedCornerShape(15.dp),
+            shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp)
+                .padding(bottom = 20.dp, top = 20.dp)
+                .shadow(5.dp, RoundedCornerShape(25.dp))
+                .padding(bottom=5.dp, start=5.dp, end=5.dp)
         ) {
 
         }
-        
         // parties
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -151,23 +166,57 @@ fun MyPartiesScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(bottom = 5.dp, top=10.dp)
+                        .padding(bottom = 5.dp, top = 10.dp)
                 )
             }
-            items(hostingParties.size) {
-                PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
+
+            if (hostingParties.isEmpty()) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(200.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else {
+                items(hostingParties.size) {
+                    PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
+                }
             }
+
             item {
                 Text(
                     text = "Upcoming Parties",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(bottom = 5.dp, top=10.dp)
+                        .padding(bottom = 5.dp, top = 10.dp)
                 )
             }
-            items(attendingParties.size) {
-                PartyItem(partyInfo = attendingParties[it], isMyParty = true, onClick = onClick,)
+            if (attendingParties.isEmpty()) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(200.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else {
+                items(attendingParties.size) {
+                    PartyItem(
+                        partyInfo = attendingParties[it],
+                        isMyParty = true,
+                        onClick = onClick,
+                    )
+                }
             }
         }
     }
