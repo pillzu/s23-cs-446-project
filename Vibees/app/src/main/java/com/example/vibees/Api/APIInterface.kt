@@ -5,12 +5,30 @@ import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.reflect.Type
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-val url = "http://192.168.0.179:5000"
+const val url = "http://192.168.0.21:5000"
+
+class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?
+    ): LocalDateTime {
+        val dateString = json?.asString
+        val formatter = DateTimeFormatter.RFC_1123_DATE_TIME
+        return LocalDateTime.parse(dateString, formatter)
+    }
+}
 
 class APIInterface {
     private val apiService: ApiService
@@ -18,7 +36,7 @@ class APIInterface {
     init {
 
         val gson = GsonBuilder()
-            .setDateFormat("EEE, dd MMM yyyy HH:mm:ss z")
+            .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeDeserializer())
             .create()
 
         val retrofit = Retrofit.Builder()
