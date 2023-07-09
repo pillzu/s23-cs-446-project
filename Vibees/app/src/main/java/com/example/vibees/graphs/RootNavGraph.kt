@@ -27,4 +27,5 @@ object Graph {
     const val AUTHENTICATION = "auth_graph"
     const val HOME = "home_graph"
     const val PARTY = "party_graph"
+    const val SETTINGS = "settings_graph"
 }
