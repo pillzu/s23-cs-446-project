@@ -69,7 +69,7 @@ fun PartyDetails(
                         .height(250.dp),
                     resolutionFactor = 10, // Optionally, increase the resolution of the generated image
                     type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
-                    value = "${url}${partyDetails?.qr_endpoint}" // The textual representation of this code
+                    value = "${URL}${partyDetails?.qr_endpoint}" // The textual representation of this code
                 )
                 Text(
                     text = partyDetails?.name!!,

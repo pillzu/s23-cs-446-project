@@ -30,7 +30,6 @@ class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     }
 }
 
-
 class APIInterface {
     private val apiService: ApiService
 

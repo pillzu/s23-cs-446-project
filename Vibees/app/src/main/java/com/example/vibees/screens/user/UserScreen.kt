@@ -58,9 +58,9 @@ import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.GlobalAppState
 import com.example.vibees.ui.theme.GrayWhite
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalDateTime
+import com.example.vibees.Api.VibeesApi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,25 +96,22 @@ fun UserScreen(
         )) }
 
         // fetch all parties from endpoint /parties
-        val apiService = APIInterface()
-        val callResponse = apiService.getAllParties()
-        val response = callResponse.enqueue(
-            object: Callback<List<Party>> {
-                override fun onResponse(
-                    call: Call<List<Party>>,
-                    response: Response<List<Party>>
-                ) {
-                    Log.d("TAG", "success")
-                    parties = response.body()!!
-                    Log.d("TAG", parties.toString())
-                }
+        val vibeesApi = VibeesApi()
 
-                override fun onFailure(call: Call<List<Party>>, t: Throwable) {
-                    Log.d("TAG", "FAILURE")
-                    Log.d("TAG", t.printStackTrace().toString())
-                }
-            }
-        )
+        // Successful request
+        val successfn: (List<Party>) -> Unit = { response ->
+            Log.d("TAG", "success")
+            parties = response
+            Log.d("TAG", parties.toString())
+        }
+
+        // failed request
+        val failurefn: (Throwable) -> Unit = { t ->
+            Log.d("TAG", "FAILURE")
+            Log.d("TAG", t.printStackTrace().toString())
+        }
+        
+        val response = vibeesApi.getAllParties(successfn, failurefn)
 
         // Header
         Header(firstLine = "Welcome back", secondLine = userName)
