@@ -82,7 +82,8 @@ class DatabaseConnection:
             - the user's information may have invalid fields
     """
 
-    def add_new_user(self, profile_url, first_name, last_name, phone_no, address_street, address_city, address_prov,
+    def add_new_user(self, profile_url, first_name, last_name, phone_no, address_street,
+                     address_city, address_prov,
                      address_postal, email, uid=None, exec_stmt=True):
         try:
             if uid is None:
@@ -124,7 +125,8 @@ class DatabaseConnection:
             - the party's information may have invalid fields
     """
 
-    def add_new_party(self, party_avatar_url, party_name, date_time, host_id, max_capacity, description, entry_fee, party_id=None,
+    def add_new_party(self, party_avatar_url, party_name, date_time, host_id, max_capacity,
+                      description, entry_fee, party_id=None,
                       exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
@@ -448,6 +450,65 @@ class DatabaseConnection:
             return False
 
     """
+    update_user(user_id, profile_url, first_name, last_name, phone_no, address_street, address_city,
+    address_prov, address_postal, email): updates the user record in database based on the given uid
+        Parameters:
+            - user_id: the provided user_id of the user
+            - profile_url: update the user's profile_url to the given value
+            - first_name: update the user's first_name to the given value
+            - last_name: update the user's last_name to the given value
+            - phone_no: update the user's phone_no to the given value
+            - address_*: updated the user's address to the given values
+            - email: update the user's email to the given value
+    """
+
+    def update_user(self, user_id, profile_url=None, first_name=None, last_name=None, phone_no=None,
+                    address_street=None, address_city=None, address_prov=None, address_postal=None,
+                    email=None, limit=50):
+        try:
+            sub_queries = []
+
+            if profile_url is not None:
+                sub_queries.append(f" u.profile_url = '{profile_url}'")
+
+            if first_name is not None:
+                sub_queries.append(f" u.first_name = '{first_name}'")
+
+            if last_name is not None:
+                sub_queries.append(f" u.last_name = '{last_name}'")
+
+            if phone_no is not None:
+                sub_queries.append(f" u.phone_no = {phone_no}")
+
+            if address_street is not None:
+                sub_queries.append(f" u.address_street = '{address_street}'")
+
+            if address_city is not None:
+                sub_queries.append(f" u.address_city = '{address_city}'")
+
+            if address_prov is not None:
+                sub_queries.append(f" u.address_prov = '{address_prov}'")
+
+            if address_postal is not None:
+                sub_queries.append(f" u.address_postal = '{address_postal}'")
+
+            if email is not None:
+                sub_queries.append(f" u.email = '{email}")
+
+            stmt = self.__join_subqueries(
+                "UPDATE Users u SET", sub_queries)
+            stmt += f" WHERE u.user_id = '{user_id}';\n"
+
+            print(stmt)
+
+            return self.exec_DML(stmt, limit)
+
+        except Exception as e:
+            logging.fatal("Updating users failed")
+            logging.fatal(e)
+            return None
+
+    """
     create_query_statement(main_query, sub_queries): Create a SQL query statement by concatenating sub_queries 
     then joining main_query
         Parameters:
@@ -470,6 +531,18 @@ class DatabaseConnection:
 
         return stmt
 
+    def __join_subqueries(self, main_query, sub_queries):
+        if (len(sub_queries)) == 0:
+            return None
+
+        connector = ""
+        stmt = main_query
+        for q in sub_queries:
+            stmt += connector + q
+            connector = ","
+
+        return stmt
+
     """
     query_user(user_id, profile_url, first_name, last_name, email, limit): Query users using some attributes. If an 
     attribute is left blank then its constraint is ignored.
@@ -485,7 +558,8 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_user(self, user_id=None, profile_url=None, first_name=None, last_name=None, email=None, limit=50):
+    def query_user(self, user_id=None, profile_url=None, first_name=None, last_name=None,
+                   email=None, limit=50):
         try:
             sub_queries = []
 
@@ -598,7 +672,8 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_party(self, party_id=None, party_avatar_url=None, party_name=None, start_date=None, end_date=None, hosted_by=None,
+    def query_party(self, party_id=None, party_avatar_url=None, party_name=None, start_date=None,
+                    end_date=None, hosted_by=None,
                     created_after=None, max_capacity=None, entry_fee=None, limit=50):
         try:
             sub_queries = []
@@ -694,7 +769,8 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_locations(self, party_id=None, street=None, city=None, prov=None, postal_code=None, limit=50):
+    def query_locations(self, party_id=None, street=None, city=None, prov=None, postal_code=None,
+                        limit=50):
         try:
             sub_queries = []
 
@@ -763,7 +839,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
-
     """
     exec_attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
         Parameters: 
@@ -784,7 +859,6 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-
     """
     exec_host_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description, entry_fee, street, city, prov, 
     postal_code, tag_list): Adds the party into the database, sets its location and tags
@@ -797,15 +871,18 @@ class DatabaseConnection:
             - False: otherwise
     """
 
-    def exec_host_party(self, party_name, party_avatar_url, date_time, host_id, max_capacity, description, entry_fee, street, city,
+    def exec_host_party(self, party_name, party_avatar_url, date_time, host_id, max_capacity,
+                        description, entry_fee, street, city,
                         prov, postal_code, tag_list):
         try:
             statements = ""
-            add_party = self.add_new_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description,
+            add_party = self.add_new_party(party_name, party_avatar_url, date_time, host_id,
+                                           max_capacity, description,
                                            entry_fee, exec_stmt=False)
             statements += add_party[0]
             party_id = add_party[1]
-            statements += self.set_location(party_id, street, city, prov, postal_code, exec_stmt=False)
+            statements += self.set_location(party_id, street, city, prov, postal_code,
+                                            exec_stmt=False)
             statements += self.set_tags(party_id, tag_list, exec_stmt=False)
             self.exec_DDL(statements)
             return True
@@ -814,7 +891,6 @@ class DatabaseConnection:
             logging.fatal("Hosting party failed")
             logging.fatal(e)
             return False
-
 
     """
     clear_table(table): Delete all rows from a table
