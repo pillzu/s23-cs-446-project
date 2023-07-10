@@ -637,13 +637,14 @@ class DatabaseConnection:
         Parameters: 
             - party_id: return the tag list associated with the party with party_id
             - tag_list: return all parties associated with the given tags
+            - show_detail: if set to true, then return the details of the queried parties. Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result
             - None: If the query present no result
     """
 
-    def query_tags(self, party_id=None, tag_subset=None, limit=50):
+    def query_tags(self, party_id=None, tag_subset=None, show_detail=False, limit=50):
         try:
             sub_queries = []
 
@@ -654,8 +655,14 @@ class DatabaseConnection:
                 tag_subset = str(tag_subset)[1:-1]
                 sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
 
-            stmt = self.__create_query_statement(
-                "SELECT * FROM Tags t", sub_queries)
+            if show_detail:
+                prefix = "SELECT * FROM Tags t"
+            else:
+                prefix = "SELECT p.*, pl.* FROM Tags t " \
+                         "JOIN Parties p ON t.party_id = p.party_id " \
+                         "JOIN PartyLocations pl ON t.party_id = pl.party_id"
+
+            stmt = self.__create_query_statement(prefix, sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
