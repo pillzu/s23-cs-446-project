@@ -526,6 +526,8 @@ class DatabaseConnection:
             - max_amount: return all transactions with payment amount <= max_amount
             - start_date: return all transactions happening after this time
             - end_date: return all transactions happening before this time
+            - show_party_detail: if set to true then show the party's info
+            - show_guest_detail: if set to true then show the guest's info
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result
@@ -533,7 +535,8 @@ class DatabaseConnection:
     """
 
     def query_transaction(self, trans_id=None, guest_id=None, party_id=None, min_amount=None,
-                          max_amount=None, start_date=None, end_date=None, limit=50):
+                          max_amount=None, start_date=None, end_date=None,
+                          show_party_detail=False, show_guest_detail=False, limit=50):
         try:
             sub_queries = []
 
@@ -558,8 +561,14 @@ class DatabaseConnection:
             if end_date is not None:
                 sub_queries.append(f" t.time <= '{end_date}'")
 
-            stmt = self.__create_query_statement(
-                "SELECT * FROM Transactions t", sub_queries)
+            prefix = "SELECT * FROM Transactions t"
+            if show_party_detail:
+                prefix += " JOIN Parties p ON t.party_id = p.party_id" \
+                          " JOIN PartyLocations pl ON t.party_id = pl.party_id"
+            if show_guest_detail:
+                prefix += " JOIN Users u ON t.guest_id = u.user_id"
+
+            stmt = self.__create_query_statement(prefix, sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -655,12 +664,10 @@ class DatabaseConnection:
                 tag_subset = str(tag_subset)[1:-1]
                 sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
 
+            prefix = "SELECT * FROM Tags t"
             if show_detail:
-                prefix = "SELECT * FROM Tags t"
-            else:
-                prefix = "SELECT p.*, pl.* FROM Tags t " \
-                         "JOIN Parties p ON t.party_id = p.party_id " \
-                         "JOIN PartyLocations pl ON t.party_id = pl.party_id"
+                prefix += " JOIN Parties p ON t.party_id = p.party_id" \
+                          " JOIN PartyLocations pl ON t.party_id = pl.party_id"
 
             stmt = self.__create_query_statement(prefix, sub_queries)
             print(stmt)
