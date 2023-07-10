@@ -362,8 +362,9 @@ class DatabaseConnection:
     def show_attended_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT p.* FROM Transactions t " \
+                statement = f"SELECT p.*, pl.* FROM Transactions t " \
                             f"JOIN Parties p ON t.party_id = p.party_id " \
+                            f"JOIN PartyLocations pl ON t.party_id = pl.party_id " \
                             f"WHERE t.guest_id = '{user_id}'"
             else:
                 statement = f"SELECT t.party_id FROM Transactions t WHERE t.guest_id = '{user_id}'"
@@ -388,7 +389,9 @@ class DatabaseConnection:
     def show_hosted_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT * FROM Parties p WHERE p.host_id = '{user_id}'"
+                statement = f"SELECT * FROM Parties p " \
+                            f"JOIN PartyLocations pl ON p.party_id = pl.party_id " \
+                            f"WHERE p.host_id = '{user_id}'"
             else:
                 statement = f"SELECT p.party_id FROM Parties p WHERE p.host_id = '{user_id}'"
             return self.exec_DML(statement, limit)
