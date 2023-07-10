@@ -460,11 +460,14 @@ class DatabaseConnection:
             - phone_no: update the user's phone_no to the given value
             - address_*: updated the user's address to the given values
             - email: update the user's email to the given value
+        Returns:
+            - true: If the user is updated successfully
+            - false: Otherwise
     """
 
     def update_user(self, user_id, profile_url=None, first_name=None, last_name=None, phone_no=None,
                     address_street=None, address_city=None, address_prov=None, address_postal=None,
-                    email=None, limit=50):
+                    email=None):
         try:
             sub_queries = []
 
@@ -501,12 +504,12 @@ class DatabaseConnection:
 
             print(stmt)
 
-            return self.exec_DML(stmt, limit)
+            return self.exec_DDL(stmt)
 
         except Exception as e:
             logging.fatal("Updating users failed")
             logging.fatal(e)
-            return None
+            return False
 
     """
     create_query_statement(main_query, sub_queries): Create a SQL query statement by concatenating sub_queries 
