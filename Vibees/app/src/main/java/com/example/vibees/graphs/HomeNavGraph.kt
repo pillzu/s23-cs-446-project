@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
-import com.example.vibees.screens.home.HostScreen
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
 
@@ -35,10 +34,16 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(route = BottomBar.Host.route) {
-            HostScreen(
+            GenericScreen(
                 name = BottomBar.Host.route,
-                onClick = { }
+                onClick = { navController.navigate(HostScreens.Step1.route) {
+                    launchSingleTop = true
+                } }
             )
+//            HostScreen(
+//                name = BottomBar.Host.route,
+//                onClick = { }
+//            )
         }
         composable(route = BottomBar.Settings.route) {
             GenericScreen(
@@ -53,6 +58,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         partyNavGraph(navController = navController)
+        hostNavGraph(navController = navController)
         settingsNavGraph(navController = navController)
     }
 }
