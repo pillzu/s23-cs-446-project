@@ -8,7 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import com.example.vibees.graphs.RootNavigationGraph
 import com.example.vibees.ui.theme.VibeesTheme
@@ -17,10 +16,16 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import android.Manifest
+import android.annotation.SuppressLint
+import android.location.Location
+import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : ComponentActivity() {
     val authContext = this
@@ -29,10 +34,37 @@ class MainActivity : ComponentActivity() {
     private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
     private lateinit var auth: FirebaseAuth
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                // Precise location access granted. You can proceed with retrieving the location.
+                getLocation()
+            }
+            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                // Only approximate location access granted. You can proceed with retrieving the location.
+                getLocation()
+            }
+            else -> {
+                // No location access granted. Handle the case where permission is denied.
+                // You can show a message or take appropriate action.
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(ContentValues.TAG, "Auth Started...")
         super.onCreate(savedInstanceState)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationPermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
 
         auth = Firebase.auth
         oneTapClient = Identity.getSignInClient(this)
@@ -98,6 +130,13 @@ class MainActivity : ComponentActivity() {
                                         // updateUI(user)
                                         Log.d(ContentValues.TAG, user?.email!!)
                                         val name = user.displayName
+                                        val parts = name?.split(" ")
+                                        val firstName = parts?.getOrNull(0)
+                                        val lastName = parts?.getOrNull(1)
+                                        val email = user.email
+                                        val phoneNo = user.phoneNumber
+
+
                                         Toast.makeText(authContext, "Welcome, $name! Sign-in successful.", Toast.LENGTH_LONG).show()
                                     } else {
                                         // If sign in fails, display a message to the user.
@@ -129,7 +168,7 @@ class MainActivity : ComponentActivity() {
                         else -> {
                             Log.d(
                                 ContentValues.TAG, "Couldn't get credential from result." +
-                                    " (${e.localizedMessage})")
+                                        " (${e.localizedMessage})")
                             Toast.makeText(authContext, "Couldn't get credential from result.", Toast.LENGTH_LONG).show()
                         }
                     }
@@ -145,4 +184,19 @@ class MainActivity : ComponentActivity() {
         // updateUI(currentUser)
 //        Log.d(ContentValues.TAG, currentUser?.phoneNumber!!)
     }
+
+    @SuppressLint("MissingPermission")
+    private fun getLocation() {
+        // Request the location using the fusedLocationClient, as shown in your previous code.
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            // Handle the retrieved location, similar to your previous code.
+            if (location != null) {
+                val latitude = location.latitude
+                val longitude = location.longitude
+                Log.d(ContentValues.TAG, "LOCATION RETRIEVED")
+
+            }
+        }
+    }
+
 }
