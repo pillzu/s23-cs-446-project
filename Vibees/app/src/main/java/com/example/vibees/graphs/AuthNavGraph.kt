@@ -7,7 +7,7 @@ import androidx.navigation.navigation
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.auth.LoginScreen
 
-fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.authNavGraph(signIn: () -> Unit, navController: NavHostController) {
     navigation(
         route = Graph.AUTHENTICATION,
         startDestination = AuthScreen.Login.route
@@ -23,6 +23,9 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                 },
                 onForgotClick = {
                     navController.navigate(AuthScreen.Forgot.route)
+                },
+                onCreateAccountClick = {
+                    signIn()
                 }
             )
         }

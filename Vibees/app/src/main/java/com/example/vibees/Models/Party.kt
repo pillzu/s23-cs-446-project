@@ -1,12 +1,13 @@
 package com.example.vibees.Models
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Date
 
 data class Party (
     val user_id: String?,
     val name: String?,
-    val date_time: String?,
+    val date_time: LocalDateTime,
     val type: String?,
     val max_cap: Int,
     val entry_fee: Double,

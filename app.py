@@ -20,6 +20,9 @@ def host_party():
 
     print(req)
 
+    # TODO: Please call db.exec_host_party() with everything including the address.
+    #                                                                  - Jerry
+
     # host_date = req["date_time"]
     # datetime_obj = datetime.strptime(host_date, "%a %b %d %H:%M:%S %Z %Y")
 
@@ -64,6 +67,11 @@ def get_tagged_parties():
     # request for parties ids using tag
     parties = db.query_tags()
     party_details = []
+
+    # TODO: Please call db.query_tags(pid, tags, show_detail=true) to fetch party
+    #       info and party addresses. No need to iterate through all party_ids and
+    #       fetch info one by one.
+    #                                                                  - Jerry
 
     for party_id, tags in parties:
         party = db.query_party(party_id=party_id)
@@ -114,6 +122,9 @@ def attend_party(party_id):
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
 
+    # TODO: Please call db.exec_attend_party(uid, pid, entry_fee) instead.
+    #                                                                  - Jerry
+
     # add guest
     if not db.attend_party(user_id, party_id, 0):
         return {"message": "Unable to add user as an attendee! Please call help..."}, 500
@@ -145,6 +156,11 @@ def get_user_attendee_parties():
 
     parties = db.show_attended_parties(user_id)
 
+    # TODO: Please call db.show_attended_parties(uid, show_detail=true) to fetch party
+    #       info and party addresses. No need to iterate through all party_ids and
+    #       fetch info one by one.
+    #                                                                  - Jerry
+
     resp = []
     for party_id in parties:
         party_id = party_id[0]
@@ -173,6 +189,11 @@ def get_user_host_parties():
     """Endpoint to retrieve user's hosted parties"""
     req = request.json
     parties = db.show_hosted_parties(req["user_id"])
+
+    # TODO: Please call db.show_hosted_parties(uid, show_detail=true) to fetch party
+    #       info and party addresses. No need to iterate through all party_ids and
+    #       fetch info one by one.
+    #                                                                  - Jerry
 
     resp = []
     for party_id in parties:

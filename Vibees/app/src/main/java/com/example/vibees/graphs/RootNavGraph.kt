@@ -8,13 +8,13 @@ import com.example.vibees.screens.home.HomeScreen
 
 
 @Composable
-fun RootNavigationGraph(navController: NavHostController) {
+fun RootNavigationGraph(navController: NavHostController, signIn: () -> Unit) {
     NavHost(
         navController = navController,
         route = Graph.ROOT,
         startDestination = Graph.AUTHENTICATION
     ) {
-        authNavGraph(navController = navController)
+        authNavGraph(signIn, navController = navController)
         composable(route = Graph.HOME) {
             HomeScreen()
         }
@@ -27,4 +27,5 @@ object Graph {
     const val AUTHENTICATION = "auth_graph"
     const val HOME = "home_graph"
     const val PARTY = "party_graph"
+    const val SETTINGS = "settings_graph"
 }
