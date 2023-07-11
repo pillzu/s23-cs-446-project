@@ -510,6 +510,7 @@ def testHostParties(conn):
 # Hardcoded URL, for POC only
 db_url = config("CDB_URL")
 connection = DatabaseConnection(db_url)
+breakpoint()
 # connection.drop_table("Users")
 # connection.drop_table("Parties")
 # connection.drop_table("Transactions")
@@ -517,7 +518,7 @@ connection = DatabaseConnection(db_url)
 # connection.drop_table("Guests")
 # connection.create_tables()
 # breakpoint()
-
+'''
 testCreateUser(connection)
 breakpoint()
 testCreateParty(connection)
@@ -548,3 +549,4 @@ breakpoint()
 testAttendParties(connection)
 breakpoint()
 testHostParties(connection)
+'''
