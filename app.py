@@ -3,6 +3,7 @@ from internal.db import DatabaseConnection
 from decouple import config
 import logging
 import internal.helpers as hp
+import uuid
 
 app = Flask(__name__)
 
@@ -205,6 +206,32 @@ def get_user_host_parties():
                      "host_name": f" {host['first_name']} {host['last_name']}"})
 
     return jsonify(resp), 200
+
+@app.post("/user")
+def register_or_login_user():
+    req = request.json
+    
+    result = add_new_user(self, req["profile_url"], req["first_name"], req["last_name"], req["phone_no"], req["address_street"],
+                req["address_city"], req["address_prov"], req["address_postal"], req["email"], uuid.UUID(req["user_id"]), exec_stmt=True)
+
+    if result is None:
+        response = {
+            message: "Login failure".format(result)
+        }
+        return jsonify(response), 500
+    else:
+        response = {
+            message: "User with user_id {} successfully logged in".format(result)
+        }
+        return jsonify(response), 201
+
+@app.route('/user', methods=['PUT'])
+def update_user_details():
+    # do something
+
+@app.route('/user', methods=['DELETE'])
+def delete_user_account():
+    # do something
 
 
 if __name__ == "__main__":

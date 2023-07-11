@@ -114,6 +114,7 @@ class MainActivity : ComponentActivity() {
                                         val email = user.email
                                         val phoneNo = user.phoneNumber
                                         val profileURL = user.photoUrl
+                                        val uid = user.uid
                                         var latitude = 0.00
                                         var longitude = 0.00
                                         var street = ""
@@ -132,7 +133,7 @@ class MainActivity : ComponentActivity() {
                                             city = address.locality
                                             province = address.adminArea
                                             postalCode = address.postalCode
-                                            val user = User("1", profileURL, firstName, lastName, phoneNo, street, city, province, postalCode, email)
+                                            val user = User(uid, profileURL, firstName, lastName, phoneNo, street, city, province, postalCode, email)
                                             // TO DO: call api to create or login user
                                         }
                                         getLoc.launch(
