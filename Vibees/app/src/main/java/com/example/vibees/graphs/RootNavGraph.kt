@@ -28,4 +28,5 @@ object Graph {
     const val HOME = "home_graph"
     const val PARTY = "party_graph"
     const val SETTINGS = "settings_graph"
+    const val HOST = "host_graph"
 }
