@@ -24,8 +24,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import android.Manifest
 import android.annotation.SuppressLint
+import android.location.Address
 import android.location.Location
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.vibees.utils.Geolocation
 
 class MainActivity : ComponentActivity() {
     val authContext = this
@@ -34,37 +37,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
     private lateinit var auth: FirebaseAuth
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                // Precise location access granted. You can proceed with retrieving the location.
-                getLocation()
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                // Only approximate location access granted. You can proceed with retrieving the location.
-                getLocation()
-            }
-            else -> {
-                // No location access granted. Handle the case where permission is denied.
-                // You can show a message or take appropriate action.
-            }
-        }
-    }
+    private lateinit var geolocation: Geolocation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(ContentValues.TAG, "Auth Started...")
         super.onCreate(savedInstanceState)
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationPermissionRequest.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
 
         auth = Firebase.auth
         oneTapClient = Identity.getSignInClient(this)
@@ -135,7 +112,31 @@ class MainActivity : ComponentActivity() {
                                         val lastName = parts?.getOrNull(1)
                                         val email = user.email
                                         val phoneNo = user.phoneNumber
-
+                                        var latitude = 0.00
+                                        var longitude = 0.00
+                                        var street = ""
+                                        var city = ""
+                                        var province = ""
+                                        var postalCode = ""
+                                        // retrieve user location
+                                        val activityResultRegistry = this@MainActivity.activityResultRegistry
+                                        geolocation = Geolocation(activityResultRegistry)
+                                        val getLoc = geolocation.locationPermissionRequest(this) { lat, long ->
+                                            // Handle the latitude and longitude values here in MainActivity
+                                            latitude = lat
+                                            longitude = long
+                                            val address: Address = geolocation.getUserLocation(this, latitude, longitude)
+                                            street = address.thoroughfare
+                                            city = address.locality
+                                            province = address.adminArea
+                                            postalCode = address.postalCode
+                                        }
+                                        getLoc.launch(
+                                            arrayOf(
+                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                            )
+                                        )
 
                                         Toast.makeText(authContext, "Welcome, $name! Sign-in successful.", Toast.LENGTH_LONG).show()
                                     } else {
@@ -183,20 +184,6 @@ class MainActivity : ComponentActivity() {
         val currentUser = auth.currentUser
         // updateUI(currentUser)
 //        Log.d(ContentValues.TAG, currentUser?.phoneNumber!!)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getLocation() {
-        // Request the location using the fusedLocationClient, as shown in your previous code.
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            // Handle the retrieved location, similar to your previous code.
-            if (location != null) {
-                val latitude = location.latitude
-                val longitude = location.longitude
-                Log.d(ContentValues.TAG, "LOCATION RETRIEVED")
-
-            }
-        }
     }
 
 }
