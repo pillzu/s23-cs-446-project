@@ -28,6 +28,7 @@ import android.location.Address
 import android.location.Location
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.vibees.Models.User
 import com.example.vibees.utils.Geolocation
 
 class MainActivity : ComponentActivity() {
@@ -112,6 +113,7 @@ class MainActivity : ComponentActivity() {
                                         val lastName = parts?.getOrNull(1)
                                         val email = user.email
                                         val phoneNo = user.phoneNumber
+                                        val profileURL = user.photoUrl
                                         var latitude = 0.00
                                         var longitude = 0.00
                                         var street = ""
@@ -130,6 +132,8 @@ class MainActivity : ComponentActivity() {
                                             city = address.locality
                                             province = address.adminArea
                                             postalCode = address.postalCode
+                                            val user = User("1", profileURL, firstName, lastName, phoneNo, street, city, province, postalCode, email)
+                                            // TO DO: call api to create or login user
                                         }
                                         getLoc.launch(
                                             arrayOf(
