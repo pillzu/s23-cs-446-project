@@ -15,8 +15,7 @@ cur = conn.cursor()
 new_table_mappings = {
     "users": [
         "user_id UUID PRIMARY KEY DEFAULT gen_random_uuid()",
-        "username VARCHAR(20) NOT NULL",
-        "password VARCHAR(20) NOT NULL",
+        "profile_url VARCHAR(100)",
         "first_name VARCHAR(20) NOT NULL",
         "last_name VARCHAR(20) NOT NULL",
         "phone_no BIGINT NOT NULL",
@@ -29,6 +28,7 @@ new_table_mappings = {
     ],
     "parties": [
         "party_id UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+        "party_avatar_url VARCHAR(100)",
         "party_name VARCHAR(50) NOT NULL",
         "date_time TIMESTAMP NOT NULL",
         "host_id UUID",
@@ -141,16 +141,32 @@ for table, columns in new_table_mappings.items():
     # Insert data into the new table
     for row in rows:
         placeholders = ', '.join(['%s'] * len(row))
-        # Check if it's the parties table and insert host_id from Hosts table
-        if new_table == "new_parties":
-            placeholders = ', '.join(['%s'] * (len(row) + 1))
+        # Check if it's the users table and insert a default profile url
+        if new_table == "new_users":
+            placeholders = ', '.join(['%s'] * (len(row) - 1))
+            
+            # TODO: Insert url to default profile here, replacing None value
+            default_profile_url = None
+            
+            cur.execute(f"INSERT INTO {new_table} VALUES ({placeholders})", 
+                        (row[0], default_profile_url, row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11]))
+
+        # Check if it's the parties table and insert host_id from Hosts table as well as a default party avatar url
+        elif new_table == "new_parties":
+            placeholders = ', '.join(['%s'] * (len(row) + 2))
             host_id_query = "SELECT host_id FROM hosts WHERE party_id = %s"
             cur.execute(host_id_query, (row[0],))
             try:
                 host_id = cur.fetchone()[0]
             except TypeError:
                 host_id = None
-            cur.execute(f"INSERT INTO {new_table} VALUES ({placeholders})", (row[0], row[1], row[2], host_id, row[3], row[4], row[5], row[6]))
+
+            # TODO: Insert url to default party avatar here, replacing None value
+            default_party_avatar_url = None
+            
+            cur.execute(f"INSERT INTO {new_table} VALUES ({placeholders})", 
+                        (row[0], default_party_avatar_url, row[1], row[2], host_id, row[3], row[4], row[5], row[6]))
+            
         # Check if it's the transactions table and insert guest_id from Guests table
         elif new_table == "new_transactions":
             guest_id_query = "SELECT guest_id FROM guests WHERE party_id = %s"
