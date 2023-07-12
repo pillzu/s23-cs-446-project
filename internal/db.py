@@ -206,9 +206,9 @@ class DatabaseConnection:
     def set_tags(self, party_id, tag_list, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
-            party = self.query_party(party_id=party_id)
-            if party is None or len(party) == 0:
-                raise Exception(f"Party with ID '{party_id}' does not exist")
+            # party = self.query_party(party_id=party_id)
+            # if party is None or len(party) == 0:
+            #     raise Exception(f"Party with ID '{party_id}' does not exist")
 
             tag_list = str(tag_list)[1:-1]
             statement = f"INSERT INTO Tags VALUES ('{party_id}', ARRAY[{tag_list}]) " \
@@ -244,9 +244,9 @@ class DatabaseConnection:
     def set_location(self, party_id, street, city, prov, postal_code, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
-            party = self.query_party(party_id=party_id)
-            if party is None or len(party) == 0:
-                raise Exception(f"Party with ID '{party_id}' does not exist")
+            # party = self.query_party(party_id=party_id)
+            # if party is None or len(party) == 0:
+            #     raise Exception(f"Party with ID '{party_id}' does not exist")
 
             location = self.query_locations
             statement = f"INSERT INTO PartyLocations VALUES ('{party_id}', '{street}', '{city}', '{prov}', '{postal_code}') " \
@@ -280,17 +280,16 @@ class DatabaseConnection:
 
     def set_suggestions(self, guest_id, party_id, suggested_tracks, exec_stmt=True):
         try:
-            # TODO: Do we need to verify this? We may add constraints to avoid these verifications
             # Check if the party_id exists in the Parties table
-            party = self.query_party(party_id=party_id)
-            if party is None or len(party) == 0:
-                raise Exception(f"Party with ID '{party_id}' does not exist")
+            # party = self.query_party(party_id=party_id)
+            # if party is None or len(party) == 0:
+            #     raise Exception(f"Party with ID '{party_id}' does not exist")
 
             # check if guest attends the party
-            attend = self.check_attends(party_id=party_id, guest_id=guest_id)
-            if attend is False:
-                raise Exception(
-                    f"Guest ('{guest_id}') does not attend party ('{party_id}')")
+            # attend = self.check_attends(party_id=party_id, guest_id=guest_id)
+            # if attend is False:
+            #     raise Exception(
+            #         f"Guest ('{guest_id}') does not attend party ('{party_id}')")
 
             suggested_tracks = str(suggested_tracks)[1:-1]
 
@@ -407,7 +406,8 @@ class DatabaseConnection:
     show_attendees(party_id): Returns all users that attends the current party
         Parameters: 
             - party_id: the party's id number
-            - show_detail: if set to true, then return the details of the attended users. Otherwise only return the ids.
+            - show_detail: if set to true, then return the details of the attended users and entry fees. 
+                        Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - Users: the id of the users that attends the party
@@ -417,7 +417,7 @@ class DatabaseConnection:
     def show_attendees(self, party_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT u.* FROM Transactions t " \
+                statement = f"SELECT u.*, t.payment_amount, t.time FROM Transactions t " \
                             f"JOIN Users u ON t.guest_id = u.user_id " \
                             f"WHERE t.party_id = '{party_id}'"
             else:
@@ -669,6 +669,7 @@ class DatabaseConnection:
             - created_after: Return parties created after the timestamp created_after.
             - max_capacity: Return parties with maximum capacity greater than or equal to max_capacity.
             - entry_fee: Return parties with entry fee less than or equal to entry_fee.
+            - show_detail: Returns all party info (including addresses) if set to true, otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result, if stmt is queried successfully
@@ -676,8 +677,9 @@ class DatabaseConnection:
     """
 
     def query_party(self, party_id=None, party_avatar_url=None, party_name=None, start_date=None,
-                    end_date=None, hosted_by=None,
-                    created_after=None, max_capacity=None, entry_fee=None, limit=50):
+                    end_date=None, hosted_by=None, created_after=None, max_capacity=None,
+                    entry_fee=None, street=None, city=None, prov=None, tag_subset=None,
+                    show_detail=False, limit=50):
         try:
             sub_queries = []
 
@@ -708,8 +710,28 @@ class DatabaseConnection:
             if entry_fee is not None:
                 sub_queries.append(f" p.entry_fee <= {entry_fee}")
 
-            statement = self.__create_query_statement(
-                "SELECT * FROM Parties p", sub_queries)
+            if street is not None:
+                sub_queries.append(f" pl.street LIKE '%{street}%'")
+
+            if city is not None:
+                sub_queries.append(f" pl.city LIKE '%{city}%'")
+
+            if prov is not None:
+                sub_queries.append(f" pl.prov LIKE '%{prov}%'")
+
+            if tag_subset is not None:
+                tag_subset = str(tag_subset)[1:-1]
+                sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
+
+            if show_detail:
+                prefix = "SELECT * "
+            else:
+                prefix = "SELECT p.party_id "
+            prefix += "FROM Parties p " \
+                      "JOIN PartyLocations pl ON p.party_id = pl.party_id " \
+                      "JOIN Tags t ON t.party_id = p.party_id"
+
+            statement = self.__create_query_statement(prefix, sub_queries)
             print(statement)
 
             return self.exec_DML(statement, limit)
@@ -848,14 +870,14 @@ class DatabaseConnection:
             - user_id: the user's id number
             - party_id: the party's id number
         Returns:
-            - True: if the user is registered as a guest successfully
+            - trans_id: if the user is registered as a guest successfully, return transaction id
             - False: otherwise
     """
 
     def exec_attend_party(self, user_id, party_id, entry_fee):
         try:
-            self.add_new_transaction(user_id, party_id, entry_fee)
-            return True
+            trans_id = self.add_new_transaction(user_id, party_id, entry_fee)
+            return trans_id
 
         except Exception as e:
             logging.fatal("Attending party failed")
@@ -870,7 +892,7 @@ class DatabaseConnection:
             - street, city, prov, postal_code: identifies a party location
             - tag_list: a list of party tags
         Returns:
-            - True: if the party is hosted successfully
+            - party_id: if the party is hosted successfully, return the party's id
             - False: otherwise
     """
 
@@ -878,17 +900,15 @@ class DatabaseConnection:
                         description, entry_fee, street, city,
                         prov, postal_code, tag_list):
         try:
-            statements = ""
-            add_party = self.add_new_party(party_name, party_avatar_url, date_time, host_id,
+            add_party = self.add_new_party(party_avatar_url, party_name, date_time, host_id,
                                            max_capacity, description,
                                            entry_fee, exec_stmt=False)
-            statements += add_party[0]
+            statements = add_party[0]
             party_id = add_party[1]
-            statements += self.set_location(party_id, street, city, prov, postal_code,
-                                            exec_stmt=False)
+            statements += self.set_location(party_id, street, city, prov, postal_code, exec_stmt=False)
             statements += self.set_tags(party_id, tag_list, exec_stmt=False)
             self.exec_DDL(statements)
-            return True
+            return party_id
 
         except Exception as e:
             logging.fatal("Hosting party failed")
@@ -1021,9 +1041,7 @@ class DatabaseConnection:
                         "party_id UUID, " \
                         "payment_amount DECIMAL(10, 2), " \
                         "CONSTRAINT guest_user_id " \
-                        "FOREIGN KEY (from_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
-                        "CONSTRAINT host_user_id " \
-                        "FOREIGN KEY (to_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
+                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
                         "CONSTRAINT party_id " \
                         "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
