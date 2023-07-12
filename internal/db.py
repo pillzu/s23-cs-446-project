@@ -356,7 +356,9 @@ class DatabaseConnection:
             - show_detail: if set to true, then return the details of the attended parties. Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - Parties: the id of the parties that the user attends
+            - row: the query result
+                - show_detail=False: the party_id of attended parties
+                - show_detail=True: all columns of Parties + all columns of PartyLocations
             - None: otherwise
     """
 
@@ -383,7 +385,9 @@ class DatabaseConnection:
             - show_detail: if set to true, then return the details of the hosted parties. Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - Parties: the id of the parties that the user hosts
+            - row: the query result
+                - show_detail=False: party_id, the id of the parties that the user hosts
+                - show_detail=True: all columns of Parties + all columns of PartyLocations
             - None: otherwise
     """
 
@@ -410,7 +414,9 @@ class DatabaseConnection:
                         Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - Users: the id of the users that attends the party
+            - row: the query result
+                - show_detail=False: user_id, the id of the users that attends the party
+                - show_detail=True: all columns of Users + (payment_amount, time) in Transactions
             - None: otherwise
     """
 
@@ -607,7 +613,9 @@ class DatabaseConnection:
             - show_guest_detail: if set to true then show the guest's info
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - row: The query result
+            - row: The query result (all columns in transaction)
+                - show_party_detail=True: + all columns in Parties
+                - show_guest_detail=True: + all columns in Users
             - None: If the query present no result
     """
 
@@ -656,8 +664,9 @@ class DatabaseConnection:
             return None
 
     """
-    query_party(party_id, party_name, start_date, end_date, created_after, max_capacity, entry_fee):
-    Query parties using some attributes. If an  attribute is left blank then its constraint is ignored.
+    query_party(party_id, party_name, start_date, end_date, created_after, max_capacity, entry_fee,
+    street, city, prov, tag_subset):
+    Query parties using some attributes. If an attribute is left blank then its constraint is ignored.
     Return at most 50 results.
         Parameters:
             - party_id : Return parties where party_id is equal to the party's generated id
@@ -669,10 +678,15 @@ class DatabaseConnection:
             - created_after: Return parties created after the timestamp created_after.
             - max_capacity: Return parties with maximum capacity greater than or equal to max_capacity.
             - entry_fee: Return parties with entry fee less than or equal to entry_fee.
+            - street, city, prov: Return parties with matching addresses
+            - tag_subset: Return parties whose tags contains all tags in tag_subset
             - show_detail: Returns all party info (including addresses) if set to true, otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - row: The query result, if stmt is queried successfully
+            - row: The query result, if stmt is queried successfully.
+                - show_detail=False: party_id
+                - show_detail=True: all columns in Parties, (street, city, prov, postal_code) in
+                                    PartyLocations, (tag_list) in Tags
             - None: If the query present no result
     """
 
@@ -724,7 +738,7 @@ class DatabaseConnection:
                 sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
 
             if show_detail:
-                prefix = "SELECT * "
+                prefix = "SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, t.tag_list "
             else:
                 prefix = "SELECT p.party_id "
             prefix += "FROM Parties p " \
@@ -746,14 +760,14 @@ class DatabaseConnection:
         Parameters: 
             - party_id: return the tag list associated with the party with party_id
             - tag_list: return all parties associated with the given tags
-            - show_detail: if set to true, then return the details of the queried parties. Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result
+                
             - None: If the query present no result
     """
 
-    def query_tags(self, party_id=None, tag_subset=None, show_detail=False, limit=50):
+    def query_tags(self, party_id=None, tag_subset=None, limit=50):
         try:
             sub_queries = []
 
@@ -765,9 +779,6 @@ class DatabaseConnection:
                 sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
 
             prefix = "SELECT * FROM Tags t"
-            if show_detail:
-                prefix += " JOIN Parties p ON t.party_id = p.party_id" \
-                          " JOIN PartyLocations pl ON t.party_id = pl.party_id"
 
             stmt = self.__create_query_statement(prefix, sub_queries)
             print(stmt)

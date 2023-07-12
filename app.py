@@ -68,9 +68,10 @@ def get_tagged_parties():
     parties = db.query_tags()
     party_details = []
 
-    # TODO: Please call db.query_tags(pid, tags, show_detail=true) to fetch party
-    #       info and party addresses. No need to iterate through all party_ids and
-    #       fetch info one by one.
+    # TODO: Please call db.query_parties(tag_subset=tags, show_detail=true) to query parties and get
+    #       party info, party addresses, and tags. No need to iterate through all party_ids and
+    #       fetch info one by one. For future queries related to parties, please call query_parties
+    #       with party related attributes, locations, or tags, and it should handle them all.
     #                                                                  - Jerry
 
     for party_id, tags in parties:
