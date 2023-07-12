@@ -37,13 +37,13 @@ new_table_mappings = {
         "description VARCHAR(250) NOT NULL",
         "UNIQUE(party_name)",
         "entry_fee INTEGER",
-        "CONSTRAINT host_user_id FOREIGN KEY (host_id) REFERENCES new_users(user_id) ON DELETE SET NULL"
+        "CONSTRAINT host_user_id FOREIGN KEY (host_id) REFERENCES users(user_id) ON DELETE SET NULL"
     ],
     "tags": [
         "party_id UUID",
         "UNIQUE(party_id)",
         "tag_list VARCHAR[] NOT NULL",
-        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES new_parties(party_id) ON DELETE CASCADE"
+        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES parties(party_id) ON DELETE CASCADE"
     ],
     "partylocations": [
         "party_id UUID",
@@ -53,15 +53,15 @@ new_table_mappings = {
         "prov VARCHAR(50) NOT NULL",
         "postal_code VARCHAR(20) NOT NULL",
         "UNIQUE(street, city, prov, postal_code)",
-        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES new_parties(party_id) ON DELETE CASCADE"
+        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES parties(party_id) ON DELETE CASCADE"
     ],
     "musicsuggestions": [
         "guest_id UUID",
         "party_id UUID",
         "UNIQUE(guest_id, party_id)",
         "suggested_tracks VARCHAR[] NOT NULL",
-        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES new_parties(party_id) ON DELETE CASCADE",
-        "CONSTRAINT guest_id FOREIGN KEY (guest_id) REFERENCES new_users(user_id) ON DELETE CASCADE"
+        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES parties(party_id) ON DELETE CASCADE",
+        "CONSTRAINT guest_id FOREIGN KEY (guest_id) REFERENCES users(user_id) ON DELETE CASCADE"
     ],
     "transactions": [
         "transaction_id UUID PRIMARY KEY",
@@ -71,15 +71,15 @@ new_table_mappings = {
         "guest_id UUID",
         "party_id UUID",
         "payment_amount DECIMAL(10, 2)",
-        "CONSTRAINT guest_user_id FOREIGN KEY (from_id) REFERENCES new_users(user_id) ON DELETE CASCADE",
-        "CONSTRAINT host_user_id FOREIGN KEY (to_id) REFERENCES new_users(user_id) ON DELETE CASCADE",
-        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES new_parties(party_id) ON DELETE CASCADE"
+        "CONSTRAINT guest_user_id FOREIGN KEY (from_id) REFERENCES users(user_id) ON DELETE CASCADE",
+        "CONSTRAINT host_user_id FOREIGN KEY (to_id) REFERENCES users(user_id) ON DELETE CASCADE",
+        "CONSTRAINT party_id FOREIGN KEY (party_id) REFERENCES parties(party_id) ON DELETE CASCADE"
     ]
 }
 
 # Do the same for the old tables, but with only the names of the columns
 old_table_mappings = {
-    "users": [
+    "old_users": [
         "user_id",
         "username",
         "password",
@@ -93,7 +93,7 @@ old_table_mappings = {
         "email",
         "party_points"
     ],
-    "parties": [
+    "old_parties": [
         "party_id",
         "party_name",
         "date_time",
@@ -102,23 +102,23 @@ old_table_mappings = {
         "description",
         "entry_fee"
     ],
-    "tags": [
+    "old_tags": [
         "party_id",
         "tag_list"
     ],
-    "partylocations": [
+    "old_partylocations": [
         "party_id",
         "street",
         "city",
         "prov",
         "postal_code"
     ],
-    "musicsuggestions": [
+    "old_musicsuggestions": [
         "guest_id",
         "party_id",
         "suggested_tracks"
     ],
-    "transactions": [
+    "old_transactions": [
         "transaction_id",
         "time",
         "from_id",
@@ -130,29 +130,27 @@ old_table_mappings = {
 
 # Migrate the data for each table
 for table, columns in new_table_mappings.items():
-    new_table = "new_" + table
+    old_table = "old_" + table
     # Fetch data from the source table
-    cur.execute(f"SELECT {', '.join(old_table_mappings[table])} FROM {table}")
+    cur.execute(f"SELECT {', '.join(old_table_mappings[old_table])} FROM {old_table}")
     rows = cur.fetchall()
 
     # Create the new table with the updated schema
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {new_table} ({', '.join(columns)})")
+    cur.execute(f"CREATE TABLE IF NOT EXISTS {table} ({', '.join(columns)})")
     
     # Insert data into the new table
     for row in rows:
         placeholders = ', '.join(['%s'] * len(row))
         # Check if it's the users table and insert a default profile url
-        if new_table == "new_users":
+        if table == "users":
             placeholders = ', '.join(['%s'] * (len(row) - 1))
             
             # TODO: Insert url to default profile here, replacing None value
             default_profile_url = None
-            
-            cur.execute(f"INSERT INTO {new_table} VALUES ({placeholders})", 
-                        (row[0], default_profile_url, row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11]))
+            cur.execute(f"INSERT INTO {table} VALUES ({placeholders})", (row[0], default_profile_url, row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11]))
 
         # Check if it's the parties table and insert host_id from Hosts table as well as a default party avatar url
-        elif new_table == "new_parties":
+        elif table == "parties":
             placeholders = ', '.join(['%s'] * (len(row) + 2))
             host_id_query = "SELECT host_id FROM hosts WHERE party_id = %s"
             cur.execute(host_id_query, (row[0],))
@@ -164,21 +162,19 @@ for table, columns in new_table_mappings.items():
             # TODO: Insert url to default party avatar here, replacing None value
             default_party_avatar_url = None
             
-            cur.execute(f"INSERT INTO {new_table} VALUES ({placeholders})", 
-                        (row[0], default_party_avatar_url, row[1], row[2], host_id, row[3], row[4], row[5], row[6]))
+            cur.execute(f"INSERT INTO {table} VALUES ({placeholders})", (row[0], default_party_avatar_url, row[1], row[2], host_id, row[3], row[4], row[5], row[6]))
             
         # Check if it's the transactions table and insert guest_id from Guests table
-        elif new_table == "new_transactions":
+        elif table == "transactions":
             guest_id_query = "SELECT guest_id FROM guests WHERE party_id = %s"
             cur.execute(guest_id_query, (row[4],))
             try:
                 guest_id = cur.fetchone()[0]
             except TypeError:
                 guest_id = None
-            cur.execute(f"INSERT INTO {new_table} (transaction_id, time, guest_id, party_id, payment_amount, from_id, to_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                        (row[0], row[1], guest_id, row[4], row[5], row[2], row[3]))
+            cur.execute(f"INSERT INTO {table} (transaction_id, time, guest_id, party_id, payment_amount, from_id, to_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",(row[0], row[1], guest_id, row[4], row[5], row[2], row[3]))
         else:
-            cur.execute(f"INSERT INTO {new_table} VALUES ({placeholders})", row)            
+            cur.execute(f"INSERT INTO {table} VALUES ({placeholders})", row)            
 
 # Commit the changes and close the cursor and connection
 conn.commit()
