@@ -90,6 +90,14 @@ class DatabaseConnection:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     uid = cur.fetchone()[0]
+            else:
+                # check if user with uid already exists
+                with self.conn.cursor() as cur:
+                    cur.execute(f"SELECT user_id FROM Users WHERE user_id='{uid}';")
+                    res = cur.fetchone()
+                    if len(res) > 0:
+                        return res[0]
+
             statement = f"INSERT INTO Users VALUES ('{uid}', '{profile_url}', '{first_name}', " \
                         f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
                         f"'{address_postal}', '{email}', 0);\n"
@@ -1000,7 +1008,7 @@ class DatabaseConnection:
                         "party_avatar_url VARCHAR(100) NOT NULL, " \
                         "party_name VARCHAR(50) NOT NULL, " \
                         "date_time TIMESTAMP NOT NULL, " \
-                        "host_id UUID NOT NULL" \
+                        "host_id UUID NOT NULL," \
                         "created_at TIMESTAMP NOT NULL, " \
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \

@@ -235,13 +235,13 @@ def register_or_login_user():
         }
         return jsonify(response), 201
 
-@app.route('/user', methods=['PUT'])
-def update_user_details():
-    # do something
+# @app.route('/user', methods=['PUT'])
+# def update_user_details():
+#     # do something
 
-@app.route('/user', methods=['DELETE'])
-def delete_user_account():
-    # do something
+# @app.route('/user', methods=['DELETE'])
+# def delete_user_account():
+#     # do something
 
 
 if __name__ == "__main__":
