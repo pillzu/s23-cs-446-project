@@ -1,3 +1,4 @@
+from flask import jsonify
 
 def row_to_party(party):
     return {
@@ -36,3 +37,15 @@ def row_to_location(location):
         "prov": location[3],
         "postal_code": location[4]
     }
+
+def is_valid_phone_number(variable):
+    if isinstance(variable, (int, float)):
+        if len(str(int(variable))) == 10:
+            return True
+    return False
+
+def return_message_response(message, status):
+    response = {
+        "message": message
+    }
+    return jsonify(response), status

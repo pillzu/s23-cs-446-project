@@ -95,7 +95,7 @@ class DatabaseConnection:
                 with self.conn.cursor() as cur:
                     cur.execute(f"SELECT user_id FROM Users WHERE user_id='{uid}';")
                     res = cur.fetchone()
-                    if len(res) > 0:
+                    if res is not None:
                         return res[0]
 
             statement = f"INSERT INTO Users VALUES ('{uid}', '{profile_url}', '{first_name}', " \
@@ -486,35 +486,35 @@ class DatabaseConnection:
             sub_queries = []
 
             if profile_url is not None:
-                sub_queries.append(f" u.profile_url = '{profile_url}'")
+                sub_queries.append(f" profile_url = '{profile_url}'")
 
             if first_name is not None:
-                sub_queries.append(f" u.first_name = '{first_name}'")
+                sub_queries.append(f" first_name = '{first_name}'")
 
             if last_name is not None:
-                sub_queries.append(f" u.last_name = '{last_name}'")
+                sub_queries.append(f" last_name = '{last_name}'")
 
             if phone_no is not None:
-                sub_queries.append(f" u.phone_no = {phone_no}")
+                sub_queries.append(f" phone_no = {phone_no}")
 
             if address_street is not None:
-                sub_queries.append(f" u.address_street = '{address_street}'")
+                sub_queries.append(f" address_street = '{address_street}'")
 
             if address_city is not None:
-                sub_queries.append(f" u.address_city = '{address_city}'")
+                sub_queries.append(f" address_city = '{address_city}'")
 
             if address_prov is not None:
-                sub_queries.append(f" u.address_prov = '{address_prov}'")
+                sub_queries.append(f" address_prov = '{address_prov}'")
 
             if address_postal is not None:
-                sub_queries.append(f" u.address_postal = '{address_postal}'")
+                sub_queries.append(f" address_postal = '{address_postal}'")
 
             if email is not None:
-                sub_queries.append(f" u.email = '{email}")
+                sub_queries.append(f" email = '{email}")
 
             stmt = self.__join_subqueries(
-                "UPDATE Users u SET", sub_queries)
-            stmt += f" WHERE u.user_id = '{user_id}';\n"
+                "UPDATE Users SET", sub_queries)
+            stmt += f" WHERE user_id = '{user_id}';\n"
 
             print(stmt)
 
@@ -522,6 +522,19 @@ class DatabaseConnection:
 
         except Exception as e:
             logging.fatal("Updating users failed")
+            logging.fatal(e)
+            return False
+    """
+    Delete a user from Users table with user_id
+    """
+    def delete_user(self, user_id):
+        try:
+            # Deleting user should cascade and delete entries in other tables
+            statement = f"DELETE FROM Users WHERE user_id='{user_id}';"
+            print(statement)
+            return self.exec_DDL(statement)
+        except Exception as e:
+            logging.fatal(f"Deleting user with id: {user_id} failed.")
             logging.fatal(e)
             return False
 
