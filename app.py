@@ -20,6 +20,9 @@ def host_party():
 
     print(req)
 
+    # TODO: Please call db.exec_host_party() with everything including the address.
+    #                                                                  - Jerry
+
     # host_date = req["date_time"]
     # datetime_obj = datetime.strptime(host_date, "%a %b %d %H:%M:%S %Z %Y")
 
@@ -64,6 +67,12 @@ def get_tagged_parties():
     # request for parties ids using tag
     parties = db.query_tags()
     party_details = []
+
+    # TODO: Please call db.query_parties(tag_subset=tags, show_detail=true) to query parties and get
+    #       party info, party addresses, and tags. No need to iterate through all party_ids and
+    #       fetch info one by one. For future queries related to parties, please call query_parties
+    #       with party related attributes, locations, or tags, and it should handle them all.
+    #                                                                  - Jerry
 
     for party_id, tags in parties:
         party = db.query_party(party_id=party_id)
@@ -114,20 +123,11 @@ def attend_party(party_id):
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
 
-    # get host details
-    host = db.show_host(party_id)
-    if host is None:
-        return {"message": "Failed to verify host of party! Please contact help"}, 500
-
-    host = host[0][0]
-
-    # create transaction
-    transaction = db.add_new_transaction(user_id, host, party_id, 0)
-    if not transaction:
-        return {"message": "Unable to add transaction! Please try again..."}, 500
+    # TODO: Please call db.exec_attend_party(uid, pid, entry_fee) instead.
+    #                                                                  - Jerry
 
     # add guest
-    if not db.attend_party(user_id, party_id):
+    if not db.attend_party(user_id, party_id, 0):
         return {"message": "Unable to add user as an attendee! Please call help..."}, 500
 
     return {"message": "User registered successfully!"}, 200
@@ -157,6 +157,11 @@ def get_user_attendee_parties():
 
     parties = db.show_attended_parties(user_id)
 
+    # TODO: Please call db.show_attended_parties(uid, show_detail=true) to fetch party
+    #       info and party addresses. No need to iterate through all party_ids and
+    #       fetch info one by one.
+    #                                                                  - Jerry
+
     resp = []
     for party_id in parties:
         party_id = party_id[0]
@@ -185,6 +190,11 @@ def get_user_host_parties():
     """Endpoint to retrieve user's hosted parties"""
     req = request.json
     parties = db.show_hosted_parties(req["user_id"])
+
+    # TODO: Please call db.show_hosted_parties(uid, show_detail=true) to fetch party
+    #       info and party addresses. No need to iterate through all party_ids and
+    #       fetch info one by one.
+    #                                                                  - Jerry
 
     resp = []
     for party_id in parties:
