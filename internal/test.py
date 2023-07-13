@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from db import DatabaseConnection
 from decouple import config
 import logging
@@ -510,6 +512,7 @@ def testHostParties(conn):
 # Hardcoded URL, for POC only
 db_url = config("CDB_URL")
 connection = DatabaseConnection(db_url)
+# breakpoint()
 # connection.drop_table("Users")
 # connection.drop_table("Parties")
 # connection.drop_table("Transactions")
@@ -518,33 +521,15 @@ connection = DatabaseConnection(db_url)
 # connection.create_tables()
 # breakpoint()
 
-testCreateUser(connection)
-breakpoint()
-testCreateParty(connection)
-breakpoint()
-testCreateTransaction(connection)
-breakpoint()
-
-testSetTags(connection)
-breakpoint()
-testSetLocation(connection)
-breakpoint()
-testSetSuggestions(connection)
-breakpoint()
-
-testQueryParty(connection)
-breakpoint()
-testQueryTags(connection)
-breakpoint()
-testQueryLocations(connection)
-breakpoint()
-testQuerySuggestions(connection)
-breakpoint()
-testQueryUser(connection)
-breakpoint()
-testQueryTransaction(connection)
-breakpoint()
-
-testAttendParties(connection)
-breakpoint()
-testHostParties(connection)
+# print(connection.query_user(user_id="9c261503-02d2-4fd4-8399-3e905de39588"))
+# print(connection.query_party(hosted_by="5bdfc21f-ea15-43b3-9654-093f15d63ba7", show_detail=False)[0])
+# print(connection.show_hosted_parties("5bdfc21f-ea15-43b3-9654-093f15d63ba7", show_detail=True))
+# print(connection.show_attendees(party_id="04afd1a3-9be3-469a-9f10-bc5937d68de4", show_detail=True))
+# print(connection.add_new_user("NULL", "JM_Test_User_1", "JM_Test_User_1", 5198884567, "200 University Ave",
+#                               "Waterloo", "ON", "A1B 2C3", "jerry_test_1@gmail.com"))
+# print(connection.exec_attend_party("9c261503-02d2-4fd4-8399-3e905de39588", "04afd1a3-9be3-469a-9f10-bc5937d68de4", 5.0))
+# print(connection.show_attended_parties("9c261503-02d2-4fd4-8399-3e905de39588", show_detail=True))
+# print(connection.show_attended_parties("6515c9f8-57f1-406f-8707-20033dcd764e", show_detail=True))
+# print(connection.exec_host_party("JM_Test_Party", "NULL", datetime.now(), "9c261503-02d2-4fd4-8399-3e905de39588",
+#                                  50, "A test party", 15.0, "123 Lester St", "Waterloo", "ON", "N2L 3H8", ["Tag"]))
+# print(connection.query_party(tag_subset=["EDM"]))

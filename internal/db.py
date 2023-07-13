@@ -63,38 +63,41 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_user(username, password, first_name, last_name, phone_no, address, email): Insert a new user with the
+    add_new_user(profile_url, first_name, last_name, phone_no, address, email): Insert a new user with the
     given information into Users table. The user will be created with a default party point of 0. The account
     associated with the user will also be created with a default balance of 0.
         Parameters: 
-            - username: the user's account username (String with len <= 20)
-            - password: the user's account password (String with len <= 20)
+            - uid: the user's uuid. If left blank then will use gen_random_uuid() (string)
+            - profile_url: the user's profile url (String with len <= 100)
             - first_name: the user's first name (String with len <= 20)
             - last_name: the user's last name (String with len <= 20)
             - phone_no: the user's phone number (Long)
             - address_*: the user's home address (street, city, prov, postal code)
             - email: the user's email address (String with len <= 50)
-            - uid: the user's uuid. If left blank then will use gen_random_uuid() (Integer)
         Returns:
-            - uuid: if the user is inserted successfully, return the user's uuid
+            - uuid: if exec_stmt=True and the user is inserted successfully, return the user's uuid
+            - statement, uuid: if exec_stmt=False, return the generated uid and the SQL statement to be executed
             - None: otherwise
         Throws Exception if:
             - the user's information may have invalid fields
     """
 
-    def add_new_user(self, username, password, first_name, last_name, phone_no, address_street, address_city, address_prov,
-                     address_postal, email, uid=None):
+    def add_new_user(self, profile_url, first_name, last_name, phone_no, address_street,
+                     address_city, address_prov,
+                     address_postal, email, uid=None, exec_stmt=True):
         try:
             if uid is None:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     uid = cur.fetchone()[0]
-            statement = f"INSERT INTO Users VALUES ('{uid}', '{username}', '{password}', '{first_name}', " \
+            statement = f"INSERT INTO Users VALUES ('{uid}', '{profile_url}', '{first_name}', " \
                         f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
-                        f"'{address_postal}', '{email}', 0)"
-            self.exec_DDL(statement)
-
-            return uid
+                        f"'{address_postal}', '{email}', 0);\n"
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return uid
+            else:
+                return statement, uid
 
         except Exception as e:
             logging.fatal("Adding new user to database failed")
@@ -102,24 +105,29 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_party(party_id, party_name, date_time, max_capacity, description, entry_fee): 
+    add_new_party(party_avatar_url, party_name, date_time, host_id, max_capacity, description, entry_fee): 
     Insert a new party entry with the given information into the Parties table. 
     The party's creation time will be filled as the current system time.
         Parameters: 
-            - party_id: The party's id number (integer)
+            - uid: the party's uuid. If left blank then will use gen_random_uuid() (string)
+            - party_avatar_url: The party's avatar url (string)
             - party_name: The party's name (string)
             - date_time: The scheduled date of the party (datetime)
+            - host_id: The user id of the host
             - max_capacity: The maximum capacity of the guests in the party (integer)
             - description: The description of the party, entered by the host (string)
             - entry_fee: The entry fee of the party (integer)
         Returns:
-            - uuid: if the party is inserted successfully, return the party's id
+            - uuid: if exec_stmt=True and the party is inserted successfully, return the party's id
+            - statement, uuid: if exec_stmt=False, return the SQL statement to be executed and the generated party id 
             - None: otherwise
         Throws Exception if:
             - the party's information may have invalid fields
     """
 
-    def add_new_party(self, party_name, date_time, max_capacity, description, entry_fee, party_id=None):
+    def add_new_party(self, party_avatar_url, party_name, date_time, host_id, max_capacity,
+                      description, entry_fee, party_id=None,
+                      exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -130,13 +138,15 @@ class DatabaseConnection:
 
             # TODO: Remove parties and thumbnail
             statement = f"INSERT INTO Parties " \
-                        f"VALUES ('{party_id}', '{party_name}', '{date_time}', '{datetime.now(timez)}', " \
+                        f"VALUES ('{party_id}', '{party_avatar_url}', '{party_name}', '{date_time}', '{host_id}', '{datetime.now(timez)}', " \
                         f"{max_capacity}, '{description}', " \
-                        f"{entry_fee})"
+                        f"{entry_fee});\n"
 
-            self.exec_DDL(statement)
-
-            return party_id
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return party_id
+            else:
+                return statement, party_id
 
         except Exception as e:
             logging.fatal("Adding new party to database failed")
@@ -144,21 +154,21 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_transaction(from_id, to_id, party_id, amount): Insert a new transaction entry with given information
+    add_new_transaction(guest_id, party_id, amount): Insert a new transaction entry with given information
     into the Transactions table. The transaction's creation time will be filled as the current system time
         Parameters: 
-            - from_id: the guest's id number
-            - to_id: the host's id number
+            - guest_id: the guest's id number
             - party_id: the party's id number
             - amount: the payment amount
         Returns:
-            - uuid: if the transaction entry is inserted successfully, return the transaction's id
+            - uuid: if exec_stmt=True and the transaction entry is inserted successfully, return the transaction's id
+            - statement, uuid: if exec_stmt=False, return the SQL statement to be executed and the generated id
             - None: otherwise
         Throws Exception if:
             - the transaction's information may have invalid fields
     """
 
-    def add_new_transaction(self, from_id, to_id, party_id, amount, trans_id=None):
+    def add_new_transaction(self, guest_id, party_id, amount, trans_id=None, exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -166,14 +176,17 @@ class DatabaseConnection:
                 with self.conn.cursor() as cur:
                     cur.execute("SELECT gen_random_uuid()")
                     trans_id = cur.fetchone()[0]
-            statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{from_id}', " \
-                        f"'{to_id}', '{party_id}', {amount})"
+            statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{guest_id}', " \
+                        f"'{party_id}', {amount});\n"
 
-            self.exec_DDL(statement)
-            return trans_id
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return trans_id
+            else:
+                return statement, trans_id
 
         except Exception as e:
-            logging.fatal("Adding new party to database failed")
+            logging.fatal("Adding new transaction to database failed")
             logging.fatal(e)
             return None
 
@@ -183,25 +196,29 @@ class DatabaseConnection:
             - party_id: the ID of the party associated with the tag list
             - tag_list: the list of tags to be associated with the party
         Returns:
-            - True: if the tag list is inserted successfully
+            - True: if exec_stmt=True and the tag list is inserted successfully
+            - statement: if exec_stmt=False, return the SQL statement to be executed
             - False: otherwise
         Throws Exception if:
             - the tag's information may have invalid fields or references a non-existing party
     """
 
-    def set_tags(self, party_id, tag_list):
+    def set_tags(self, party_id, tag_list, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
-            party = self.query_party(party_id=party_id)
-            if party is None or len(party) == 0:
-                raise Exception(f"Party with ID '{party_id}' does not exist")
+            # party = self.query_party(party_id=party_id)
+            # if party is None or len(party) == 0:
+            #     raise Exception(f"Party with ID '{party_id}' does not exist")
 
             tag_list = str(tag_list)[1:-1]
             statement = f"INSERT INTO Tags VALUES ('{party_id}', ARRAY[{tag_list}]) " \
-                        f"ON CONFLICT (party_id) DO UPDATE SET tag_list = ARRAY[{tag_list}]"
+                        f"ON CONFLICT (party_id) DO UPDATE SET tag_list = ARRAY[{tag_list}];\n"
 
-            self.exec_DDL(statement)
-            return True
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return True
+            else:
+                return statement
 
         except Exception as e:
             logging.fatal("Setting tags failed")
@@ -217,26 +234,30 @@ class DatabaseConnection:
             - prov: the province/state of the party location 
             - postal_code: the postal code of the party location 
         Returns:
-            - True: if the party location is set successfully
+            - True: if exec_stmt=True the party location is set successfully
+            - statement: if exec_stmt=False, return the SQL statement to be executed
             - False: otherwise
         Throws Exception if:
             - the party location information may have invalid fields or references a non-existing party
     """
 
-    def set_location(self, party_id, street, city, prov, postal_code):
+    def set_location(self, party_id, street, city, prov, postal_code, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
-            party = self.query_party(party_id=party_id)
-            if party is None or len(party) == 0:
-                raise Exception(f"Party with ID '{party_id}' does not exist")
+            # party = self.query_party(party_id=party_id)
+            # if party is None or len(party) == 0:
+            #     raise Exception(f"Party with ID '{party_id}' does not exist")
 
             location = self.query_locations
             statement = f"INSERT INTO PartyLocations VALUES ('{party_id}', '{street}', '{city}', '{prov}', '{postal_code}') " \
                         f"ON CONFLICT (party_id) DO UPDATE " \
-                        f"SET (street, city, prov, postal_code) = ('{street}', '{city}', '{prov}', '{postal_code}')"
+                        f"SET (street, city, prov, postal_code) = ('{street}', '{city}', '{prov}', '{postal_code}');\n"
 
-            self.exec_DDL(statement)
-            return True
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return True
+            else:
+                return statement
 
         except Exception as e:
             logging.fatal("Setting party location failed")
@@ -250,56 +271,39 @@ class DatabaseConnection:
             - party_id: the ID of the party associated with the music suggestions 
             - suggested_tracks: a list of suggested tracks 
         Returns:
-            - True: if the music suggestions are set successfully
+            - True: if exec_stmt=True and the music suggestions are set successfully
+            - statement: if exec_stmt=False, return the SQL statement to be executed
             - False: otherwise
         Throws Exception if:
             - the music suggestion information may have invalid fields or references a non-existing guest or party
     """
 
-    def set_suggestions(self, guest_id, party_id, suggested_tracks):
+    def set_suggestions(self, guest_id, party_id, suggested_tracks, exec_stmt=True):
         try:
             # Check if the party_id exists in the Parties table
-            party = self.query_party(party_id=party_id)
-            if party is None or len(party) == 0:
-                raise Exception(f"Party with ID '{party_id}' does not exist")
+            # party = self.query_party(party_id=party_id)
+            # if party is None or len(party) == 0:
+            #     raise Exception(f"Party with ID '{party_id}' does not exist")
 
             # check if guest attends the party
-            attend = self.check_attends(party_id=party_id, guest_id=guest_id)
-            if attend is False:
-                raise Exception(
-                    f"Guest ('{guest_id}') does not attend party ('{party_id}')")
+            # attend = self.check_attends(party_id=party_id, guest_id=guest_id)
+            # if attend is False:
+            #     raise Exception(
+            #         f"Guest ('{guest_id}') does not attend party ('{party_id}')")
 
             suggested_tracks = str(suggested_tracks)[1:-1]
 
             statement = f"INSERT INTO MusicSuggestions VALUES ('{guest_id}', '{party_id}', ARRAY[{suggested_tracks}]) " \
-                        f"ON CONFLICT (guest_id, party_id) DO UPDATE SET suggested_tracks = ARRAY[{suggested_tracks}]"
+                        f"ON CONFLICT (guest_id, party_id) DO UPDATE SET suggested_tracks = ARRAY[{suggested_tracks}];\n"
 
-            self.exec_DDL(statement)
-            return True
+            if exec_stmt:
+                self.exec_DDL(statement)
+                return True
+            else:
+                return statement
 
         except Exception as e:
             logging.fatal("Setting music suggestions failed")
-            logging.fatal(e)
-            return False
-
-    """
-    attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
-        Parameters: 
-            - user_id: the user's id number
-            - party_id: the party's id number
-        Returns:
-            - True: if the user is registered as a guest successfully
-            - False: otherwise
-    """
-
-    def attend_party(self, user_id, party_id):
-        try:
-            statement = f"INSERT INTO Guests VALUES ('{user_id}', '{party_id}')"
-            self.exec_DDL(statement)
-            return True
-
-        except Exception as e:
-            logging.fatal("Registering guest to party failed")
             logging.fatal(e)
             return False
 
@@ -315,7 +319,7 @@ class DatabaseConnection:
 
     def leave_party(self, user_id, party_id):
         try:
-            statement = f"DELETE FROM Guests g WHERE g.guest_id = '{user_id}' AND g.party_id = '{party_id}'"
+            statement = f"DELETE FROM Transactions t WHERE t.guest_id = '{user_id}' AND t.party_id = '{party_id}'"
             self.exec_DDL(statement)
             return True
 
@@ -325,43 +329,19 @@ class DatabaseConnection:
             return False
 
     """
-    host_party(user_id, party_id): Registers the user with user_id into the party with party_id as a host
-        Parameters: 
-            - user_id: the user's id number
-            - party_id: the party's id number
-        Returns:
-            - True: if the user is registered as a host successfully
-            - False: otherwise
-    """
-
-    def host_party(self, user_id, party_id):
-        try:
-            statement = f"INSERT INTO Hosts VALUES ('{user_id}', '{party_id}')"
-            self.exec_DDL(statement)
-            return True
-
-        except Exception as e:
-            logging.fatal("Registering host to party failed")
-            logging.fatal(e)
-            return False
-
-    """
     cancel_party(party_id): Cancels the party with party_id.
         Parameters: 
             - party_id: the party's id number
-            - force_leave: if set to true, then all attenders will also be forced to leave the party
         Returns:
             - True: if the party is cancelled successfully
             - False: otherwise
     """
 
-    def cancel_party(self, party_id, force_leave=True):
+    def cancel_party(self, party_id):
         try:
-            statement = f"DELETE FROM Hosts h WHERE h.party_id = '{party_id}'"
+            statement = f"DELETE FROM Parties p WHERE p.party_id = '{party_id}';\n " \
+                        f"DELETE FROM Transactions t WHERE t.party_id = '{party_id}';"
             self.exec_DDL(statement)
-            if force_leave:
-                statement = f"DELETE FROM guests g WHERE g.party_id = '{party_id}'"
-                self.exec_DDL(statement)
             return True
 
         except Exception as e:
@@ -376,18 +356,21 @@ class DatabaseConnection:
             - show_detail: if set to true, then return the details of the attended parties. Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - Parties: the id of the parties that the user attends
+            - row: the query result
+                - show_detail=False: the party_id of attended parties
+                - show_detail=True: all columns of Parties + all columns of PartyLocations
             - None: otherwise
     """
 
     def show_attended_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT p.* FROM Guests g " \
-                            f"JOIN Parties p ON g.party_id = p.party_id " \
-                            f"WHERE g.guest_id = '{user_id}'"
+                statement = f"SELECT p.*, pl.* FROM Transactions t " \
+                            f"JOIN Parties p ON t.party_id = p.party_id " \
+                            f"JOIN PartyLocations pl ON t.party_id = pl.party_id " \
+                            f"WHERE t.guest_id = '{user_id}'"
             else:
-                statement = f"SELECT g.party_id FROM Guests g WHERE g.guest_id = '{user_id}'"
+                statement = f"SELECT t.party_id FROM Transactions t WHERE t.guest_id = '{user_id}'"
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -402,18 +385,20 @@ class DatabaseConnection:
             - show_detail: if set to true, then return the details of the hosted parties. Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - Parties: the id of the parties that the user hosts
+            - row: the query result
+                - show_detail=False: party_id, the id of the parties that the user hosts
+                - show_detail=True: all columns of Parties + all columns of PartyLocations
             - None: otherwise
     """
 
     def show_hosted_parties(self, user_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT p.* FROM Hosts h " \
-                            f"JOIN Parties p ON h.party_id = p.party_id " \
-                            f"WHERE h.host_id = '{user_id}'"
+                statement = f"SELECT * FROM Parties p " \
+                            f"JOIN PartyLocations pl ON p.party_id = pl.party_id " \
+                            f"WHERE p.host_id = '{user_id}'"
             else:
-                statement = f"SELECT h.party_id FROM Hosts h WHERE h.host_id = '{user_id}'"
+                statement = f"SELECT p.party_id FROM Parties p WHERE p.host_id = '{user_id}'"
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -425,21 +410,24 @@ class DatabaseConnection:
     show_attendees(party_id): Returns all users that attends the current party
         Parameters: 
             - party_id: the party's id number
-            - show_detail: if set to true, then return the details of the attended users. Otherwise only return the ids.
+            - show_detail: if set to true, then return the details of the attended users and entry fees. 
+                        Otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - Users: the id of the users that attends the party
+            - row: the query result
+                - show_detail=False: user_id, the id of the users that attends the party
+                - show_detail=True: all columns of Users + (payment_amount, time) in Transactions
             - None: otherwise
     """
 
     def show_attendees(self, party_id, show_detail=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT u.* FROM Guests g " \
-                            f"JOIN Users u ON g.guest_id = u.user_id " \
-                            f"WHERE g.party_id = '{party_id}'"
+                statement = f"SELECT u.*, t.payment_amount, t.time FROM Transactions t " \
+                            f"JOIN Users u ON t.guest_id = u.user_id " \
+                            f"WHERE t.party_id = '{party_id}'"
             else:
-                statement = f"SELECT g.guest_id FROM Guests g WHERE g.party_id = '{party_id}'"
+                statement = f"SELECT t.guest_id FROM Transactions t WHERE t.party_id = '{party_id}'"
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -448,32 +436,7 @@ class DatabaseConnection:
             return None
 
     """
-    show_host(party_id): Returns the user that hosts the current party
-        Parameters: 
-            - party_id: the party's id number
-            - show_detail: if set to true, then return the details of the host users. Otherwise only return the id.
-        Returns:
-            - Users: the id of the host
-            - None: otherwise
-    """
-
-    def show_host(self, party_id, show_detail=False):
-        try:
-            if show_detail:
-                statement = f"SELECT u.* FROM Hosts h " \
-                            f"JOIN Users u ON h.host_id = u.user_id " \
-                            f"WHERE h.party_id = '{party_id}'"
-            else:
-                statement = f"SELECT h.host_id FROM Hosts h WHERE h.party_id = '{party_id}'"
-            return self.exec_DML(statement)
-
-        except Exception as e:
-            logging.fatal("Displaying host failed")
-            logging.fatal(e)
-            return None
-
-    """
-    check_attends(party_id, guest_id): Checks if the guest with guest_id attends party with party_id
+    check_attends(party_id, guest_id): Checks if the user with guest_id attends party with party_id
         Parameters: 
             - party_id: the party's id number
             - guest_id: the guest's user id
@@ -484,11 +447,73 @@ class DatabaseConnection:
 
     def check_attends(self, party_id, guest_id):
         try:
-            statement = f"SELECT * FROM Guests g WHERE g.party_id = '{party_id}' AND g.guest_id = '{guest_id}'"
+            statement = f"SELECT * FROM Transactions t WHERE t.party_id = '{party_id}' AND t.guest_id = '{guest_id}'"
             return len(self.exec_DML(statement)) != 0
 
         except Exception as e:
             logging.fatal("Checking attendance failed")
+            logging.fatal(e)
+            return False
+
+    """
+    update_user(user_id, profile_url, first_name, last_name, phone_no, address_street, address_city,
+    address_prov, address_postal, email): updates the user record in database based on the given uid
+        Parameters:
+            - user_id: the provided user_id of the user
+            - profile_url: update the user's profile_url to the given value
+            - first_name: update the user's first_name to the given value
+            - last_name: update the user's last_name to the given value
+            - phone_no: update the user's phone_no to the given value
+            - address_*: updated the user's address to the given values
+            - email: update the user's email to the given value
+        Returns:
+            - true: If the user is updated successfully
+            - false: Otherwise
+    """
+
+    def update_user(self, user_id, profile_url=None, first_name=None, last_name=None, phone_no=None,
+                    address_street=None, address_city=None, address_prov=None, address_postal=None,
+                    email=None):
+        try:
+            sub_queries = []
+
+            if profile_url is not None:
+                sub_queries.append(f" u.profile_url = '{profile_url}'")
+
+            if first_name is not None:
+                sub_queries.append(f" u.first_name = '{first_name}'")
+
+            if last_name is not None:
+                sub_queries.append(f" u.last_name = '{last_name}'")
+
+            if phone_no is not None:
+                sub_queries.append(f" u.phone_no = {phone_no}")
+
+            if address_street is not None:
+                sub_queries.append(f" u.address_street = '{address_street}'")
+
+            if address_city is not None:
+                sub_queries.append(f" u.address_city = '{address_city}'")
+
+            if address_prov is not None:
+                sub_queries.append(f" u.address_prov = '{address_prov}'")
+
+            if address_postal is not None:
+                sub_queries.append(f" u.address_postal = '{address_postal}'")
+
+            if email is not None:
+                sub_queries.append(f" u.email = '{email}")
+
+            stmt = self.__join_subqueries(
+                "UPDATE Users u SET", sub_queries)
+            stmt += f" WHERE u.user_id = '{user_id}';\n"
+
+            print(stmt)
+
+            return self.exec_DDL(stmt)
+
+        except Exception as e:
+            logging.fatal("Updating users failed")
             logging.fatal(e)
             return False
 
@@ -515,12 +540,24 @@ class DatabaseConnection:
 
         return stmt
 
+    def __join_subqueries(self, main_query, sub_queries):
+        if (len(sub_queries)) == 0:
+            return None
+
+        connector = ""
+        stmt = main_query
+        for q in sub_queries:
+            stmt += connector + q
+            connector = ","
+
+        return stmt
+
     """
-    query_user(user_id, username, first_name, last_name, email, limit): Query users using some attributes. If an 
+    query_user(user_id, profile_url, first_name, last_name, email, limit): Query users using some attributes. If an 
     attribute is left blank then its constraint is ignored.
         Parameters: 
             - user_id: return the user with the matching user_id
-            - username: return the user with matching username
+            - profile_url: return the user with matching profile_url
             - first_name: return all users with matching first_name
             - last_name: return all users with matching last_name
             - email: return the user with matching email address
@@ -530,15 +567,16 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_user(self, user_id=None, username=None, first_name=None, last_name=None, email=None, limit=50):
+    def query_user(self, user_id=None, profile_url=None, first_name=None, last_name=None,
+                   email=None, limit=50):
         try:
             sub_queries = []
 
             if user_id is not None:
                 sub_queries.append(f" u.user_id = '{user_id}'")
 
-            if username is not None:
-                sub_queries.append(f" u.username LIKE '%{username}%'")
+            if profile_url is not None:
+                sub_queries.append(f" u.profile_url = '{profile_url}'")
 
             if first_name is not None:
                 sub_queries.append(f" u.first_name LIKE '%{first_name}%'")
@@ -561,36 +599,37 @@ class DatabaseConnection:
             return None
 
     """
-    query_transaction(trans_id, from_id, to_id, party_id, min_amount, max_amount, start_date, end_date): Query 
+    query_transaction(trans_id, guest_id, party_id, min_amount, max_amount, start_date, end_date): Query 
     transactions using some attributes. If an attribute is left blank then its constraint is ignored.
         Parameters: 
             - trans_id: return the transaction with the matching transaction_id
-            - from_id: return all transactions with paid by user with from_id
-            - to_id: return all transactions with paid to user with to_id
+            - guest_id: return all transactions with paid by user with guest_id
             - party_id: return all transactions associated with the party with party_id
             - min_amount: return all transactions with payment amount >= min_amount
             - max_amount: return all transactions with payment amount <= max_amount
             - start_date: return all transactions happening after this time
             - end_date: return all transactions happening before this time
+            - show_party_detail: if set to true then show the party's info
+            - show_guest_detail: if set to true then show the guest's info
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - row: The query result
+            - row: The query result (all columns in transaction)
+                - show_party_detail=True: + all columns in Parties
+                - show_guest_detail=True: + all columns in Users
             - None: If the query present no result
     """
 
-    def query_transaction(self, trans_id=None, from_id=None, to_id=None, party_id=None, min_amount=None,
-                          max_amount=None, start_date=None, end_date=None, limit=50):
+    def query_transaction(self, trans_id=None, guest_id=None, party_id=None, min_amount=None,
+                          max_amount=None, start_date=None, end_date=None,
+                          show_party_detail=False, show_guest_detail=False, limit=50):
         try:
             sub_queries = []
 
             if trans_id is not None:
                 sub_queries.append(f" t.transaction_id = '{trans_id}'")
 
-            if from_id is not None:
-                sub_queries.append(f" t.from_id = '{from_id}'")
-
-            if to_id is not None:
-                sub_queries.append(f" t.to_id = '{to_id}'")
+            if guest_id is not None:
+                sub_queries.append(f" t.guest_id = '{guest_id}'")
 
             if party_id is not None:
                 sub_queries.append(f" t.party_id = '{party_id}'")
@@ -607,8 +646,14 @@ class DatabaseConnection:
             if end_date is not None:
                 sub_queries.append(f" t.time <= '{end_date}'")
 
-            stmt = self.__create_query_statement(
-                "SELECT * FROM Transactions t", sub_queries)
+            prefix = "SELECT * FROM Transactions t"
+            if show_party_detail:
+                prefix += " JOIN Parties p ON t.party_id = p.party_id" \
+                          " JOIN PartyLocations pl ON t.party_id = pl.party_id"
+            if show_guest_detail:
+                prefix += " JOIN Users u ON t.guest_id = u.user_id"
+
+            stmt = self.__create_query_statement(prefix, sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -619,30 +664,44 @@ class DatabaseConnection:
             return None
 
     """
-    query_party(party_id, party_name, start_date, end_date, created_after, max_capacity, entry_fee):
-    Query parties using some attributes. If an  attribute is left blank then its constraint is ignored.
+    query_party(party_id, party_name, start_date, end_date, created_after, max_capacity, entry_fee,
+    street, city, prov, tag_subset):
+    Query parties using some attributes. If an attribute is left blank then its constraint is ignored.
     Return at most 50 results.
         Parameters:
             - party_id : Return parties where party_id is equal to the party's generated id
+            - party_avatar_url: Return parties with the matching party_avatar_url.
             - party_name: Return parties where party_name is a substring of the party's name.
             - start_date: Return parties with scheduled dates later than start_date.
             - end_date: Return parties with scheduled dates earlier than end_date.
+            - hosted_by: Return parties that are hosted by this uid
             - created_after: Return parties created after the timestamp created_after.
             - max_capacity: Return parties with maximum capacity greater than or equal to max_capacity.
             - entry_fee: Return parties with entry fee less than or equal to entry_fee.
+            - street, city, prov: Return parties with matching addresses
+            - tag_subset: Return parties whose tags contains all tags in tag_subset
+            - show_detail: Returns all party info (including addresses) if set to true, otherwise only return the ids.
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
-            - row: The query result, if stmt is queried successfully
+            - row: The query result, if stmt is queried successfully.
+                - show_detail=False: party_id
+                - show_detail=True: all columns in Parties, (street, city, prov, postal_code) in
+                                    PartyLocations, (tag_list) in Tags
             - None: If the query present no result
     """
 
-    def query_party(self, party_id=None, party_name=None, start_date=None, end_date=None, created_after=None,
-                    max_capacity=None, entry_fee=None, limit=50):
+    def query_party(self, party_id=None, party_avatar_url=None, party_name=None, start_date=None,
+                    end_date=None, hosted_by=None, created_after=None, max_capacity=None,
+                    entry_fee=None, street=None, city=None, prov=None, tag_subset=None,
+                    show_detail=False, limit=50):
         try:
             sub_queries = []
 
             if party_id is not None:
                 sub_queries.append(f" p.party_id = '{party_id}'")
+
+            if party_avatar_url is not None:
+                sub_queries.append(f" p.party_avatar_url = '{party_avatar_url}'")
 
             if party_name is not None:
                 sub_queries.append(f" p.party_name LIKE '%{party_name}%'")
@@ -653,6 +712,9 @@ class DatabaseConnection:
             if end_date is not None:
                 sub_queries.append(f" p.date_time <= '{end_date}'")
 
+            if hosted_by is not None:
+                sub_queries.append(f" p.host_id = '{hosted_by}'")
+
             if created_after is not None:
                 sub_queries.append(f" p.created_at >= '{created_after}'")
 
@@ -662,8 +724,28 @@ class DatabaseConnection:
             if entry_fee is not None:
                 sub_queries.append(f" p.entry_fee <= {entry_fee}")
 
-            statement = self.__create_query_statement(
-                "SELECT * FROM Parties p", sub_queries)
+            if street is not None:
+                sub_queries.append(f" pl.street LIKE '%{street}%'")
+
+            if city is not None:
+                sub_queries.append(f" pl.city LIKE '%{city}%'")
+
+            if prov is not None:
+                sub_queries.append(f" pl.prov LIKE '%{prov}%'")
+
+            if tag_subset is not None:
+                tag_subset = str(tag_subset)[1:-1]
+                sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
+
+            if show_detail:
+                prefix = "SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, t.tag_list "
+            else:
+                prefix = "SELECT p.party_id "
+            prefix += "FROM Parties p " \
+                      "JOIN PartyLocations pl ON p.party_id = pl.party_id " \
+                      "JOIN Tags t ON t.party_id = p.party_id"
+
+            statement = self.__create_query_statement(prefix, sub_queries)
             print(statement)
 
             return self.exec_DML(statement, limit)
@@ -681,6 +763,7 @@ class DatabaseConnection:
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result
+                
             - None: If the query present no result
     """
 
@@ -695,8 +778,9 @@ class DatabaseConnection:
                 tag_subset = str(tag_subset)[1:-1]
                 sub_queries.append(f" t.tag_list @> ARRAY[{tag_subset}]")
 
-            stmt = self.__create_query_statement(
-                "SELECT * FROM Tags t", sub_queries)
+            prefix = "SELECT * FROM Tags t"
+
+            stmt = self.__create_query_statement(prefix, sub_queries)
             print(stmt)
 
             return self.exec_DML(stmt, limit)
@@ -721,7 +805,8 @@ class DatabaseConnection:
             - None: If the query present no result
     """
 
-    def query_locations(self, party_id=None, street=None, city=None, prov=None, postal_code=None, limit=50):
+    def query_locations(self, party_id=None, street=None, city=None, prov=None, postal_code=None,
+                        limit=50):
         try:
             sub_queries = []
 
@@ -791,6 +876,57 @@ class DatabaseConnection:
             return None
 
     """
+    exec_attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
+        Parameters: 
+            - user_id: the user's id number
+            - party_id: the party's id number
+        Returns:
+            - trans_id: if the user is registered as a guest successfully, return transaction id
+            - False: otherwise
+    """
+
+    def exec_attend_party(self, user_id, party_id, entry_fee):
+        try:
+            trans_id = self.add_new_transaction(user_id, party_id, entry_fee)
+            return trans_id
+
+        except Exception as e:
+            logging.fatal("Attending party failed")
+            logging.fatal(e)
+            return False
+
+    """
+    exec_host_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description, entry_fee, street, city, prov, 
+    postal_code, tag_list): Adds the party into the database, sets its location and tags
+        Parameters:
+            - party_name, date_time, host_id, max_capacity, description, entry_fee: identifies a party
+            - street, city, prov, postal_code: identifies a party location
+            - tag_list: a list of party tags
+        Returns:
+            - party_id: if the party is hosted successfully, return the party's id
+            - False: otherwise
+    """
+
+    def exec_host_party(self, party_name, party_avatar_url, date_time, host_id, max_capacity,
+                        description, entry_fee, street, city,
+                        prov, postal_code, tag_list):
+        try:
+            add_party = self.add_new_party(party_avatar_url, party_name, date_time, host_id,
+                                           max_capacity, description,
+                                           entry_fee, exec_stmt=False)
+            statements = add_party[0]
+            party_id = add_party[1]
+            statements += self.set_location(party_id, street, city, prov, postal_code, exec_stmt=False)
+            statements += self.set_tags(party_id, tag_list, exec_stmt=False)
+            self.exec_DDL(statements)
+            return party_id
+
+        except Exception as e:
+            logging.fatal("Hosting party failed")
+            logging.fatal(e)
+            return False
+
+    """
     clear_table(table): Delete all rows from a table
         Parameters: 
             - table: name of the cleared table
@@ -846,8 +982,7 @@ class DatabaseConnection:
             # Users
             statement = "CREATE TABLE IF NOT EXISTS Users (" \
                         "user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " \
-                        "username VARCHAR(20) NOT NULL, " \
-                        "password VARCHAR(20) NOT NULL, " \
+                        "profile_url VARCHAR(100) NOT NULL, " \
                         "first_name VARCHAR(20) NOT NULL, " \
                         "last_name VARCHAR(20) NOT NULL, " \
                         "phone_no BIGINT NOT NULL, " \
@@ -862,34 +997,17 @@ class DatabaseConnection:
             # Parties
             statement = "CREATE TABLE IF NOT EXISTS Parties (" \
                         "party_id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " \
+                        "party_avatar_url VARCHAR(100) NOT NULL, " \
                         "party_name VARCHAR(50) NOT NULL, " \
                         "date_time TIMESTAMP NOT NULL, " \
+                        "host_id UUID NOT NULL" \
                         "created_at TIMESTAMP NOT NULL, " \
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \
                         "UNIQUE(party_name), " \
-                        "entry_fee INTEGER)"
-            self.exec_DDL(statement)
-
-            # Hosts
-            statement = "CREATE TABLE IF NOT EXISTS Hosts (" \
-                        "host_id UUID, " \
-                        "party_id UUID, " \
+                        "entry_fee INTEGER, " \
                         "CONSTRAINT host_user_id " \
-                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
-                        "CONSTRAINT host_party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
-            self.exec_DDL(statement)
-
-            # Guests
-            statement = "CREATE TABLE IF NOT EXISTS Guests (" \
-                        "guest_id UUID, " \
-                        "party_id UUID, " \
-                        "UNIQUE(guest_id, party_id), " \
-                        "CONSTRAINT guest_user_id " \
-                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE SET NULL, " \
-                        "CONSTRAINT guest_party_id " \
-                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
+                        "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL)"
             self.exec_DDL(statement)
 
             # Tags
@@ -926,35 +1044,15 @@ class DatabaseConnection:
                         "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
-            # # Accounts
-            # statement = "CREATE TABLE IF NOT EXISTS Accounts (" \
-            #             "account_id UUID PRIMARY KEY, " \
-            #             "balance DECIMAL(10, 2) NOT NULL, " \
-            #             "CONSTRAINT user_account " \
-            #             "FOREIGN KEY (account_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
-            # self.exec_DDL(statement)
-            #
-            # # CreditCards
-            # statement = "CREATE TABLE IF NOT EXISTS CreditCards (" \
-            #             "account_id UUID, " \
-            #             "card_number BIGINT NOT NULL, " \
-            #             "cvv INTEGER NOT NULL, " \
-            #             "CONSTRAINT account_credit_card " \
-            #             "FOREIGN KEY (account_id) REFERENCES Accounts(account_id) ON DELETE CASCADE)"
-            # self.exec_DDL(statement)
-
             # Transactions
             statement = "CREATE TABLE IF NOT EXISTS Transactions (" \
                         "transaction_id UUID PRIMARY KEY, " \
                         "time TIMESTAMP, " \
-                        "from_id UUID, " \
-                        "to_id UUID, " \
+                        "guest_id UUID, " \
                         "party_id UUID, " \
                         "payment_amount DECIMAL(10, 2), " \
                         "CONSTRAINT guest_user_id " \
-                        "FOREIGN KEY (from_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
-                        "CONSTRAINT host_user_id " \
-                        "FOREIGN KEY (to_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
+                        "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE, " \
                         "CONSTRAINT party_id " \
                         "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
