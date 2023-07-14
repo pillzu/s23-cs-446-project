@@ -220,6 +220,7 @@ def get_user_host_parties():
 
     return jsonify(resp), 200
 
+# Register if user does not exist or login
 @app.post("/user")
 def register_or_login_user():
     req = request.json
@@ -231,19 +232,17 @@ def register_or_login_user():
         return return_message_response("Email does not have valid format.", 400)
 
     # Phone number validation
-    if not is_valid_phone_number(req["phone_no"]):
-        return return_message_response("Phone number does not have valid format.", 400)
+    # if not is_valid_phone_number(req["phone_no"]):
+    #     return return_message_response("Phone number does not have valid format.", 400)
 
-    try:
-        result = db.add_new_user(req["profile_url"], req["first_name"], req["last_name"], req["phone_no"], req["address_street"],
+    result = db.add_new_user(req["profile_url"], req["first_name"], req["last_name"], req["phone_no"], req["address_street"],
                 req["address_city"], req["address_prov"], req["address_postal"], req["email"], req["user_id"], exec_stmt=True)
-    except:
-        return return_message_response("Internal Server Error", 500)
 
     if result is None:
         return return_message_response("Login failure.", 500)
     else:
         return return_message_response("User with user_id {} successfully logged in".format(result), 201)
+
 
 @app.route('/user', methods=['PUT'])
 def update_user_details():
@@ -270,6 +269,8 @@ def update_user_details():
         return return_message_response("Could not update user details.", 500)
     else:
         return return_message_response("Successfully updated user details.", 500)
+
+
 
 @app.route('/user', methods=['DELETE'])
 def delete_user_account():

@@ -26,4 +26,7 @@ interface ApiService  {
 
     @POST("/parties/attend/{party_id}")
     fun registerUserForParty(@Path("party_id") party_id: String, @Body requestModel: User): Call<ResponseMessage>
+
+    @POST("/user")
+    fun registerOrLoginUser(@Body requestModel: User): Call<ResponseMessage>
 }

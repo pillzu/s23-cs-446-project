@@ -28,8 +28,17 @@ import android.location.Address
 import android.location.Location
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.vibees.Api.VibeesApi
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
 import com.example.vibees.utils.Geolocation
+import com.example.vibees.utils.hashToUUID
+import kotlinx.coroutines.launch
+import java.nio.ByteBuffer
+import java.security.MessageDigest
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     val authContext = this
@@ -39,6 +48,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var signInRequest: BeginSignInRequest
     private lateinit var auth: FirebaseAuth
     private lateinit var geolocation: Geolocation
+    val vibeesApi = VibeesApi()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(ContentValues.TAG, "Auth Started...")
@@ -112,9 +122,10 @@ class MainActivity : ComponentActivity() {
                                         val firstName = parts?.getOrNull(0)
                                         val lastName = parts?.getOrNull(1)
                                         val email = user.email
-                                        val phoneNo = user.phoneNumber
+                                        val phoneNo = 0
+                                        Log.d(ContentValues.TAG, "${user.phoneNumber}")
                                         val profileURL = user.photoUrl
-                                        val uid = user.uid
+                                        val uid = hashToUUID(user.uid)
                                         var latitude = 0.00
                                         var longitude = 0.00
                                         var street = ""
@@ -134,7 +145,15 @@ class MainActivity : ComponentActivity() {
                                             province = address.adminArea
                                             postalCode = address.postalCode
                                             val user = User(uid, profileURL, firstName, lastName, phoneNo, street, city, province, postalCode, email)
-                                            // TO DO: call api to create or login user
+                                            val successfn: (ResponseMessage) -> Unit = { response ->
+                                                Log.d("TAG", "$response")
+                                                GlobalAppState.currentUser = user
+                                            }
+                                            val failurefn: (Throwable) -> Unit = { t ->
+                                                Log.d("TAG", "FAILURE")
+                                                Log.d("TAG", t.printStackTrace().toString())
+                                            }
+                                            val response = vibeesApi.registerUser(successfn, failurefn, user)
                                         }
                                         getLoc.launch(
                                             arrayOf(
