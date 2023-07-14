@@ -70,3 +70,5 @@
 | 13 July  | 6         |          |                |        |           |          | Spent time learning enough about Jetpack Compose to add expandable menu to Help page for app and wrote up text for "About Us", "FAQ", and "Privacy Policy" sections   |
 | 14 July  |           |          |                |  15    |           |          | Researched how to implement field validations and new material3 components, and implemented Step1 of the Host screen with fields, a date picker and a time picker, as well as validation logic for all the components   |
 | 14 July  | 2         |          |                |        |           |          | Offloaded string literals in help page to XML file in string resources folder   |
+| 14 July  |           |          | 2              |        |           |          | Reorganised Main Actvity to reduce load on the main thread by adding coro                                                                                                                                                                                                                                                                                          |
+
