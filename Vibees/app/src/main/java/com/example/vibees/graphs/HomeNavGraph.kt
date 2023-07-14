@@ -48,23 +48,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(route = BottomBar.Help.route) {
-            HelpScreen(
-                onClickAboutUs = {
-                    // Handle About Us click
-                    // For example, show a dialog with information about the company
-                    showDialog("About Us", "This is our company information.")
-                },
-                onClickFAQ = {
-                    // Handle FAQ click
-                    // For example, navigate to an FAQ screen
-                    showDialog("FAQ", "Question 1?\\n   Answer 1\\n\\n2. Question 2?\\n   Answer 2")
-                },
-                onClickPrivacyPolicy = {
-                    // Handle Privacy Policy click
-                    // For example, show a dialog with the privacy policy
-                    showDialog("Privacy Policy", "This is our privacy policy.")
-                }
-            )
+            HelpScreen()
         }
 
         partyNavGraph(navController = navController)
