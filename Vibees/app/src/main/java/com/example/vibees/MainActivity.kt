@@ -35,6 +35,7 @@ import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
 import com.example.vibees.utils.Geolocation
 import com.example.vibees.utils.hashToUUID
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.security.MessageDigest
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var geolocation: Geolocation
     val vibeesApi = VibeesApi()
+    private lateinit var sic: CompletableDeferred<Unit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(ContentValues.TAG, "Auth Started...")
@@ -69,7 +71,8 @@ class MainActivity : ComponentActivity() {
             .setAutoSelectEnabled(true)
             .build()
 
-        val signInUsingGoogle: () -> Unit = {
+        val signInUsingGoogle: suspend (signInComplete: CompletableDeferred<Unit>) -> Unit = { signInComplete ->
+            sic = signInComplete
             oneTapClient.beginSignIn(signInRequest)
                 .addOnSuccessListener(this) { result ->
                     try {
@@ -79,6 +82,7 @@ class MainActivity : ComponentActivity() {
                     } catch (e: IntentSender.SendIntentException) {
                         Log.e(ContentValues.TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
                         Toast.makeText(authContext, "Couldn't start One Tap UI: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                        sic?.completeExceptionally(e) // Complete exceptionally if there's an error
                     }
                 }
                 .addOnFailureListener(this) { e ->
@@ -86,6 +90,7 @@ class MainActivity : ComponentActivity() {
                     // do nothing and continue presenting the signed-out UI.
                     Log.d(ContentValues.TAG, e.localizedMessage)
                     Toast.makeText(authContext, "${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                    sic?.completeExceptionally(e) // Complete exceptionally if there's an error
                 }
         }
 
@@ -148,6 +153,7 @@ class MainActivity : ComponentActivity() {
                                             val successfn: (ResponseMessage) -> Unit = { response ->
                                                 Log.d("TAG", "$response")
                                                 GlobalAppState.currentUser = user
+                                                sic.complete(Unit)
                                             }
                                             val failurefn: (Throwable) -> Unit = { t ->
                                                 Log.d("TAG", "FAILURE")
