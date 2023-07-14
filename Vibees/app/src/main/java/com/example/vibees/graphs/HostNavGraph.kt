@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
+import com.example.vibees.screens.home.host.HostLogisticsScreen
 
 fun NavGraphBuilder.hostNavGraph(navController: NavHostController) {
     navigation(
@@ -13,10 +14,11 @@ fun NavGraphBuilder.hostNavGraph(navController: NavHostController) {
         startDestination = HostScreens.Step1.route
     ) {
         composable(route = HostScreens.Step1.route) {
-            GenericScreen(
-                name = "Step1",
-                onClick = { navController.navigate(HostScreens.Step2.route) }
-            )
+            HostLogisticsScreen()
+//            GenericScreen(
+//                name = "Step1",
+//                onClick = { navController.navigate(HostScreens.Step2.route) }
+//            )
         }
         composable(route = HostScreens.Step2.route) {
             GenericScreen(

@@ -1,4 +1,4 @@
-package com.example.vibees.screens.home
+package com.example.vibees.screens.home.host
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
@@ -12,17 +12,12 @@ import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,18 +29,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -54,19 +47,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.text.Normalizer.Form
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -79,7 +66,7 @@ import java.util.Date
 fun dropdownProvinceMenu(): String {
     var expanded by remember { mutableStateOf(false) }
     val items = listOf("AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC", "SK", "YT")
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
     Box(modifier = Modifier
         .padding(10.dp)
         .size(200.dp, 56.dp)
@@ -152,7 +139,7 @@ fun AppTextField(
 
 @Composable
 fun FlexibleTextField(
-    modifier: Modifier = Modifier.padding(10.dp),
+    modifier: Modifier = Modifier,
     text: String,
     placeholder: String,
     leadingIcon: @Composable (() -> Unit)? = null,
