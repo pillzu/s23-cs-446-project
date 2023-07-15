@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
@@ -23,7 +24,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.wear.compose.material.ContentAlpha
-import com.example.vibees.ui.theme.Yellow
+import androidx.compose.ui.res.vectorResource
 
 @Composable
 fun BottomBarScreen(navController: NavHostController) {
@@ -66,7 +67,7 @@ fun RowScope.AddItem(
         },
         icon = {
             Icon(
-                imageVector = screen.icon,
+                painter = painterResource(id = screen.icon),
                 contentDescription = "Navigation Icon",
                 tint=Color.Black
             )
