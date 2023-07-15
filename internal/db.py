@@ -985,7 +985,7 @@ class DatabaseConnection:
                         "profile_url VARCHAR(100) NOT NULL, " \
                         "first_name VARCHAR(20) NOT NULL, " \
                         "last_name VARCHAR(20) NOT NULL, " \
-                        "phone_no BIGINT NOT NULL, " \
+                        "phone_no BIGINT, " \
                         "address_street VARCHAR(50) NOT NULL, " \
                         "address_city VARCHAR(10) NOT NULL, " \
                         "address_prov VARCHAR(10) NOT NULL, " \
@@ -1004,7 +1004,6 @@ class DatabaseConnection:
                         "created_at TIMESTAMP NOT NULL, " \
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \
-                        "UNIQUE(party_name), " \
                         "entry_fee INTEGER, " \
                         "CONSTRAINT host_user_id " \
                         "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL)"
