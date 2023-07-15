@@ -94,7 +94,7 @@ class DatabaseConnection:
                         f"'{last_name}', {phone_no}, '{address_street}', '{address_city}', '{address_prov}', " \
                         f"'{address_postal}', '{email}', 0);\n"
             if exec_stmt:
-                self.exec_DDL(statement)
+                assert self.exec_DDL(statement)
                 return uid
             else:
                 return statement, uid
@@ -143,7 +143,7 @@ class DatabaseConnection:
                         f"{entry_fee});\n"
 
             if exec_stmt:
-                self.exec_DDL(statement)
+                assert self.exec_DDL(statement)
                 return party_id
             else:
                 return statement, party_id
@@ -180,7 +180,7 @@ class DatabaseConnection:
                         f"'{party_id}', {amount});\n"
 
             if exec_stmt:
-                self.exec_DDL(statement)
+                assert self.exec_DDL(statement)
                 return trans_id
             else:
                 return statement, trans_id
@@ -215,7 +215,7 @@ class DatabaseConnection:
                         f"ON CONFLICT (party_id) DO UPDATE SET tag_list = ARRAY[{tag_list}];\n"
 
             if exec_stmt:
-                self.exec_DDL(statement)
+                assert self.exec_DDL(statement)
                 return True
             else:
                 return statement
@@ -254,7 +254,7 @@ class DatabaseConnection:
                         f"SET (street, city, prov, postal_code) = ('{street}', '{city}', '{prov}', '{postal_code}');\n"
 
             if exec_stmt:
-                self.exec_DDL(statement)
+                assert self.exec_DDL(statement)
                 return True
             else:
                 return statement
@@ -297,7 +297,7 @@ class DatabaseConnection:
                         f"ON CONFLICT (guest_id, party_id) DO UPDATE SET suggested_tracks = ARRAY[{suggested_tracks}];\n"
 
             if exec_stmt:
-                self.exec_DDL(statement)
+                assert self.exec_DDL(statement)
                 return True
             else:
                 return statement
@@ -320,7 +320,7 @@ class DatabaseConnection:
     def leave_party(self, user_id, party_id):
         try:
             statement = f"DELETE FROM Transactions t WHERE t.guest_id = '{user_id}' AND t.party_id = '{party_id}'"
-            self.exec_DDL(statement)
+            assert self.exec_DDL(statement)
             return True
 
         except Exception as e:
@@ -341,7 +341,7 @@ class DatabaseConnection:
         try:
             statement = f"DELETE FROM Parties p WHERE p.party_id = '{party_id}';\n " \
                         f"DELETE FROM Transactions t WHERE t.party_id = '{party_id}';"
-            self.exec_DDL(statement)
+            assert self.exec_DDL(statement)
             return True
 
         except Exception as e:
@@ -918,7 +918,7 @@ class DatabaseConnection:
             party_id = add_party[1]
             statements += self.set_location(party_id, street, city, prov, postal_code, exec_stmt=False)
             statements += self.set_tags(party_id, tag_list, exec_stmt=False)
-            self.exec_DDL(statements)
+            assert self.exec_DDL(statements)
             return party_id
 
         except Exception as e:
@@ -937,7 +937,7 @@ class DatabaseConnection:
 
     def clear_table(self, table):
         try:
-            self.exec_DDL(f"DELETE FROM {table}")
+            assert self.exec_DDL(f"DELETE FROM {table}")
 
             return True
 
@@ -957,7 +957,7 @@ class DatabaseConnection:
 
     def drop_table(self, table):
         try:
-            self.exec_DDL(f"DROP TABLE IF EXISTS {table}")
+            assert self.exec_DDL(f"DROP TABLE IF EXISTS {table}")
 
             return True
 
