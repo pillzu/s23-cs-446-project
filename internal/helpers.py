@@ -2,29 +2,35 @@
 def row_to_party(party):
     return {
         "party_id": party[0],
-        "name": party[1],
-        "date_time": party[2],
-        "created_at": party[3],
-        "max_cap": party[4],
-        "desc": party[5],
-        "entry_fee": party[6],
+        "party_avatar_url": party[1],
+        "name": party[2],
+        "date_time": party[3],
+        "host_id": party[4],
+        "created_at": party[5],
+        "max_cap": party[6],
+        "desc": party[7],
+        "entry_fee": party[8],
+        # 9 is id again
+        "street": party[10],
+        "city": party[11],
+        "prov": party[12],
+        "postal_code": party[13]
     }
 
 
 def row_to_user(user):
     return {
         "user_id": user[0],
-        "username": user[1],
-        "password": user[2],
-        "first_name": user[3],
-        "last_name": user[4],
-        "phone_no": user[5],
-        "street": user[6],
-        "city": user[7],
-        "prov": user[8],
-        "postal_code": user[9],
-        "email": user[10],
-        "party_points": user[11],
+        "profile_url": user[1],
+        "first_name": user[2],
+        "last_name": user[3],
+        "phone_no": user[4],
+        "street": user[5],
+        "city": user[6],
+        "prov": user[7],
+        "postal_code": user[8],
+        "email": user[9],
+        "party_points": user[10],
     }
 
 
