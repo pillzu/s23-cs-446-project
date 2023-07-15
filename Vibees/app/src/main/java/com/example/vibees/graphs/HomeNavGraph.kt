@@ -9,6 +9,7 @@ import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
+import com.example.vibees.screens.home.HelpScreen
 
 @Composable
 fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
@@ -52,11 +53,9 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(route = BottomBar.Help.route) {
-            GenericScreen(
-                name = BottomBar.Help.route,
-                onClick = { }
-            )
+            HelpScreen()
         }
+
         partyNavGraph(navController = navController)
         hostNavGraph(navController = navController)
         settingsNavGraph(navController = navController)
