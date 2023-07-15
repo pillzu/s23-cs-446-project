@@ -11,11 +11,11 @@ def row_to_party(party):
         "max_cap": party[6],
         "desc": party[7],
         "entry_fee": party[8],
-        # 9 is id again
-        "street": party[10],
-        "city": party[11],
-        "prov": party[12],
-        "postal_code": party[13]
+        "street": party[9],
+        "city": party[10],
+        "prov": party[11],
+        "postal_code": party[12],
+        "tags": party[13],
     }
 
 

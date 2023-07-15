@@ -51,6 +51,7 @@ def get_tagged_parties():
     if parties is None:
         return jsonify({"message": "Unable to fetch tagged parties. Please try again..."}), 500
 
+    print(parties)
     parties = map(hp.row_to_party, parties)
     return jsonify(list(parties)), 200
 
