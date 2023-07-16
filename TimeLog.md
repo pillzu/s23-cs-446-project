@@ -72,3 +72,4 @@
 | 14 July  | 2         |          |                |        |           |          | Offloaded string literals in help page to XML file in string resources folder   |
 | 14 July  |           |          | 2              |        |           |          | Reorganised Main Actvity to reduce load on the main thread by adding coro                                                                                                                                                                                                                                                                                          |
 
+| 15 July  | 1.5         |          |                |        |           |          | Made some aesthetic upgrades and additions to the help page   |
