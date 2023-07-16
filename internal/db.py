@@ -168,7 +168,7 @@ class DatabaseConnection:
             - the transaction's information may have invalid fields
     """
 
-    def add_new_transaction(self, guest_id, party_id, amount, trans_id=None, exec_stmt=True):
+    def add_new_transaction(self, guest_id, party_id, trans_id=None, exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -177,7 +177,7 @@ class DatabaseConnection:
                     cur.execute("SELECT gen_random_uuid()")
                     trans_id = cur.fetchone()[0]
             statement = f"INSERT INTO Transactions VALUES ('{trans_id}', '{datetime.now(timez)}', '{guest_id}', " \
-                        f"'{party_id}', {amount});\n"
+                        f"'{party_id}', (SELECT entry_fee from Parties WHERE party_id='{party_id}'));\n"
 
             if exec_stmt:
                 assert self.exec_DDL(statement)
@@ -701,7 +701,8 @@ class DatabaseConnection:
                 sub_queries.append(f" p.party_id = '{party_id}'")
 
             if party_avatar_url is not None:
-                sub_queries.append(f" p.party_avatar_url = '{party_avatar_url}'")
+                sub_queries.append(
+                    f" p.party_avatar_url = '{party_avatar_url}'")
 
             if party_name is not None:
                 sub_queries.append(f" p.party_name LIKE '%{party_name}%'")
@@ -885,9 +886,9 @@ class DatabaseConnection:
             - False: otherwise
     """
 
-    def exec_attend_party(self, user_id, party_id, entry_fee):
+    def exec_attend_party(self, user_id, party_id):
         try:
-            trans_id = self.add_new_transaction(user_id, party_id, entry_fee)
+            trans_id = self.add_new_transaction(user_id, party_id)
             return trans_id
 
         except Exception as e:
@@ -916,7 +917,8 @@ class DatabaseConnection:
                                            entry_fee, exec_stmt=False)
             statements = add_party[0]
             party_id = add_party[1]
-            statements += self.set_location(party_id, street, city, prov, postal_code, exec_stmt=False)
+            statements += self.set_location(party_id, street,
+                                            city, prov, postal_code, exec_stmt=False)
             statements += self.set_tags(party_id, tag_list, exec_stmt=False)
             assert self.exec_DDL(statements)
             return party_id
