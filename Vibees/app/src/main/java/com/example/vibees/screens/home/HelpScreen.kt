@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -25,11 +28,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.vibees.R
+import com.example.vibees.ui.theme.Yellow
 
 @Composable
 fun HelpScreen() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+                    .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         CollapsableLazyColumn(
@@ -37,6 +42,17 @@ fun HelpScreen() {
                 CollapsableSection(
                     title = stringResource(id = R.string.title_about_us),
                     rows = listOf(stringResource(id = R.string.description_about_us))
+                ),
+                CollapsableSection(
+                    title = stringResource(id = R.string.title_contact_us),
+                    rows = listOf(
+                        stringResource(id = R.string.description_contact_email),
+                        stringResource(id = R.string.description_contact_phone),
+                        stringResource(id = R.string.description_contact_twitter),
+                        stringResource(id = R.string.description_contact_discord),
+                        stringResource(id = R.string.description_contact_facebook),
+                        stringResource(id = R.string.description_contact_instagram)
+                    )
                 ),
                 CollapsableSection(
                     title = stringResource(id = R.string.title_faq),
@@ -50,10 +66,12 @@ fun HelpScreen() {
                     title = stringResource(id = R.string.title_privacy_policy),
                     rows = listOf(stringResource(id = R.string.description_privacy_policy))
                 ),
-            ),
+
+                ),
         )
     }
 }
+
 @Composable
 fun CollapsableLazyColumn(
     sections: List<CollapsableSection>,
@@ -64,40 +82,52 @@ fun CollapsableLazyColumn(
         sections.forEachIndexed { i, dataItem ->
             val collapsed = collapsedState[i]
             item(key = "header_$i") {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                Box(
                     modifier = Modifier
                         .clickable {
                             collapsedState[i] = !collapsed
                         }
+                        .background(Yellow)
+
                 ) {
-                    Icon(
-                        Icons.Default.run {
-                            if (collapsed)
-                                KeyboardArrowDown
-                            else
-                                KeyboardArrowUp
-                        },
-                        contentDescription = "",
-                        tint = Color.LightGray,
-                    )
-                    Text(
-                        dataItem.title,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .padding(vertical = 10.dp)
-                            .weight(1f)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.run {
+                                if (collapsed)
+                                    KeyboardArrowDown
+                                else
+                                    KeyboardArrowUp
+                            },
+                            contentDescription = "",
+                            tint = Color.LightGray,
+                            modifier = Modifier.padding(start = 8.dp, end = 16.dp)
+                        )
+                        Text(
+                            dataItem.title,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
                 Divider()
             }
             if (!collapsed) {
                 items(dataItem.rows) { row ->
-                    Row {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(vertical = 10.dp)
+
+                    ) {
                         Spacer(modifier = Modifier.size(MaterialIconDimension.dp))
                         Text(
                             row,
-                            modifier = Modifier.padding(vertical = 10.dp)
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+
                         )
                     }
                     Divider()
@@ -107,7 +137,7 @@ fun CollapsableLazyColumn(
     }
 }
 
+
 data class CollapsableSection(val title: String, val rows: List<String>)
 
 const val MaterialIconDimension = 24f
-
