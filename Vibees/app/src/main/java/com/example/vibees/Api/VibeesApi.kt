@@ -37,7 +37,7 @@ class VibeesApi {
 
     fun getPartiesAttending(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit) {
         var userID by GlobalAppState::UserID
-        val callResponseAttending = apiService.getMyPartiesAttending(User(hashToUUID(userID)))
+        val callResponseAttending = apiService.getMyPartiesAttending(User(userID!!))
         return callResponseAttending.enqueue(
             object: Callback<List<Party>> {
                 override fun onResponse(
@@ -55,7 +55,7 @@ class VibeesApi {
     }
 
     fun getPartiesHosting(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit) {
-        val callResponseHosting = apiService.getMyPartiesHosting(User(hashToUUID(userID)))
+        val callResponseHosting = apiService.getMyPartiesHosting(User(userID!!))
         return callResponseHosting.enqueue(
             object: Callback<List<Party>> {
                 override fun onResponse(
@@ -91,7 +91,7 @@ class VibeesApi {
     }
 
     fun registerUserForParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, party_id: String) {
-        val callResponse = apiService.attendParty(party_id, User(hashToUUID(userID)))
+        val callResponse = apiService.attendParty(party_id, User(userID!!))
         return callResponse.enqueue(
             object: Callback<ResponseMessage> {
                 override fun onResponse(

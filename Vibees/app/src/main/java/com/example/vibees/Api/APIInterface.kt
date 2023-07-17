@@ -1,14 +1,13 @@
 package com.example.vibees.Api
 
-import android.content.Context
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -52,7 +51,8 @@ class APIInterface {
     }
 
     fun getAllParties(): Call<List<Party>> {
-        return apiService.requestAllParties()
+        val tags = Tags()
+        return apiService.requestAllParties(tags)
     }
 
     fun getMyPartiesAttending(requestModel: User): Call<List<Party>> {

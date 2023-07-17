@@ -43,6 +43,7 @@ import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import com.example.vibees.GlobalAppState
 import com.example.vibees.graphs.PartyScreen
+import com.example.vibees.utils.hashToUUID
 
 
 @Composable
@@ -210,9 +211,9 @@ fun LoginScreen(
             horizontalArrangement = Arrangement.Center) {
             androidx.compose.material.Button(
                 onClick = {
-                    userID = "6515c9f8-57f1-406f-8707-20033dcd764e"
-                    userName = "Christian"
-                    onClick()
+//                    userID = hashToUUID()"6515c9f8-57f1-406f-8707-20033dcd764e"
+//                    userName = "Christian"
+//                    onClick()
                 },
                 modifier = Modifier.padding(20.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
@@ -225,9 +226,9 @@ fun LoginScreen(
 
             androidx.compose.material.Button(
                 onClick = {
-                    userID = "5bdfc21f-ea15-43b3-9654-093f15d63ba7"
-                    userName = "Shawn"
-                    onClick()
+//                    userID = "5bdfc21f-ea15-43b3-9654-093f15d63ba7"
+//                    userName = "Shawn"
+//                    onClick()
                 },
                 modifier = Modifier.padding(20.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)

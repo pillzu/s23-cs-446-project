@@ -5,10 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.User
+import java.util.UUID
 
 object GlobalAppState {
-    var UserID by mutableStateOf("6515c9f8-57f1-406f-8707-20033dcd764e")
-    var UserName by mutableStateOf("Christian")
+    var UserID by mutableStateOf<UUID?>(null)
+    var UserName by mutableStateOf<String?>(null)
     var PartyDetails by mutableStateOf<Party?>(null)
     var currentUser by mutableStateOf<User?>(null)
 }

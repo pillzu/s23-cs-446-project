@@ -80,9 +80,9 @@ def attend_party(party_id):
     """Endpoint to register attendee to a party"""
     req = request.json
     user_id = req.get("user_id", None)
-    entry_fee = req.get("entry_fee", None)
+    entry_fee = 0
 
-    if user_id is None or entry_fee is None:
+    if user_id is None:
         return {"message": "No user id or entry fee provided! Please try again..."}, 400
 
     # add guest to hosties party

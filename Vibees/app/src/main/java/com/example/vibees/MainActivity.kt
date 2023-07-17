@@ -180,6 +180,8 @@ class MainActivity : ComponentActivity() {
                 val successfn: (ResponseMessage) -> Unit = { response ->
                     Log.d("TAG", "$response")
                     GlobalAppState.currentUser = user
+                    GlobalAppState.UserID = user.user_id
+                    GlobalAppState.UserName = user.first_name
                     sic.complete(Unit)
                 }
 
