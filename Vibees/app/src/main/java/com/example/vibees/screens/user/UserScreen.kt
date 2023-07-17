@@ -64,12 +64,14 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.zIndex
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.LaunchBackgroundEffect
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.GlobalAppState
@@ -79,6 +81,7 @@ import retrofit2.Response
 import java.time.LocalDateTime
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.ui.theme.SubtleWhite
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,7 +105,6 @@ fun UserScreen(
         // fetch all parties from endpoint /parties
         val vibeesApi = VibeesApi()
 
-
         // Successful request
         val successfn: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
@@ -116,10 +118,12 @@ fun UserScreen(
             Log.d("TAG", t.printStackTrace().toString())
         }
 
-        val response = vibeesApi.getAllParties(successfn, failurefn)
+        LaunchBackgroundEffect(key = Unit) {
+            val response = vibeesApi.getAllParties(successfn, failurefn)
+        }
 
         // Header
-        Header(firstLine = "Welcome back", secondLine = userName)
+        Header(firstLine = "Welcome back", secondLine = userName!!)
 
         // Search bar
         var searchText by remember { mutableStateOf("") }

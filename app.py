@@ -3,6 +3,10 @@ from internal.db import DatabaseConnection
 from decouple import config
 import logging
 import internal.helpers as hp
+import uuid
+import json
+from email_validator import validate_email, EmailNotValidError
+from internal.helpers import is_valid_phone_number, return_message_response
 
 app = Flask(__name__)
 
@@ -148,6 +152,75 @@ def get_user_host_parties():
             {**parsed_party, "host_name": f" {host['first_name']} {host['last_name']}"})
 
     return jsonify(resp), 200
+
+# Register if user does not exist or login
+@app.post("/user")
+def register_or_login_user():
+    req = request.json
+
+    # Email validation
+    try:
+        emailinfo = validate_email(req["email"], check_deliverability=False)
+    except EmailNotValidError:
+        return return_message_response("Email does not have valid format.", 400)
+
+    # Phone number validation
+    # if not is_valid_phone_number(req["phone_no"]):
+    #     return return_message_response("Phone number does not have valid format.", 400)
+
+    result = db.add_new_user(req["profile_url"], req["first_name"], req["last_name"], req["phone_no"], req["address_street"],
+                req["address_city"], req["address_prov"], req["address_postal"], req["email"], req["user_id"], exec_stmt=True)
+
+    if result is None:
+        return return_message_response("Login failure.", 500)
+    else:
+        return return_message_response("User with user_id {} successfully logged in".format(result), 201)
+
+
+@app.route('/user', methods=['PUT'])
+def update_user_details():
+    req = request.json
+
+    # Email validation
+    try:
+        if req.get("email"):
+            emailinfo = validate_email(req.get("email"), check_deliverability=False)
+    except EmailNotValidError:
+        return return_message_response("Email does not have valid format.", 400)
+
+    # Phone number validation
+    if req.get("phone_no") and not is_valid_phone_number(req.get("phone_no")):
+        return return_message_response("Phone number does not have valid format.", 400)
+
+    try:
+        result = db.update_user(req.get("user_id"), req.get("profile_url"), req.get("first_name"), req.get("last_name"), req.get("phone_no"), req.get("address_street"),
+                req.get("address_city"), req.get("address_prov"), req.get("address_postal"), req.get("email"))
+    except:
+        return return_message_response("Internal Server Error", 500)
+
+    if not result:
+        return return_message_response("Could not update user details.", 500)
+    else:
+        return return_message_response("Successfully updated user details.", 500)
+
+
+
+@app.route('/user', methods=['DELETE'])
+def delete_user_account():
+    user_id = request.args.get('user_id')
+    if user_id is None:
+         return return_message_response("Failed: Please provide user_id.", 500)
+
+    try:
+        result = db.delete_user(user_id)
+    except:
+        return return_message_response("Internal Server Error", 500)
+
+    if not result:
+        return return_message_response("User deletion failed. Please check user exists.", 500)
+    else:
+        return return_message_response("User with user_id {} successfully deleted".format(result), 201)
+
 
 
 if __name__ == "__main__":

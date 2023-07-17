@@ -48,6 +48,7 @@ import androidx.wear.compose.material.Button
 import com.example.vibees.GlobalAppState
 import com.example.vibees.R
 import com.example.vibees.graphs.PartyScreen
+import com.example.vibees.utils.hashToUUID
 import com.example.vibees.screens.home.MaterialIconDimension
 
 
@@ -166,7 +167,7 @@ fun LoginScreen(
 //            )
 
             OutlinedButton(
-                onClick = { /*TODO*/ },
+                onClick = { onCreateAccountClick() },
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth()

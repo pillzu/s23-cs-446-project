@@ -5,10 +5,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.vibees.screens.home.HomeScreen
+import kotlinx.coroutines.CompletableDeferred
 
 
 @Composable
-fun RootNavigationGraph(navController: NavHostController, signIn: () -> Unit) {
+fun RootNavigationGraph(navController: NavHostController, signIn: suspend (signInComplete: CompletableDeferred<Unit>) -> Unit) {
     NavHost(
         navController = navController,
         route = Graph.ROOT,

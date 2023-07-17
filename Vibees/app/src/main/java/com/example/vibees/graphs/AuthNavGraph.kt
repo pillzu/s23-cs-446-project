@@ -6,8 +6,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.auth.LoginScreen
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
-fun NavGraphBuilder.authNavGraph(signIn: () -> Unit, navController: NavHostController) {
+fun NavGraphBuilder.authNavGraph(signIn: suspend (signInComplete: CompletableDeferred<Unit>) -> Unit, navController: NavHostController) {
     navigation(
         route = Graph.AUTHENTICATION,
         startDestination = AuthScreen.Login.route
@@ -25,7 +31,16 @@ fun NavGraphBuilder.authNavGraph(signIn: () -> Unit, navController: NavHostContr
                     navController.navigate(AuthScreen.Forgot.route)
                 },
                 onCreateAccountClick = {
-                    signIn()
+                    val signInComplete = CompletableDeferred<Unit>()
+                    CoroutineScope(Dispatchers.Main).launch {
+                        withContext(Dispatchers.IO) {
+                            signIn(signInComplete)
+                        }
+
+                        signInComplete.await()
+                        navController.popBackStack()
+                        navController.navigate(Graph.HOME)
+                    }
                 }
             )
         }

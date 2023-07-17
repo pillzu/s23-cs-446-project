@@ -3,9 +3,10 @@ package com.example.vibees.Models
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
+import java.util.UUID
 
 data class Party (
-    val user_id: String?,
+    val user_id: UUID?,
     val name: String?,
     val date_time: LocalDateTime,
     val type: String?,
