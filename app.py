@@ -51,7 +51,6 @@ def get_tagged_parties():
     if parties is None:
         return jsonify({"message": "Unable to fetch tagged parties. Please try again..."}), 500
 
-    print(parties)
     parties = map(hp.row_to_party, parties)
     return jsonify(list(parties)), 200
 
@@ -80,13 +79,12 @@ def attend_party(party_id):
     """Endpoint to register attendee to a party"""
     req = request.json
     user_id = req.get("user_id", None)
-    entry_fee = 0
 
     if user_id is None:
-        return {"message": "No user id or entry fee provided! Please try again..."}, 400
+        return {"message": "No user id provided! Please try again..."}, 400
 
     # add guest to hosties party
-    if not db.exec_attend_party(user_id, party_id, entry_fee):
+    if not db.exec_attend_party(user_id, party_id):
         return {"message": "Unable to add user as an attendee! Please call help..."}, 500
 
     return {"message": "User registered successfully!"}, 200
@@ -121,7 +119,6 @@ def get_user_attendee_parties():
 
     resp = []
     for party in parties:
-        print(party)
         parsed_party = hp.row_to_party(party)
 
         host = db.query_user(parsed_party['host_id'])
