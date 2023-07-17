@@ -27,6 +27,7 @@ import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
 import com.example.vibees.utils.Geolocation
 import com.example.vibees.utils.hashToUUID
+import com.google.android.gms.auth.api.identity.BeginSignInResult
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.CompletableDeferred
@@ -74,12 +75,20 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun signInUsingGoogle(signInComplete: CompletableDeferred<Unit>) {
         sic = signInComplete
-        val result = oneTapClient.beginSignIn(signInRequest).await()
+        var result: BeginSignInResult? = null
         try {
-            startIntentSenderForResult(
-                result.pendingIntent.intentSender, REQ_ONE_TAP,
-                null, 0, 0, 0, null
-            )
+            result = oneTapClient.beginSignIn(signInRequest).await()
+        }
+        catch (e: Exception) {
+            showToast("Google One Tap Sign in is not available.")
+        }
+        try {
+            if (result != null) {
+                startIntentSenderForResult(
+                    result.pendingIntent.intentSender, REQ_ONE_TAP,
+                    null, 0, 0, 0, null
+                )
+            }
         } catch (e: IntentSender.SendIntentException) {
             Log.e(ContentValues.TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
             withContext(Dispatchers.Main) {
