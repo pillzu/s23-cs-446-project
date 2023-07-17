@@ -167,7 +167,7 @@ fun LoginScreen(
 //            )
 
             OutlinedButton(
-                onClick = { /*TODO*/ },
+                onClick = { onCreateAccountClick() },
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth()
