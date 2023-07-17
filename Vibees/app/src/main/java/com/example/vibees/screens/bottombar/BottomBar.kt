@@ -2,41 +2,40 @@ package com.example.vibees.screens.bottombar
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import com.example.vibees.R
 
 sealed class BottomBar(
     val route: String,
     val title: String,
-    val icon: ImageVector
+    val icon: Int
 ) {
     object Home: BottomBar(
         route = "HOME",
         title = "Home",
-        icon = Icons.Default.Home
+        icon = R.drawable.home
     )
     object MyParties: BottomBar(
         route = "MYPARTIES",
         title = "Parties",
-        icon = Icons.Default.Favorite
+        icon = R.drawable.party_icon,
     )
     object Host: BottomBar(
         route = "HOST",
         title = "Host",
-        icon = Icons.Default.AddCircle
+        icon = R.drawable.add_icon,
     )
     object Settings: BottomBar(
         route = "SETTINGS",
         title = "Setting",
-        icon = Icons.Default.Settings
+        icon = R.drawable.settings_icon,
     )
     object Help: BottomBar(
         route = "HELP",
         title = "Help",
-        icon = Icons.Default.Info
+        icon = R.drawable.contact
     )
 }

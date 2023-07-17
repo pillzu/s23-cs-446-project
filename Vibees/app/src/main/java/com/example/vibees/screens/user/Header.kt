@@ -45,7 +45,7 @@ fun Header(
             )
         }
         Image(
-            painter = painterResource(R.drawable.ic_launcher_background),
+            painter = painterResource(R.drawable.saly_7),
             contentDescription = "User Avatar",
             modifier = Modifier
                 .size(80.dp)
