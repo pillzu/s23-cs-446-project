@@ -1,7 +1,6 @@
 package com.example.vibees.screens.home.host
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -76,7 +75,7 @@ import java.util.Locale
 
 @Composable
 fun HostLogisticsScreen(
-
+    onClick: () -> Unit,
 ) {
     var unitStreet by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -202,7 +201,7 @@ fun HostLogisticsScreen(
             }
 
             TextButton(
-                onClick = { Log.d("clicked", "CLick") },
+                onClick = { onClick() },
                 modifier = Modifier.align(Alignment.End),
                 enabled = this.formState.value is FormResult.Success
             ) {
