@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home.host
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,7 +56,8 @@ fun HostPartyDetailsScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(start = 10.dp, top = 25.dp, end = 10.dp, bottom = 20.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         form(HostPartyDetails::class) {
             Column(
@@ -74,8 +76,7 @@ fun HostPartyDetailsScreen(
                     fontWeight = FontWeight.Normal,
                     color = Color.Black,
                     modifier = Modifier
-                        .padding(20.dp)
-                        .padding(bottom = 20.dp),
+                        .padding(20.dp),
                     textAlign = TextAlign.Start
                 )
 
@@ -148,16 +149,20 @@ fun HostPartyDetailsScreen(
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
                         modifier = Modifier
-                            .height(200.dp)
+                            .height(120.dp)
                             .padding(4.dp)
                     )
                 }
                 field(HostPartyDetails::fee) {
                     OutlinedTextField(
-                        value = state.value?.value.toString(),
+                        value = state.value?.value.orEmpty(),
                         onValueChange = {
-                            fee = it.toInt()
-                            setField(it.toInt())
+                            try {
+                                fee = it.toInt()
+                                setField(it)
+                            } catch (_: NumberFormatException) {
+                                Log.d("Invalid number", "Invalid number entered in fee")
+                            }
                         } ,
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Fee")},
@@ -169,7 +174,7 @@ fun HostPartyDetailsScreen(
                             }
                         ),
                         keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,//Show next as IME button
+                            imeAction = ImeAction.Done,//Show next as IME button
                             keyboardType = KeyboardType.Number, //Plain text keyboard
                         ),
                         modifier = Modifier.padding(4.dp)
@@ -178,18 +183,19 @@ fun HostPartyDetailsScreen(
                 field(HostPartyDetails::drugfriendly) {
                     Text(
                         text = "Does this party allow drug usage?",
-                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 20.dp)
                     )
                     Row(Modifier.selectableGroup(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row() {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "Yes",
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                modifier = Modifier.padding(end = 20.dp)
                             )
                             RadioButton(
                                 selected = state.value?.value == "Yes",
@@ -197,15 +203,18 @@ fun HostPartyDetailsScreen(
                                     setField("Yes")
                                     drugfriendly = true
                                           },
-                                modifier = Modifier.semantics { contentDescription = "Yes" }
+                                modifier = Modifier
+                                    .semantics { contentDescription = "Yes" }
+                                    .padding(end = 50.dp)
                             )
 
                         }
-                        Row() {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "No",
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                modifier = Modifier.padding(end = 20.dp)
                             )
                             RadioButton(
                                 selected = state.value?.value == "No",
@@ -213,7 +222,9 @@ fun HostPartyDetailsScreen(
                                     setField("No")
                                     drugfriendly = false
                                           },
-                                modifier = Modifier.semantics { contentDescription = "No" }
+                                modifier = Modifier
+                                    .semantics { contentDescription = "No" }
+                                    .padding(end = 50.dp)
                             )
                         }
 
@@ -228,18 +239,18 @@ fun HostPartyDetailsScreen(
                 field(HostPartyDetails::byob) {
                     Text(
                         text = "Bring Your Own Booze/Snacks?",
-                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 20.dp)
                     )
                     Row(Modifier.selectableGroup(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row() {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "Yes",
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                modifier = Modifier.padding(end = 20.dp)
                             )
                             RadioButton(
                                 selected = state.value?.value == "Yes",
@@ -247,15 +258,18 @@ fun HostPartyDetailsScreen(
                                     setField("Yes")
                                     byob = true
                                 },
-                                modifier = Modifier.semantics { contentDescription = "Yes" }
+                                modifier = Modifier
+                                    .semantics { contentDescription = "Yes" }
+                                    .padding(end = 50.dp)
                             )
 
                         }
-                        Row() {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "No",
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                modifier = Modifier.padding(end = 20.dp)
                             )
                             RadioButton(
                                 selected = state.value?.value == "No",
@@ -263,7 +277,9 @@ fun HostPartyDetailsScreen(
                                     setField("No")
                                     byob = false
                                 },
-                                modifier = Modifier.semantics { contentDescription = "No" }
+                                modifier = Modifier
+                                    .semantics { contentDescription = "No" }
+                                    .padding(end = 50.dp)
                             )
                         }
 
@@ -278,7 +294,9 @@ fun HostPartyDetailsScreen(
             }
 
             TextButton(
-                onClick = { onClick() },
+                onClick = {
+                  onClick()
+                },
                 modifier = Modifier.align(Alignment.End),
                 enabled = this.formState.value is FormResult.Success
             ) {

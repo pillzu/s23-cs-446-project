@@ -1,7 +1,6 @@
 package com.example.vibees.screens.home.host
 
 import me.naingaungluu.formconductor.annotations.Form
-import me.naingaungluu.formconductor.annotations.Optional
 
 @Form
 data class HostPartyDetails(
@@ -10,8 +9,7 @@ data class HostPartyDetails(
 
     val theme: String = "",
 
-    @Optional
-    val fee: Number = 0,
+    val fee: String = "",
 
     val description: String = "",
 

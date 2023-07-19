@@ -1,5 +1,9 @@
 package com.example.vibees.screens.home.host
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,21 +38,28 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
-@Preview
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HostPartyAttributesScreen(
-
+    onClick: () -> Unit
 ) {
     val selectedlist = mutableListOf<String>()
-    val listcount by remember { mutableIntStateOf(0) }
+    var selectedcount by remember { mutableIntStateOf(0) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val photopickerlauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> selectedImageUri = uri }
+    )
+
     val tags = listOf("Dance", "Board game", "Karaoke", "Barbecue", "Pool", "Disco", "Birthday",
-        "Graduation", "Adult only", "Business", "Formal", "Wedding", "Sports", "Bar Hopping", "Day", "Early Night",
+        "Graduation", "Adult only", "Business", "Formal", "Wedding", "Sports", "Bar Hopping", "Day",
         "Late Night")
 
     Column(
@@ -74,8 +85,7 @@ fun HostPartyAttributesScreen(
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 modifier = Modifier
-                    .padding(20.dp)
-                    .padding(bottom = 20.dp),
+                    .padding(20.dp),
                 textAlign = TextAlign.Start
             )
 
@@ -97,7 +107,14 @@ fun HostPartyAttributesScreen(
                 for (element in tags) {
                     FilterChipTag(
                         name = element,
-                        list = selectedlist
+                        onAdd = {
+                            selectedlist.add(element)
+                            selectedcount += 1
+                                },
+                        onRemove = {
+                            selectedlist.remove(element)
+                            selectedcount -= 1
+                        }
                     )
                 }
             }
@@ -111,52 +128,70 @@ fun HostPartyAttributesScreen(
                 modifier = Modifier.padding(16.dp),
                 textAlign = TextAlign.Start
             )
-            Box(
-                Modifier
-                    .size(250.dp, 80.dp)
-                    .drawBehind {
-                        drawRoundRect(
-                            color = Color.Gray,
-                            style = Stroke(
-                                width = 2f,
-                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                            ),
-                            cornerRadius = CornerRadius(8.dp.toPx())
+
+            if (selectedImageUri == null) {
+                Box(
+                    Modifier
+                        .size(250.dp, 80.dp)
+                        .drawBehind {
+                            drawRoundRect(
+                                color = Color.Gray,
+                                style = Stroke(
+                                    width = 2f,
+                                    pathEffect = PathEffect.dashPathEffect(
+                                        floatArrayOf(10f, 10f),
+                                        0f
+                                    )
+                                ),
+                                cornerRadius = CornerRadius(8.dp.toPx())
+                            )
+                        }
+                        .clickable {
+                            photopickerlauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = "Add Icon",
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
+                        Text(
+                            text = "Upload an image",
+                            modifier = Modifier.padding(start = 4.dp)
                         )
                     }
-                    .clickable {
-                        // image upload logic
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddCircle,
-                        contentDescription = "Add Icon",
-                        modifier = Modifier.padding(end = 4.dp)
-                    )
-                    Text(
-                        text = "Upload an image",
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
                 }
+            } else {
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = "image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(120.dp)
+                )
             }
         }
 
 
         TextButton(
-            onClick = {  },
+            onClick = { onClick() },
             modifier = Modifier.align(Alignment.End),
-            enabled = listcount > 0
+            enabled = (selectedcount > 0) and (selectedcount < 6)
         ) {
             Text(
                 "Create",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = if (listcount > 0) Color.Blue else Color.Gray
+                color = if ((selectedcount > 0) and (selectedcount < 6)) Color.Blue
+                        else Color.Gray
             )
             Icon(
                 imageVector = Icons.Default.KeyboardArrowRight,
@@ -172,14 +207,15 @@ fun HostPartyAttributesScreen(
 @Composable
 fun FilterChipTag(
     name: String,
-    list: MutableList<String>
+    onAdd: () -> Unit,
+    onRemove: () -> Unit
 ) {
     var selected by remember { mutableStateOf(false) }
     FilterChip(
         selected = selected,
         onClick = {
                     selected = !selected
-                    if (selected) list.add(name) else list.remove(name)
+                    if (selected) onAdd() else onRemove()
                   },
         label = { Text(name) },
         leadingIcon = if (selected) {

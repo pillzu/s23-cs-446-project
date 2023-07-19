@@ -4,9 +4,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.host.HostLogisticsScreen
+import com.example.vibees.screens.home.host.HostPartyAttributesScreen
 import com.example.vibees.screens.home.host.HostPartyDetailsScreen
 
 fun NavGraphBuilder.hostNavGraph(navController: NavHostController) {
@@ -29,8 +29,7 @@ fun NavGraphBuilder.hostNavGraph(navController: NavHostController) {
             )
         }
         composable(route = HostScreens.Step3.route) {
-            GenericScreen(
-                name = "Step3",
+            HostPartyAttributesScreen(
                 onClick = { navController.navigate(BottomBar.Host.route) {
                     popUpTo(BottomBar.Host.route) {
                         inclusive = true
