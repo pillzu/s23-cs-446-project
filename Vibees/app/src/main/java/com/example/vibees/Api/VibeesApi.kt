@@ -16,6 +16,10 @@ class VibeesApi {
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
+    val profile_url = GlobalAppState.currentUser?.profile_url
+    val phone_no = GlobalAppState.currentUser?.phone_no
+    val email = GlobalAppState.currentUser?.email
+
 
     fun getAllParties(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit) {
         val callResponse = apiService.getAllParties()
@@ -125,4 +129,61 @@ class VibeesApi {
             }
         )
     }
+
+    // Vibees/app/src/main/java/com/example/vibees/Api/VibeesApi.kt:
+
+// ... (other functions remain unchanged)
+
+    fun deleteUserAccount(
+        user_id: String,
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit
+    ) {
+        val callResponse = apiService.deleteUserAccount(user_id)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    successfn(response.body()!!)
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+// ... (other functions remain unchanged)
+    // Vibees/app/src/main/java/com/example/vibees/Api/VibeesApi.kt:
+
+// ... (other functions remain unchanged)
+
+    fun updateUserDetails(
+        user_id: String,
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+        requestModel: User
+    ) {
+        val callResponse = apiService.updateUserDetails(user_id, requestModel)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    successfn(response.body()!!)
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+// ... (other functions remain unchanged)
+
 }

@@ -177,31 +177,59 @@ def register_or_login_user():
         return return_message_response("User with user_id {} successfully logged in".format(result), 201)
 
 
+# ... (existing imports remain unchanged)
+
 @app.route('/user', methods=['PUT'])
 def update_user_details():
     req = request.json
+    user_id = req.get("user_id")
+
+    # Check if the user_id is provided
+    if not user_id:
+        return return_message_response("Failed: Please provide user_id.", 400)
 
     # Email validation
-    try:
-        if req.get("email"):
-            emailinfo = validate_email(req.get("email"), check_deliverability=False)
-    except EmailNotValidError:
-        return return_message_response("Email does not have valid format.", 400)
+    email = req.get("email")
+    if email:
+        try:
+            emailinfo = validate_email(email, check_deliverability=False)
+        except EmailNotValidError:
+            return return_message_response("Email does not have a valid format.", 400)
 
     # Phone number validation
-    if req.get("phone_no") and not is_valid_phone_number(req.get("phone_no")):
-        return return_message_response("Phone number does not have valid format.", 400)
+    phone_no = req.get("phone_no")
+    if phone_no and not is_valid_phone_number(phone_no):
+        return return_message_response("Phone number does not have a valid format.", 400)
 
+    # Extract the user details from the request
+    first_name = req.get("first_name")
+    last_name = req.get("last_name")
+    address_street = req.get("address_street")
+    address_city = req.get("address_city")
+    address_prov = req.get("address_prov")
+    address_postal = req.get("address_postal")
+
+    # Update the user details in the database
     try:
-        result = db.update_user(req.get("user_id"), req.get("profile_url"), req.get("first_name"), req.get("last_name"), req.get("phone_no"), req.get("address_street"),
-                req.get("address_city"), req.get("address_prov"), req.get("address_postal"), req.get("email"))
+        result = db.update_user(
+            user_id,
+            first_name=first_name,
+            last_name=last_name,
+            phone_no=phone_no,
+            address_street=address_street,
+            address_city=address_city,
+            address_prov=address_prov,
+            address_postal=address_postal,
+            email=email
+        )
     except:
         return return_message_response("Internal Server Error", 500)
 
     if not result:
         return return_message_response("Could not update user details.", 500)
     else:
-        return return_message_response("Successfully updated user details.", 500)
+        return return_message_response("Successfully updated user details.", 200)
+
 
 
 
