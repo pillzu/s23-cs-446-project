@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.example.vibees.screens.home.myparties.PartyDetails
 import com.example.vibees.screens.home.myparties.PartyViewing
@@ -12,7 +13,7 @@ import com.example.vibees.screens.home.myparties.PartyViewing
 fun NavGraphBuilder.partyNavGraph(navController: NavHostController) {
     navigation(
         route = Graph.PARTY,
-        startDestination = PartyScreen.Details.route
+        startDestination = PartyScreen.Details.route,
     ) {
         composable(
             route = PartyScreen.Details.route,
@@ -30,6 +31,9 @@ fun NavGraphBuilder.partyNavGraph(navController: NavHostController) {
             route = PartyScreen.ViewingDetails.route,
             arguments = listOf(navArgument("id") {
                 type = NavType.StringType
+            }),
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "https://vibees.ca/party/{id}"
             })
         ) {
             PartyViewing(
