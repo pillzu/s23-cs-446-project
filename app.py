@@ -57,18 +57,19 @@ def get_tagged_parties():
 
 @ app.get("/parties/<party_id>")
 def get_party_details(party_id):
-    party = db.query_party(party_id=party_id)
+    party = db.query_party(party_id=party_id, show_detail=True)
     if party is None:
         return {"message": "Party does not exist! Please try again..."}, 404
 
-    location = db.query_locations(party_id=party_id)
-    if location is None:
-        return {"message": "Error retrieving party location! Please try again..."}, 500
+    # location = db.query_locations(party_id=party_id)
+    # if location is None:
+    #     return {"message": "Error retrieving party location! Please try again..."}, 500
 
     party = hp.row_to_party(party[0])
-    location = hp.row_to_location(location[0])
+    # location = hp.row_to_location(location[0])
 
-    resp = {**party, **location}
+    # resp = {**party, **location}
+    resp = {**party}
 
     return jsonify(resp), 200
 

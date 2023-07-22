@@ -36,6 +36,7 @@ class DatabaseConnection:
             logging.fatal("Query Execution Failed")
             logging.fatal(f"Last Executed Query: {stmt}")
             logging.fatal(e)
+            self.conn.rollback()
             return False
 
     """
@@ -60,6 +61,7 @@ class DatabaseConnection:
             logging.fatal("Query Execution Failed")
             logging.fatal(f"Last Executed Query: {stmt}")
             logging.fatal(e)
+            self.conn.rollback()
             return None
 
     """
