@@ -7,9 +7,15 @@ import uuid
 import json
 from email_validator import validate_email, EmailNotValidError
 from internal.helpers import is_valid_phone_number, return_message_response
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+
 
 app = Flask(__name__)
 
+SPOTIFY_CLIENT_ID = "Preeti should probably check her Discord DMs"
+SPOTIFY_CLIENT_SECRET = "Preeti should probably check her Discord DMs"
+SPOTIFY_USER_ID = "Preeti should probably check her Discord DMs"
 
 '''
 Parties Endpoints
@@ -32,6 +38,17 @@ def host_party():
     if not party_id:
         return jsonify({"message": "Unable to create party. Please try again..."}), 400
 
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                                     client_secret=SPOTIFY_CLIENT_SECRET,
+                                                     redirect_uri="http://localhost:8080",
+                                                     scope="playlist-modify-public"))
+
+    # Create a public Spotify playlist for the party and add its ID to the DB
+    playlist_name = f"{party_id}"
+    playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name, public=True, collaborative=True)
+    playlist_id = playlist["id"]
+    db.set_playlist_id(party_id, playlist_id)
+    
     return jsonify({
         "message": "Party successfully hosted"
     }), 200
@@ -79,6 +96,9 @@ def attend_party(party_id):
     """Endpoint to register attendee to a party"""
     req = request.json
     user_id = req.get("user_id", None)
+    
+    # TODO: Edit frontend connecting to attend_party to ask attendee for a list of Spotify track names
+    track_names = req.get("track_names")
 
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
@@ -87,6 +107,26 @@ def attend_party(party_id):
     if not db.exec_attend_party(user_id, party_id):
         return {"message": "Unable to add user as an attendee! Please call help..."}, 500
 
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                                     client_secret=SPOTIFY_CLIENT_SECRET,
+                                                     redirect_uri="http://localhost:8080",
+                                                     scope="playlist-modify-public"))
+    playlist_id = db.query_spotify_IDs(party_id)[0][1]
+    
+    # Convert track names to track uris for Spotify API parsing
+    track_uris = []
+    for track_name in track_names:
+        result = sp.search(q=track_name, type="track", limit=1)
+
+        if result["tracks"]["items"]:
+            track_uri = result["tracks"]["items"][0]["uri"]
+            track_uris.append(track_uri)
+        else:
+            print(f"Track '{track_name}' not found on Spotify.")
+
+    # Add tracks to the playlist
+    sp.playlist_add_items(playlist_id, track_uris)
+            
     return {"message": "User registered successfully!"}, 200
 
 
