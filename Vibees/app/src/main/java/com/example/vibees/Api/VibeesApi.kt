@@ -1,13 +1,9 @@
 package com.example.vibees.Api
 
-import android.util.Log
-import android.widget.Toast
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
-import com.example.vibees.screens.bottombar.BottomBar
-import com.example.vibees.utils.hashToUUID
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,6 +25,29 @@ class VibeesApi {
                 }
 
                 override fun onFailure(call: Call<List<Party>>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+    fun getParty(successfn: (Party) -> Unit, notfoundfn: () -> Unit, failurefn: (Throwable) -> Unit, party_id: String) {
+        val callResponse = apiService.getParty(party_id)
+        return callResponse.enqueue(
+            object: Callback<Party> {
+                override fun onResponse(
+                    call: Call<Party>,
+                    response: Response<Party>
+                ) {
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        notfoundfn()
+                    }
+
+                }
+
+                override fun onFailure(call: Call<Party>, t: Throwable) {
                     failurefn(t)
                 }
             }

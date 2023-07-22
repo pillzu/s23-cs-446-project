@@ -18,10 +18,6 @@ fun NavGraphBuilder.hostNavGraph(navController: NavHostController) {
             HostLogisticsScreen(
                 onClick = { navController.navigate(HostScreens.Step2.route) }
             )
-//            GenericScreen(
-//                name = "Step1",
-//                onClick = { navController.navigate(HostScreens.Step2.route) }
-//            )
         }
         composable(route = HostScreens.Step2.route) {
             HostPartyDetailsScreen(

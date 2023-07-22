@@ -1,6 +1,7 @@
 package com.example.vibees.screens.home.myparties
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
@@ -33,6 +35,7 @@ import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.LaunchBackgroundEffect
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.screens.bottombar.BottomBar
 import java.time.format.DateTimeFormatter
@@ -49,7 +52,7 @@ fun PartyViewing(
     val vibeesApi = VibeesApi()
 
     var idfound by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(true) }
+    var loading by remember { mutableStateOf(false) }
 
     // Successful request
     val successfn: (ResponseMessage) -> Unit = { response ->
@@ -65,25 +68,34 @@ fun PartyViewing(
 
     // get success and failure functions for getting data for id
     // Successful request for id
-    val idsuccessfn: (ResponseMessage) -> Unit = { response ->
-        Log.d("TAG", "${response.message}")
+    val idsuccessfn: (Party) -> Unit = { response ->
         loading = false
         idfound = true
+        partyDetails = response
     }
 
     // failed request for id
-    val idfailurefn: (Throwable) -> Unit = { t ->
-        Log.d("TAG", "FAILURE")
+    val idfailurefn: () -> Unit = {
+        Log.d("TAG", "FAILURE: could not find id")
         loading = false
         idfound = false
     }
 
-    LaunchBackgroundEffect(key = Unit) {
-        Log.d("PARTY_ID", id)
-        //val response = vibeesApi.getParty(idsuccessfn, idfailurefn, id)
-
-        // also add share button to generate link
+    val serverfailurefn: (Throwable) -> Unit = { t ->
+        Log.d("TAG", "FAILURE: server error")
+        Log.d("TAG", t.printStackTrace().toString())
+        loading = false
+        idfound = false
     }
+
+    if (partyDetails == null) {
+        LaunchBackgroundEffect(key = Unit) {
+            Log.d("PARTY_ID", id)
+            loading = true
+            val response = vibeesApi.getParty(idsuccessfn, idfailurefn, serverfailurefn, id)
+        }
+    }
+
 
     if (loading) {
         // show loading screen
@@ -96,7 +108,8 @@ fun PartyViewing(
         }
     } else {
         // check if id found or not
-        if (idfound) {
+        if (idfound or (partyDetails != null)) {
+            idfound = true
             // show party details
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Row(horizontalArrangement = Arrangement.Center,
@@ -234,11 +247,50 @@ fun PartyViewing(
                     text = "Could not retrieve the party details. Selected party or invite is invalid :(",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
                 )
             }
         }
     }
-
+    BackHandler {
+        navigatingBack(navController, idfound)
+    }
 
 }
+
+fun navigatingBack(
+    navController: NavHostController,
+    idfound: Boolean
+) {
+    if (!idfound) {
+        // go back to home instead of details screen
+        navController.popBackStack()
+        navController.popBackStack()
+    } else {
+        navController.popBackStack()
+    }
+}
+
+//fun navigatingBack(
+//    navController: NavHostController,
+//    destinationRoute: String
+//) {
+//    val hasBackstackTheDestinationRoute = navController.currentBackStack.value.find {
+//        it.destination.route == destinationRoute
+//    } != null
+//    // if the destination is already in the backstack, simply go back
+//    if (hasBackstackTheDestinationRoute) {
+//        navController.popBackStack()
+//    } else {
+//        // otherwise, navigate to a new destination popping the current destination
+//        navController.navigate(destinationRoute) {
+//            navController.currentBackStackEntry?.destination?.route?.let {
+//                popUpTo(it) {
+//                    inclusive = true
+//                }
+//            }
+//        }
+//    }
+//}

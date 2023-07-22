@@ -1,20 +1,22 @@
 package com.example.vibees.Api
 
-import android.content.Context
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService  {
 
     @POST("/parties/host")
     fun requestParty(@Body requestModel: Party): Call<ResponseMessage>
+
+    @GET("/parties/{party_id}")
+    fun requestGeneralParty(@Path("party_id") party_id: String): Call<Party>
 
     @POST("/parties")
     fun requestAllParties(@Body requestModel: Tags): Call<List<Party>>
