@@ -1,7 +1,9 @@
 package com.example.vibees.screens.home.myparties
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +29,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,6 +57,8 @@ fun PartyViewing(
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     val vibeesApi = VibeesApi()
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     var idfound by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
@@ -112,6 +121,25 @@ fun PartyViewing(
             idfound = true
             // show party details
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share",
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 20.dp)
+                            .size(40.dp)
+                            .clickable {
+                                clipboardManager.setText(AnnotatedString("https://vibees.ca/party/${id}"))
+                                Toast.makeText(context, "Invite link copied to clipboard!", Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                }
+
                 Row(horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -272,6 +300,8 @@ fun navigatingBack(
         navController.popBackStack()
     }
 }
+
+
 
 //fun navigatingBack(
 //    navController: NavHostController,
