@@ -1,7 +1,8 @@
 package com.example.vibees.screens.home.myparties
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,9 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -23,16 +24,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
-import com.example.vibees.Api.url
 import com.example.vibees.GlobalAppState
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
-import com.example.vibees.graphs.PartyScreen
 import java.time.format.DateTimeFormatter
 
 var URL = "https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran"
@@ -45,8 +48,27 @@ fun PartyDetails(
     var userID by GlobalAppState::UserID
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share",
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 20.dp)
+                    .size(40.dp)
+                    .clickable {
+                        clipboardManager.setText(AnnotatedString("https://vibees.ca/party/${id}"))
+                        Toast.makeText(context, "Invite link copied to clipboard!", Toast.LENGTH_SHORT).show()
+                    }
+            )
+        }
         // QR Code section
         Row(
             horizontalArrangement = Arrangement.Center,

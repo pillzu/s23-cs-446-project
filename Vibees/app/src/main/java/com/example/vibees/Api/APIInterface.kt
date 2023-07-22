@@ -50,6 +50,10 @@ class APIInterface {
         return apiService.requestParty(requestModel)
     }
 
+    fun getParty(party_id: String): Call<Party> {
+        return apiService.requestGeneralParty(party_id)
+    }
+
     fun getAllParties(): Call<List<Party>> {
         val tags = Tags()
         return apiService.requestAllParties(tags)
