@@ -102,13 +102,20 @@ fun UserScreen(
             )
         }
 
+        var originalParties by remember {
+            mutableStateOf(
+                listOf<Party>()
+            )
+        }
+
         // fetch all parties from endpoint /parties
         val vibeesApi = VibeesApi()
 
         // Successful request
         val successfn: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
-            parties = response
+            originalParties = response
+            parties = originalParties
             Log.d("TAG", parties.toString())
         }
 
@@ -179,7 +186,7 @@ fun UserScreen(
         }
 
         // Recommended Header with dropdown
-        val options = listOf("Proximity", "Price", "Date", "Day")
+        val options = listOf("Proximity", "Price", "Date", "Capacity")
         var expanded by remember { mutableStateOf(false) }
         var selectedOptionText by remember { mutableStateOf(options[0]) }
 
@@ -237,6 +244,9 @@ fun UserScreen(
                             text = { Text(selectionOption) },
                             onClick = {
                                 selectedOptionText = selectionOption
+
+                                parties = Helper.sortPartiesBy(originalParties, selectionOption)
+
                                 expanded = false
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
