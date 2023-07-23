@@ -49,12 +49,51 @@ class Helper {
 
         fun queryPartiesByTags(
             parties: List<Party>,
-            tags: List<String>
+            tag: String
         ): List<Party> {
             var matchedParties = parties.filter {
-                    party -> tags.contains(party.type)
+                    party -> tag == party.type
             }
             return matchedParties
+        }
+
+
+        fun searchParties(
+            parties: List<Party>,
+            keyword: String
+        ): List<Party> {
+            var matchedParties = parties.filter {
+                    party -> filterPartyByKeyword(party, keyword)
+            }
+            return matchedParties
+        }
+
+
+        private fun filterPartyByKeyword (
+            party: Party,
+            keyword: String
+        ): Boolean {
+            // verify name
+            if (party.name != null && party.name.contains(keyword))
+                return true
+
+            // verify address
+            if (party.street.contains(keyword))
+                return true
+            if (party.city.contains(keyword))
+                return true
+            if (party.prov.contains(keyword))
+                return true
+
+            // verify host name
+            if (party.host_name != null && party.host_name.contains(keyword))
+                return true
+
+            // verify description
+            if (party.desc.contains(keyword))
+                return true
+
+            return false
         }
     }
 }

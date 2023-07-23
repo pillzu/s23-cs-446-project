@@ -13,12 +13,15 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import com.example.vibees.screens.home.myparties.PartyItem
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -64,6 +68,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -142,6 +147,7 @@ fun UserScreen(
                 searchText = it
             },
             onSearch = {
+                parties = Helper.searchParties(originalParties, searchText)
                 searchActive = false
             },
             active = false,
@@ -258,7 +264,40 @@ fun UserScreen(
 
         // User Interest Tags
         var tagList = listOf("Anime", "EDM", "Board Games", "Fraternity", "FIFA")
-        Tags(tagList = tagList)
+
+        var selectedChipIndex by remember {
+            mutableIntStateOf(0)
+        }
+
+        LazyRow(modifier = Modifier.padding(bottom = 20.dp)) {
+            items(tagList.size) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .clickable {
+                            selectedChipIndex = it
+
+                            parties = Helper.queryPartiesByTags(originalParties, tagList[selectedChipIndex])
+
+                        }
+                        .clip(RoundedCornerShape(40.dp))
+                        .background(
+                            if (selectedChipIndex == it) MaterialTheme.colorScheme.primary
+                            else Color.DarkGray
+                        )
+                        .padding(15.dp, 10.dp)
+                        .defaultMinSize(50.dp)
+                ) {
+                    androidx.compose.material.Text(
+                        text = tagList[it],
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        }
 
         if (parties.isEmpty()) {
             Row(
