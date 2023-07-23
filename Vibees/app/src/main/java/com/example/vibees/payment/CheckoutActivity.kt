@@ -1,0 +1,93 @@
+package com.example.vibees.payment
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.vibees.Api.VibeesApi
+import com.example.vibees.MainActivity
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.PaymentMetaData
+import com.example.vibees.Models.Transaction
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+
+class CheckoutActivity : AppCompatActivity() {
+    lateinit var paymentSheet: PaymentSheet
+    lateinit var customerConfig: PaymentSheet.CustomerConfiguration
+    lateinit var paymentIntentClientSecret: String
+    val vibeesApi = VibeesApi()
+    // Successful request
+    val successfn: (PaymentMetaData) -> Unit = { response ->
+        Log.d("TAG", "success")
+        paymentIntentClientSecret = response.paymentIntent
+        customerConfig = PaymentSheet.CustomerConfiguration(
+            response.customer,
+            response.ephemeralKey
+        )
+        val publishableKey = response.publishableKey
+        PaymentConfiguration.init(this, publishableKey)
+        presentPaymentSheet()
+    }
+
+    // failed request
+    val failurefn: (Throwable) -> Unit = { t ->
+        Log.d("TAG", "FAILURE")
+        Log.d("TAG", t.printStackTrace().toString())
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
+        val amount: Double = intent.getDoubleExtra("entryFee", 0.0) * 100
+        val transaction = Transaction(amount.toInt())
+        val response = vibeesApi.getPaymentInfo(transaction, successfn, failurefn)
+    }
+
+    fun presentPaymentSheet() {
+        paymentSheet.presentWithPaymentIntent(
+            paymentIntentClientSecret,
+            PaymentSheet.Configuration(
+                merchantDisplayName = "My merchant name",
+                customer = customerConfig,
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(country = "Canada")
+                ),
+                // Set `allowsDelayedPaymentMethods` to true if your business
+                // can handle payment methods that complete payment after a delay, like SEPA Debit and Sofort.
+                allowsDelayedPaymentMethods = false
+            )
+        )
+    }
+
+    fun onPaymentSheetResult(paymentSheetResult: PaymentSheetResult) {
+        when(paymentSheetResult) {
+            is PaymentSheetResult.Canceled -> {
+                Log.d("TAG", "CANCELLED")
+                showToast("Transaction Cancelled")
+            }
+            is PaymentSheetResult.Failed -> {
+                Log.d("TAG","Error: ${paymentSheetResult.error}")
+                showToast("Transaction Failed")
+            }
+            is PaymentSheetResult.Completed -> {
+                // Display for example, an order confirmation screen
+                Log.d("TAG", "TRANSACTION COMPLETED")
+                showToast("Transaction Completed")
+
+                val intent = Intent(this,   MainActivity::class.java)
+                intent.putExtra("navigateToHome", true)
+                startActivity(intent)
+                finish()
+            }
+        }
+    }
+
+    private fun showToast(message: String) {
+        runOnUiThread {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+    }
+}

@@ -1,6 +1,11 @@
 package com.example.vibees.screens.home.myparties
 
+import android.app.Activity
+import android.content.Intent
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,8 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
@@ -36,6 +44,7 @@ import com.example.vibees.Models.User
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import com.example.vibees.graphs.PartyScreen
+import com.example.vibees.payment.CheckoutActivity
 import com.example.vibees.screens.bottombar.BottomBar
 import retrofit2.Call
 import retrofit2.Callback
@@ -52,6 +61,17 @@ fun PartyViewing(
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     val vibeesApi = VibeesApi()
+    val activity = LocalContext.current as? ComponentActivity
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // Handle the result here if needed
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Handle successful result
+        } else {
+            // Handle other result codes or errors
+        }
+    }
 
     // Successful request
     val successfn: (ResponseMessage) -> Unit = { response ->
@@ -171,6 +191,9 @@ fun PartyViewing(
             horizontalArrangement = Arrangement.Center) {
             androidx.compose.material.Button(
                 onClick = {
+                    val intent = Intent(activity, CheckoutActivity::class.java)
+                    intent.putExtra("entryFee", partyDetails?.entry_fee)
+                    launcher.launch(intent)
                     val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
                 },
                 modifier = Modifier.padding(20.dp),

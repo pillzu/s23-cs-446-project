@@ -5,6 +5,7 @@ import logging
 import internal.helpers as hp
 import uuid
 import json
+import stripe
 from email_validator import validate_email, EmailNotValidError
 from internal.helpers import is_valid_phone_number, return_message_response
 
@@ -220,6 +221,31 @@ def delete_user_account():
         return return_message_response("User deletion failed. Please check user exists.", 500)
     else:
         return return_message_response("User with user_id {} successfully deleted".format(result), 201)
+
+'''
+Payment Endpoint
+'''
+
+@app.route('/payment-sheet', methods=['POST'])
+def payment_sheet():
+    req = request.json
+
+    stripe.api_key = 'sk_test_51NWutYB9GlqxPfMYYnnZDsUZDHf4t8RQvbuzF6RldklWW8KKGBRFxrbAaIDBxkhAeB9D6t9dSn7Ro9kOfHcaA7Ou00tg99GvG3'
+    customer = stripe.Customer.create()
+    ephemeralKey = stripe.EphemeralKey.create(
+        customer=customer['id'],
+        stripe_version='2022-11-15',
+    )
+    paymentIntent = stripe.PaymentIntent.create(
+        amount=req["amount"],
+        currency='cad',
+        customer=customer['id'],
+        payment_method_types=['card'],
+    )
+    return jsonify(paymentIntent=paymentIntent.client_secret,
+                    ephemeralKey=ephemeralKey.secret,
+                    customer=customer.id,
+                    publishableKey='pk_test_51NWutYB9GlqxPfMYGmeB1XiOm376R1cASdzAO5oB37UiDZ9NEb7wJLyx8qN0A2KyhbaxI2LiIqjqhmHHGooY743t00JnjAvV1W')
 
 
 

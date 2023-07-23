@@ -9,12 +9,15 @@ import kotlinx.coroutines.CompletableDeferred
 
 
 @Composable
-fun RootNavigationGraph(navController: NavHostController, signIn: suspend (signInComplete: CompletableDeferred<Unit>) -> Unit) {
+fun RootNavigationGraph(navController: NavHostController, signIn: suspend (signInComplete: CompletableDeferred<Unit>, ) -> Unit, navigateToHome: Boolean) {
     NavHost(
         navController = navController,
         route = Graph.ROOT,
         startDestination = Graph.AUTHENTICATION
     ) {
+        if (navigateToHome) {
+            navController.navigate(Graph.HOME)
+        }
         authNavGraph(signIn, navController = navController)
         composable(route = Graph.HOME) {
             HomeScreen()

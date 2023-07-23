@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             VibeesTheme {
-                RootNavigationGraph(navController = rememberNavController(), signIn = ::signInUsingGoogle)
+                RootNavigationGraph(navController = rememberNavController(), signIn = ::signInUsingGoogle, navigateToHome = intent.getBooleanExtra("navigateToHome", false))
             }
         }
         initializeAuth()

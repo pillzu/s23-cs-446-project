@@ -1,8 +1,10 @@
 package com.example.vibees.Api
 
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
+import com.example.vibees.Models.Transaction
 import com.example.vibees.Models.User
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
@@ -15,7 +17,7 @@ import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val url = "http://192.168.203.95:5000"
+const val url = "http://192.168.0.34:5000"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -69,5 +71,9 @@ class APIInterface {
 
     fun registerUser(requestModel: User): Call<ResponseMessage> {
         return apiService.registerOrLoginUser(requestModel)
+    }
+
+    fun getPartyInfo(requestModel: Transaction): Call<PaymentMetaData> {
+        return apiService.getPaymentInfo(requestModel)
     }
 }

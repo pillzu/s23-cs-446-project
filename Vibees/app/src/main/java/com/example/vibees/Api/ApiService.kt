@@ -2,8 +2,10 @@ package com.example.vibees.Api
 
 import android.content.Context
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
+import com.example.vibees.Models.Transaction
 import com.example.vibees.Models.User
 import retrofit2.Call
 import retrofit2.http.Body
@@ -30,4 +32,7 @@ interface ApiService  {
 
     @POST("/user")
     fun registerOrLoginUser(@Body requestModel: User): Call<ResponseMessage>
+
+    @POST("/payment-sheet")
+    fun getPaymentInfo(@Body requestModel: Transaction): Call<PaymentMetaData>
 }

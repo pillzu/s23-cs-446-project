@@ -27,6 +27,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Declare your CheckoutActivity -->
+        <activity
+            android:name=".payment.CheckoutActivity"
+            android:label="Checkout Activity"
+            android:theme="@style/AppTheme.CheckoutActivity">
+
+            <!-- Intent filters if needed -->
+            <!-- ... -->
+
+        </activity>
     </application>
 
 </manifest>
