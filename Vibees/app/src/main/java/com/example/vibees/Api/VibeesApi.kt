@@ -3,6 +3,7 @@ package com.example.vibees.Api
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
 import retrofit2.Call
 import retrofit2.Callback
@@ -13,8 +14,8 @@ class VibeesApi {
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
 
-    fun getAllParties(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit) {
-        val callResponse = apiService.getAllParties()
+    fun getAllParties(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit, tags: List<String>) {
+        val callResponse = apiService.getAllParties(Tags(tags))
         return callResponse.enqueue(
             object: Callback<List<Party>> {
                 override fun onResponse(

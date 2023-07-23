@@ -113,6 +113,12 @@ fun UserScreen(
             )
         }
 
+        var tags by remember {
+            mutableStateOf(
+                mutableListOf<String>()
+            )
+        }
+
         // fetch all parties from endpoint /parties
         val vibeesApi = VibeesApi()
 
@@ -131,7 +137,7 @@ fun UserScreen(
         }
 
         LaunchBackgroundEffect(key = Unit) {
-            val response = vibeesApi.getAllParties(successfn, failurefn)
+            val response = vibeesApi.getAllParties(successfn, failurefn, tags)
         }
 
         // Header
@@ -263,7 +269,7 @@ fun UserScreen(
         }
 
         // User Interest Tags
-        var tagList = listOf("Anime", "EDM", "Board Games", "Fraternity", "FIFA")
+        var tagList = listOf("Default", "Anime", "EDM", "Board Games", "Fraternity", "FIFA")
 
         var selectedChipIndex by remember {
             mutableIntStateOf(0)
@@ -275,12 +281,16 @@ fun UserScreen(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .padding(end = 10.dp)
-                        .clickable {
-                            selectedChipIndex = it
+                        .clickable (
+                            onClick = {
+                                tags.remove(tagList[selectedChipIndex])
+                                selectedChipIndex = it
+                                if (it != 0)
+                                    tags.add(tagList[it])
 
-                            parties = Helper.queryPartiesByTags(originalParties, tagList[selectedChipIndex])
-
-                        }
+                                vibeesApi.getAllParties(successfn, failurefn, tags)
+                            }
+                        )
                         .clip(RoundedCornerShape(40.dp))
                         .background(
                             if (selectedChipIndex == it) MaterialTheme.colorScheme.primary

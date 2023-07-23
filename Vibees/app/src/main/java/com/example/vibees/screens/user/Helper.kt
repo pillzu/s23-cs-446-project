@@ -47,17 +47,6 @@ class Helper {
         }
 
 
-        fun queryPartiesByTags(
-            parties: List<Party>,
-            tag: String
-        ): List<Party> {
-            var matchedParties = parties.filter {
-                    party -> tag == party.type
-            }
-            return matchedParties
-        }
-
-
         fun searchParties(
             parties: List<Party>,
             keyword: String
