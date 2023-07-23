@@ -1,6 +1,7 @@
 package com.example.vibees.screens.home.host
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -16,8 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -64,11 +67,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.vibees.GlobalAppState
 import me.naingaungluu.formconductor.FieldResult
 import me.naingaungluu.formconductor.FormResult
 import me.naingaungluu.formconductor.composeui.field
 import me.naingaungluu.formconductor.composeui.form
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -84,9 +90,12 @@ fun HostLogisticsScreen(
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
 
+    val partystore by GlobalAppState::PartyStore
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(start = 10.dp, top = 25.dp, end = 10.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -122,7 +131,7 @@ fun HostLogisticsScreen(
                         } ,
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Unit and Street")},
-                        placeholder = { Text("Unit and Street", color = Color.Gray)},
+                        placeholder = { Text("Unit and Street*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -133,7 +142,10 @@ fun HostLogisticsScreen(
                             imeAction = ImeAction.Next,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(64.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostLogistics::city) {
@@ -145,7 +157,7 @@ fun HostLogisticsScreen(
                         },
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("City")},
-                        placeholder = { Text("City", color = Color.Gray)},
+                        placeholder = { Text("City*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -156,7 +168,10 @@ fun HostLogisticsScreen(
                             imeAction = ImeAction.Next,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(64.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostLogistics::postalcode) {
@@ -168,7 +183,7 @@ fun HostLogisticsScreen(
                         },
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Postal Code")},
-                        placeholder = { Text("Postal Code", color = Color.Gray)},
+                        placeholder = { Text("Postal Code*", color = Color.Gray)},
                         supportingText = {
                             if (resultState.value is FieldResult.Error) Text("6 characters only")
                             else Text("")
@@ -183,7 +198,10 @@ fun HostLogisticsScreen(
                             imeAction = ImeAction.Done,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(84.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostLogistics::province) {
@@ -201,7 +219,16 @@ fun HostLogisticsScreen(
             }
 
             TextButton(
-                onClick = { onClick() },
+                onClick = {
+                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy,hh:mm a")
+                    partystore?.street = unitStreet
+                    partystore?.city = city
+                    partystore?.postal_code = postalCode
+                    partystore?.prov = province
+                    partystore?.date_time = LocalDateTime.parse("$date,$time", formatter)
+                    Log.d("STORE", partystore.toString())
+                    onClick()
+                          },
                 modifier = Modifier.align(Alignment.End),
                 enabled = this.formState.value is FormResult.Success
             ) {
@@ -246,7 +273,11 @@ fun provinceDropdownMenu(): String {
                 label = { Text("Province") },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier
+                    .menuAnchor()
+                    .padding(horizontal = 4.dp)
+                    .height(64.dp)
+                    .fillMaxWidth()
             )
 
             ExposedDropdownMenu(
@@ -300,6 +331,8 @@ fun datePickerMenu(): String {
                 }
             }
             .padding(4.dp)
+            .height(64.dp)
+            .fillMaxWidth()
     )
 
     if (openDialog) {
@@ -391,6 +424,8 @@ fun timePickerMenu(): String {
                 }
             }
             .padding(4.dp)
+            .height(64.dp)
+            .fillMaxWidth()
     )
 
     if (openDialog) {

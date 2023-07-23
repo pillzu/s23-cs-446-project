@@ -11,6 +11,8 @@ data class HostPartyDetails(
 
     val fee: String = "",
 
+    val capacity: String = "",
+
     val description: String = "",
 
     val drugfriendly: String = "",

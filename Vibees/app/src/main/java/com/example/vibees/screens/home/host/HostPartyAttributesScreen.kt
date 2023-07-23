@@ -1,6 +1,8 @@
 package com.example.vibees.screens.home.host
 
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +16,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Done
@@ -39,19 +43,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
+import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.ResponseMessage
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HostPartyAttributesScreen(
     onClick: () -> Unit
 ) {
-    val selectedlist = mutableListOf<String>()
+    val selectedlist by GlobalAppState::TagList
     var selectedcount by remember { mutableIntStateOf(0) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val apiService = APIInterface()
+    var userID by GlobalAppState::UserID
+    val vibeesApi = VibeesApi()
+    val partyContext = LocalContext.current
+
+    val partystore by GlobalAppState::PartyStore
 
     val photopickerlauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -65,6 +81,7 @@ fun HostPartyAttributesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(start = 10.dp, top = 25.dp, end = 10.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -182,7 +199,30 @@ fun HostPartyAttributesScreen(
 
 
         TextButton(
-            onClick = { onClick() },
+            onClick = {
+                partystore?.taglist = selectedlist
+                partystore?.image = selectedImageUri
+
+                Log.d("STORE", partystore.toString())
+
+                val successfn: (ResponseMessage) -> Unit = { response ->
+                    Log.d("TAG", response.message)
+                    Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
+                }
+
+                // failed request
+                val failurefn: (Throwable) -> Unit = { t ->
+                    Log.d("TAG", "FAILURE: could not create party.")
+                    Log.d("TAG", t.message.toString())
+                }
+
+                // call endpoint /parties/host to create a party
+                //val callResponse = vibeesApi.createParty(successfn, failurefn, partystore)
+
+                selectedlist.clear()
+
+                onClick()
+                      },
             modifier = Modifier.align(Alignment.End),
             enabled = (selectedcount > 0) and (selectedcount < 6)
         ) {

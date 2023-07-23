@@ -5,14 +5,17 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.vibees.GlobalAppState
 import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
 import com.example.vibees.screens.home.HelpScreen
+import com.example.vibees.screens.home.host.PartyStore
 
 @Composable
 fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
+    var partystore by GlobalAppState::PartyStore
     NavHost(
         navController = navController,
         route = Graph.HOME,
@@ -37,8 +40,11 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
         composable(route = BottomBar.Host.route) {
             GenericScreen(
                 name = BottomBar.Host.route,
-                onClick = { navController.navigate(HostScreens.Step1.route) {
-                    launchSingleTop = true
+                onClick = {
+                    // reset party store to empty
+                    partystore = PartyStore(isedit = false)
+                    navController.navigate(HostScreens.Step1.route) {
+                        launchSingleTop = true
                 } }
             )
 //            HostScreen(

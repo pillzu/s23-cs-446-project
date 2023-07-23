@@ -5,11 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
@@ -36,6 +40,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.vibees.GlobalAppState
 import me.naingaungluu.formconductor.FieldResult
 import me.naingaungluu.formconductor.FormResult
 import me.naingaungluu.formconductor.composeui.field
@@ -48,13 +53,17 @@ fun HostPartyDetailsScreen(
     var partyname by remember { mutableStateOf("")}
     var theme by remember { mutableStateOf("")}
     var fee by remember { mutableIntStateOf(0) }
+    var capacity by remember { mutableIntStateOf(0)}
     var description by remember { mutableStateOf("")}
     var drugfriendly by remember { mutableStateOf(false)}
     var byob by remember { mutableStateOf(false)}
 
+    val partystore by GlobalAppState::PartyStore
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(start = 10.dp, top = 25.dp, end = 10.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -91,7 +100,7 @@ fun HostPartyDetailsScreen(
                         } ,
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Party Name")},
-                        placeholder = { Text("Party Name", color = Color.Gray)},
+                        placeholder = { Text("Party Name*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -102,7 +111,10 @@ fun HostPartyDetailsScreen(
                             imeAction = ImeAction.Next,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(64.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostPartyDetails::theme) {
@@ -114,7 +126,7 @@ fun HostPartyDetailsScreen(
                         } ,
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Party Theme")},
-                        placeholder = { Text("Party Theme", color = Color.Gray)},
+                        placeholder = { Text("Party Theme*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -125,7 +137,10 @@ fun HostPartyDetailsScreen(
                             imeAction = ImeAction.Next,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(64.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostPartyDetails::description) {
@@ -137,7 +152,7 @@ fun HostPartyDetailsScreen(
                         } ,
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Description")},
-                        placeholder = { Text("Description", color = Color.Gray)},
+                        placeholder = { Text("Description*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -151,35 +166,75 @@ fun HostPartyDetailsScreen(
                         modifier = Modifier
                             .height(120.dp)
                             .padding(4.dp)
+                            .fillMaxWidth()
                     )
                 }
-                field(HostPartyDetails::fee) {
-                    OutlinedTextField(
-                        value = state.value?.value.orEmpty(),
-                        onValueChange = {
-                            try {
-                                fee = it.toInt()
-                                setField(it)
-                            } catch (_: NumberFormatException) {
-                                Log.d("Invalid number", "Invalid number entered in fee")
-                            }
-                        } ,
-                        isError = resultState.value is FieldResult.Error,
-                        label = { Text("Fee")},
-                        placeholder = { Text("Fee (Optional)", color = Color.Gray)},
-                        enabled = true,
-                        keyboardActions = KeyboardActions(
-                            onNext = {
-                                focusManager.moveFocus(FocusDirection.Down)
-                            }
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done,//Show next as IME button
-                            keyboardType = KeyboardType.Number, //Plain text keyboard
-                        ),
-                        modifier = Modifier.padding(4.dp)
-                    )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    field(HostPartyDetails::fee) {
+                        OutlinedTextField(
+                            value = state.value?.value.orEmpty(),
+                            onValueChange = {
+                                try {
+                                    fee = it.toInt()
+                                    setField(it)
+                                } catch (_: NumberFormatException) {
+                                    Log.d("Invalid number", "Invalid number entered in fee")
+                                }
+                            } ,
+                            isError = resultState.value is FieldResult.Error,
+                            label = { Text("Fee")},
+                            placeholder = { Text("Fee* (Enter 0 if none)", color = Color.Gray)},
+                            enabled = true,
+                            keyboardActions = KeyboardActions(
+                                onNext = {
+                                    focusManager.moveFocus(FocusDirection.Down)
+                                }
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,//Show next as IME button
+                                keyboardType = KeyboardType.Number, //Plain text keyboard
+                            ),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .height(64.dp)
+                                .width(100.dp)
+                        )
+                    }
+                    field(HostPartyDetails::capacity) {
+                        OutlinedTextField(
+                            value = state.value?.value.orEmpty(),
+                            onValueChange = {
+                                try {
+                                    capacity = it.toInt()
+                                    setField(it)
+                                } catch (_: NumberFormatException) {
+                                    Log.d("Invalid number", "Invalid number entered in capacity")
+                                }
+                            } ,
+                            isError = resultState.value is FieldResult.Error,
+                            label = { Text("Capacity")},
+                            placeholder = { Text("Capacity*", color = Color.Gray)},
+                            enabled = true,
+                            keyboardActions = KeyboardActions(
+                                onNext = {
+                                    focusManager.moveFocus(FocusDirection.Down)
+                                }
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,//Show next as IME button
+                                keyboardType = KeyboardType.Number, //Plain text keyboard
+                            ),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .height(64.dp)
+                                .width(100.dp)
+                        )
+                    }
                 }
+
                 field(HostPartyDetails::drugfriendly) {
                     Text(
                         text = "Does this party allow drug usage?",
@@ -295,6 +350,14 @@ fun HostPartyDetailsScreen(
 
             TextButton(
                 onClick = {
+                    partystore?.name = partyname
+                    partystore?.type = theme
+                    partystore?.entry_fee = fee
+                    partystore?.desc = description
+                    partystore?.drug = drugfriendly
+                    partystore?.byob = byob
+                    partystore?.max_cap = capacity
+                    Log.d("STORE", partystore.toString())
                   onClick()
                 },
                 modifier = Modifier.align(Alignment.End),
