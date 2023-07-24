@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
-import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -20,8 +19,8 @@ class VibeesApi {
     val email = GlobalAppState.currentUser?.email
 
 
-    fun getAllParties(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit, tags: List<String>) {
-        val callResponse = apiService.getAllParties(Tags(tags))
+    fun getAllParties(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit) {
+        val callResponse = apiService.getAllParties()
         return callResponse.enqueue(
             object: Callback<List<Party>> {
                 override fun onResponse(
