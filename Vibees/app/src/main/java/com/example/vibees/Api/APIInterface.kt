@@ -74,4 +74,8 @@ class APIInterface {
     fun registerUser(requestModel: User): Call<ResponseMessage> {
         return apiService.registerOrLoginUser(requestModel)
     }
+
+    fun verifyAttendance(party_id: String, guest_id: String): Call<ResponseMessage> {
+        return apiService.verifyAttendance(party_id, guest_id)
+    }
 }
