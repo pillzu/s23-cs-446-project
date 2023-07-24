@@ -79,6 +79,7 @@ fun PartyDetails(
                         .padding(top = 20.dp)
                         .size(40.dp)
                         .clickable {
+
                             navController.navigate(HostScreens.Step1.route)
                         }
                 )

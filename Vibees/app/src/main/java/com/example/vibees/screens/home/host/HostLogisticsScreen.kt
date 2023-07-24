@@ -225,7 +225,8 @@ fun HostLogisticsScreen(
                     partystore?.city = city
                     partystore?.postal_code = postalCode
                     partystore?.prov = province
-                    partystore?.date_time = LocalDateTime.parse("$date,$time", formatter)
+                    val l = LocalDateTime.parse("$date,$time", formatter)
+                    partystore?.date_time = l.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                     Log.d("STORE", partystore.toString())
                     onClick()
                           },

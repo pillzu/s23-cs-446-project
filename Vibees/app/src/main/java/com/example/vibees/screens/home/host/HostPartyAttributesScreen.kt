@@ -227,7 +227,7 @@ fun HostPartyAttributesScreen(
                     partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
                     partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
                     partystore?.drug!!, partystore?.byob!!, partystore?.taglist as MutableList<String>,
-                    "", userName, "")
+                    partystore?.image.toString(),"", userName, "")
 
                 // call endpoint /parties/host to create a party
                 val callResponse = vibeesApi.createParty(successfn, failurefn, obj)

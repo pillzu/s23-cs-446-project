@@ -194,7 +194,7 @@ fun HostPartyDetailsScreen(
                                 }
                             ),
                             keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done,//Show next as IME button
+                                imeAction = ImeAction.Next,//Show next as IME button
                                 keyboardType = KeyboardType.Number, //Plain text keyboard
                             ),
                             modifier = Modifier

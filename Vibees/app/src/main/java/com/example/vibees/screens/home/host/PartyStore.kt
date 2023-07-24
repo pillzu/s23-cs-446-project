@@ -10,7 +10,7 @@ data class PartyStore(
     var city: String? = null,
     var prov: String? = null,
     var postal_code: String? = null,
-    var date_time: LocalDateTime? = null,
+    var date_time: String? = null,
     var name: String? = null,
     var type: String? = null,
     var entry_fee: Int? = null,
