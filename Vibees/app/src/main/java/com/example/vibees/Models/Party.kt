@@ -1,8 +1,6 @@
 package com.example.vibees.Models
 
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Date
 import java.util.UUID
 
 data class Party (
@@ -17,6 +15,10 @@ data class Party (
     val city: String,
     val prov: String,
     val postal_code: String,
+    val drug: Boolean,
+    val byob: Boolean,
+    val taglist: List<String>,
+    //val image: Uri,
     val party_id: String?,
     val host_name: String?,
     val qr_endpoint: String?,

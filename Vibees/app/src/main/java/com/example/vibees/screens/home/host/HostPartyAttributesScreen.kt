@@ -51,7 +51,9 @@ import coil.compose.AsyncImage
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import okhttp3.ResponseBody
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -64,6 +66,7 @@ fun HostPartyAttributesScreen(
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
+    var userName by GlobalAppState::UserName
     val vibeesApi = VibeesApi()
     val partyContext = LocalContext.current
 
@@ -208,20 +211,26 @@ fun HostPartyAttributesScreen(
                 val successfn: (ResponseMessage) -> Unit = { response ->
                     Log.d("TAG", response.message)
                     Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
+                    selectedlist.clear()
+                    onClick()
                 }
+
 
                 // failed request
-                val failurefn: (Throwable) -> Unit = { t ->
+                val failurefn: (ResponseBody) -> Unit = { response ->
                     Log.d("TAG", "FAILURE: could not create party.")
-                    Log.d("TAG", t.message.toString())
+                    Log.d("TAG", response.toString())
+                    Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
                 }
 
+                val obj = Party(userID, partystore?.name, partystore?.date_time!!, partystore?.type,
+                    partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
+                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+                    partystore?.drug!!, partystore?.byob!!, partystore?.taglist as MutableList<String>,
+                    "", userName, "")
+
                 // call endpoint /parties/host to create a party
-                //val callResponse = vibeesApi.createParty(successfn, failurefn, partystore)
-
-                selectedlist.clear()
-
-                onClick()
+                val callResponse = vibeesApi.createParty(successfn, failurefn, obj)
                       },
             modifier = Modifier.align(Alignment.End),
             enabled = (selectedcount > 0) and (selectedcount < 6)
