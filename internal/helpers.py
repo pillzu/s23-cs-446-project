@@ -11,11 +11,17 @@ def row_to_party(party):
         "max_cap": party[6],
         "desc": party[7],
         "entry_fee": party[8],
-        "street": party[9],
-        "city": party[10],
-        "prov": party[11],
-        "postal_code": party[12],
-        "tags": party[13],
+        "type": party[9],
+        "drug": party[10],
+        "byob": party[11],
+        "image": party[12],
+        "host_name": party[13],
+        "qr_endpoint": party[14],
+        "street": party[15],
+        "city": party[16],
+        "prov": party[17],
+        "postal_code": party[18],
+        "tags": party[19],
     }
 
 
