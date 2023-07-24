@@ -10,12 +10,16 @@ package com.example.vibees.screens.user
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import com.example.vibees.screens.home.myparties.PartyItem
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +27,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -50,12 +56,16 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import com.example.vibees.Api.LaunchBackgroundEffect
 import com.example.vibees.Models.Party
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Api.VibeesApi
+import com.example.vibees.Models.User
 import com.example.vibees.ui.theme.SubtleWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,13 +87,26 @@ fun UserScreen(
             )
         }
 
+        var originalParties by remember {
+            mutableStateOf(
+                listOf<Party>()
+            )
+        }
+
+        var tags by remember {
+            mutableStateOf(
+                mutableListOf<String>()
+            )
+        }
+
         // fetch all parties from endpoint /parties
         val vibeesApi = VibeesApi()
 
         // Successful request
         val successfn: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
-            parties = response
+            originalParties = response
+            parties = originalParties
             Log.d("TAG", parties.toString())
         }
 
@@ -94,7 +117,7 @@ fun UserScreen(
         }
 
         LaunchBackgroundEffect(key = Unit) {
-            val response = vibeesApi.getAllParties(successfn, failurefn)
+            val response = vibeesApi.getAllParties(successfn, failurefn, tags)
         }
 
         // Header
@@ -110,6 +133,7 @@ fun UserScreen(
                 searchText = it
             },
             onSearch = {
+                parties = Helper.searchParties(originalParties, searchText)
                 searchActive = false
             },
             active = false,
@@ -153,6 +177,11 @@ fun UserScreen(
 
         }
 
+        // Recommended Header with dropdown
+        val options = listOf("Proximity", "Price", "Date", "Capacity")
+        var expanded by remember { mutableStateOf(false) }
+        var selectedOptionText by remember { mutableStateOf(options[0]) }
+
         if (searchText == "") {
             // Recommended Header with dropdown
             val options = listOf("Proximity", "Price", "Date", "Day")
@@ -178,6 +207,32 @@ fun UserScreen(
                         .width(140.dp)
                         .padding(bottom = 15.dp)
                 ) {
+                    options.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(selectionOption) },
+                            onClick = {
+                                selectedOptionText = selectionOption
+
+                                var user = GlobalAppState::currentUser.get()
+                                var city = ""
+                                var prov = ""
+                                if (user != null) {
+                                    city = user.address_city.toString()
+                                    prov = user.address_prov.toString()
+                                }
+
+                                parties = Helper.sortPartiesBy(
+                                        originalParties,
+                                        selectionOption,
+                                        city,
+                                        prov)
+
+                                expanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                        )
+                    }
+                    
                     OutlinedTextField(
                         // The `menuAnchor` modifier must be passed to the text field for correctness.
                         modifier = Modifier
@@ -223,8 +278,45 @@ fun UserScreen(
             }
 
             // User Interest Tags
-            var tagList = listOf("Anime", "EDM", "Board Games", "Fraternity", "FIFA")
-            Tags(tagList = tagList)
+            var tagList = listOf("Default", "Anime", "EDM", "Board Games", "Fraternity", "FIFA")
+
+            var selectedChipIndex by remember {
+                mutableIntStateOf(0)
+            }
+
+            LazyRow(modifier = Modifier.padding(bottom = 20.dp)) {
+                items(tagList.size) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .clickable (
+                                onClick = {
+                                    tags.remove(tagList[selectedChipIndex])
+                                    selectedChipIndex = it
+                                    if (it != 0)
+                                        tags.add(tagList[it])
+
+                                    vibeesApi.getAllParties(successfn, failurefn, tags)
+                                }
+                            )
+                            .clip(RoundedCornerShape(40.dp))
+                            .background(
+                                if (selectedChipIndex == it) MaterialTheme.colorScheme.primary
+                                else Color.DarkGray
+                            )
+                            .padding(15.dp, 10.dp)
+                            .defaultMinSize(50.dp)
+                    ) {
+                        androidx.compose.material.Text(
+                            text = tagList[it],
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
 
             if (parties.isEmpty()) {
                 Row(
