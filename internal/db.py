@@ -517,7 +517,7 @@ class DatabaseConnection:
                 sub_queries.append(f" address_postal = '{address_postal}'")
 
             if email is not None:
-                sub_queries.append(f" email = '{email}")
+                sub_queries.append(f" email = '{email}'")
 
             stmt = self.__join_subqueries(
                 "UPDATE Users SET", sub_queries)

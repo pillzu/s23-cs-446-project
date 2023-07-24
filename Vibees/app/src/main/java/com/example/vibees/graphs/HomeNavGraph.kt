@@ -1,5 +1,7 @@
 package com.example.vibees.graphs
 
+
+import SettingsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -11,6 +13,8 @@ import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
 import com.example.vibees.screens.home.HelpScreen
 import com.example.vibees.screens.home.host.HostAgreementScreen
+
+// import settingsNavGraph
 
 @Composable
 fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
@@ -51,10 +55,7 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
 //            )
         }
         composable(route = BottomBar.Settings.route) {
-            GenericScreen(
-                name = BottomBar.Settings.route,
-                onClick = { navController.navigate(SettingsScreen.Setting1.route) }
-            )
+            SettingsScreen(navController = navController)
         }
         composable(route = BottomBar.Help.route) {
             HelpScreen()
@@ -62,7 +63,6 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
 
         partyNavGraph(navController = navController)
         hostNavGraph(navController = navController)
-        settingsNavGraph(navController = navController)
+        // settingsNavGraph(navController = navController)
     }
 }
-
