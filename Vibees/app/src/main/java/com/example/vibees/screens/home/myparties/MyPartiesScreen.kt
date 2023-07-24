@@ -75,13 +75,13 @@ fun MyPartiesScreen(
         val successfn_attending: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
             attendingParties = response
-            Log.d("TAG", attendingParties.toString())
+            Log.d("TAG attending", attendingParties.toString())
         }
 
         // failed request
         val failurefn_hosting: (Throwable) -> Unit = { t ->
             Log.d("TAG", "FAILURE: hosting")
-            Log.d("TAG", t.printStackTrace().toString())
+            Log.d("TAG failure", t.printStackTrace().toString())
         }
 
         val failurefn_attending: (Throwable) -> Unit = { t ->
@@ -93,7 +93,7 @@ fun MyPartiesScreen(
         val successfn_hosting: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
             hostingParties = response
-            Log.d("TAG", hostingParties.toString())
+            Log.d("TAG hosting", hostingParties.toString())
         }
 
         val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_hosting)

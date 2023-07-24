@@ -70,7 +70,7 @@ fun PartyDetails(
                         Toast.makeText(context, "Invite link copied to clipboard!", Toast.LENGTH_SHORT).show()
                     }
             )
-            if (partyDetails?.user_id == userID) {
+            if (partyDetails?.host_id == userID) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit",

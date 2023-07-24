@@ -53,6 +53,7 @@ import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.google.gson.Gson
 import okhttp3.ResponseBody
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -223,11 +224,19 @@ fun HostPartyAttributesScreen(
                     Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
                 }
 
-                val obj = Party(userID, partystore?.name, partystore?.date_time!!, partystore?.type,
-                    partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
+//                val obj = Party(userID, partystore?.name, partystore?.date_time!!, partystore?.type,
+//                    partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
+//                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+//                    partystore?.drug!!, partystore?.byob!!, Gson().toJson(partystore?.taglist).replace("\"", "'"),
+//                    partystore?.image.toString(),"", userName, "")
+
+                val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                    userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
+                    partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
                     partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-                    partystore?.drug!!, partystore?.byob!!, partystore?.taglist as MutableList<String>,
-                    partystore?.image.toString(),"", userName, "")
+                    Gson().toJson(partystore?.taglist).replace("\"", "'").replace("[", "'").replace("]", "'"))
+
+                Log.d("Obj value", obj.toString())
 
                 // call endpoint /parties/host to create a party
                 val callResponse = vibeesApi.createParty(successfn, failurefn, obj)

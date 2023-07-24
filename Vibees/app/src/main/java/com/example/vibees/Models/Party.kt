@@ -4,22 +4,25 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Party (
-    val user_id: UUID?,
+    val party_id: String?,
+    val party_avatar_url: String,
     val name: String?,
     val date_time: String,
-    val type: String?,
+    val host_id: UUID?,
     val max_cap: Int,
-    val entry_fee: Double,
     val desc: String,
+    val entry_fee: Double,
+    val type: String?,
+    val drug: Boolean,
+    val byob: Boolean,
+    val host_name: String?,
+    val qr_endpoint: String?,
     val street: String,
     val city: String,
     val prov: String,
     val postal_code: String,
-    val drug: Boolean,
-    val byob: Boolean,
-    val tags: List<String>,
-    val party_avatar_url: String,
-    val party_id: String?,
-    val host_name: String?,
-    val qr_endpoint: String?,
+    val tags: String,
+
+
+
 )

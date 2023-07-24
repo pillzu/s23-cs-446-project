@@ -23,7 +23,7 @@ def host_party():
     req = request.json
 
     party_id = db.exec_host_party(req["name"], req["party_avatar_url"],
-                                  req["date_time"], req["user_id"],
+                                  req["date_time"], req["host_id"],
                                   req["max_cap"], req["desc"],
                                   req["entry_fee"], req["street"],
                                   req["city"], req["prov"],

@@ -1,6 +1,8 @@
 from flask import jsonify
 
 def row_to_party(party):
+    # print("PARTY\n")
+    # print(party)
     return {
         "party_id": party[0],
         "party_avatar_url": party[1],
