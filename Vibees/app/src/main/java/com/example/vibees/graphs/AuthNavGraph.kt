@@ -50,6 +50,7 @@ fun NavGraphBuilder.authNavGraph(signIn: suspend (signInComplete: CompletableDef
         composable(route = AuthScreen.Forgot.route) {
             GenericScreen(name = AuthScreen.Forgot.route) {}
         }
+
     }
 }
 
