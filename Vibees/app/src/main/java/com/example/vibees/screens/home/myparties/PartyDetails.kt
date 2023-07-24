@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
+import com.example.vibees.graphs.HostScreens
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import java.time.format.DateTimeFormatter
@@ -52,14 +54,14 @@ fun PartyDetails(
     val context = LocalContext.current
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = "Share",
                 modifier = Modifier
-                    .align(Alignment.End)
                     .padding(horizontal = 20.dp)
                     .padding(top = 20.dp)
                     .size(40.dp)
@@ -68,6 +70,21 @@ fun PartyDetails(
                         Toast.makeText(context, "Invite link copied to clipboard!", Toast.LENGTH_SHORT).show()
                     }
             )
+            if (partyDetails?.host_id == userID) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 20.dp)
+                        .size(40.dp)
+                        .clickable {
+
+                            navController.navigate(HostScreens.Step1.route)
+                        }
+                )
+            }
+
         }
         // QR Code section
         Row(
@@ -157,11 +174,9 @@ fun PartyDetails(
                         color = Color.Black
                     )
                     Text(
-                        color = Color.Black, text = "${
-                            partyDetails?.date_time!!.format(
-                                DateTimeFormatter.ISO_DATE
-                            )
-                        }"
+                        color = Color.Black, text = partyDetails?.date_time!!.format(
+                            DateTimeFormatter.ISO_DATE
+                        )
                     )
                 }
                 Column(modifier = Modifier.padding(20.dp)) {

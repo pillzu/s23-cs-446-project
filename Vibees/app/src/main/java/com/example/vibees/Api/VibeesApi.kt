@@ -1,9 +1,11 @@
 package com.example.vibees.Api
 
+import android.util.Log
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -95,7 +97,7 @@ class VibeesApi {
         )
     }
 
-    fun createParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, obj: Party) {
+    fun createParty(successfn: (ResponseMessage) -> Unit, failurefn: (ResponseBody) -> Unit, obj: Party) {
         val callResponse = apiService.createParty(obj)
         return callResponse.enqueue(
             object: Callback<ResponseMessage> {
@@ -103,11 +105,15 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(response.errorBody()!!)
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                    failurefn(t)
+                    Log.d("ERROR", "FAILURE: Create party")
                 }
             }
         )
