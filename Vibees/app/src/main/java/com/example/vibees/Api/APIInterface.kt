@@ -15,7 +15,7 @@ import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val url = "http://172.22.11.70:5000"
+const val url = "http://192.168.8.9:5000"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -73,7 +73,6 @@ class APIInterface {
     fun updateUserDetails(user_id: String, requestModel: User): Call<ResponseMessage> {
         return apiService.updateUserDetails(user_id, requestModel)
     }
-
     fun deleteUserAccount(user_id: String): Call<ResponseMessage> {
         return apiService.deleteUserAccount(user_id)
     }

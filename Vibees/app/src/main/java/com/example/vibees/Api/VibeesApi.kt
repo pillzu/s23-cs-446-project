@@ -130,9 +130,7 @@ class VibeesApi {
         )
     }
 
-    // Vibees/app/src/main/java/com/example/vibees/Api/VibeesApi.kt:
 
-// ... (other functions remain unchanged)
 
     fun deleteUserAccount(
         user_id: String,
@@ -156,10 +154,6 @@ class VibeesApi {
         )
     }
 
-// ... (other functions remain unchanged)
-    // Vibees/app/src/main/java/com/example/vibees/Api/VibeesApi.kt:
-
-// ... (other functions remain unchanged)
 
     fun updateUserDetails(
         user_id: String,
@@ -184,6 +178,5 @@ class VibeesApi {
         )
     }
 
-// ... (other functions remain unchanged)
 
 }

@@ -179,17 +179,16 @@ def register_or_login_user():
 
 # ... (existing imports remain unchanged)
 
-@app.route('/user', methods=['PUT'])
-def update_user_details():
+@app.route('/user/<user_id>', methods=['PUT'])
+def update_user_details(user_id):
     req = request.json
-    user_id = req.get("user_id")
 
     # Check if the user_id is provided
     if not user_id:
         return return_message_response("Failed: Please provide user_id.", 400)
 
     # Email validation
-    email = req.get("email")
+    email = req.get("email", None)
     if email:
         try:
             emailinfo = validate_email(email, check_deliverability=False)
@@ -197,17 +196,17 @@ def update_user_details():
             return return_message_response("Email does not have a valid format.", 400)
 
     # Phone number validation
-    phone_no = req.get("phone_no")
+    phone_no = req.get("phone_no", None)
     if phone_no and not is_valid_phone_number(phone_no):
         return return_message_response("Phone number does not have a valid format.", 400)
 
     # Extract the user details from the request
-    first_name = req.get("first_name")
-    last_name = req.get("last_name")
-    address_street = req.get("address_street")
-    address_city = req.get("address_city")
-    address_prov = req.get("address_prov")
-    address_postal = req.get("address_postal")
+    first_name = req.get("first_name", None)
+    last_name = req.get("last_name", None)
+    address_street = req.get("address_street", None)
+    address_city = req.get("address_city", None)
+    address_prov = req.get("address_prov", None)
+    address_postal = req.get("address_postal", None)
 
     # Update the user details in the database
     try:
@@ -233,9 +232,8 @@ def update_user_details():
 
 
 
-@app.route('/user', methods=['DELETE'])
-def delete_user_account():
-    user_id = request.args.get('user_id')
+@app.route('/user/<user_id>', methods=['DELETE'])
+def delete_user_account(user_id):
     if user_id is None:
          return return_message_response("Failed: Please provide user_id.", 500)
 
