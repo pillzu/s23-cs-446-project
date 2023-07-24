@@ -85,6 +85,7 @@ import retrofit2.Call
 import retrofit2.Response
 import java.time.LocalDateTime
 import com.example.vibees.Api.VibeesApi
+import com.example.vibees.Models.User
 import com.example.vibees.ui.theme.SubtleWhite
 import kotlinx.coroutines.launch
 
@@ -257,7 +258,19 @@ fun UserScreen(
                             onClick = {
                                 selectedOptionText = selectionOption
 
-                                parties = Helper.sortPartiesBy(originalParties, selectionOption)
+                                var user = GlobalAppState::currentUser.get()
+                                var city = ""
+                                var prov = ""
+                                if (user != null) {
+                                    city = user.address_city.toString()
+                                    prov = user.address_prov.toString()
+                                }
+
+                                parties = Helper.sortPartiesBy(
+                                        originalParties,
+                                        selectionOption,
+                                        city,
+                                        prov)
 
                                 expanded = false
                             },
