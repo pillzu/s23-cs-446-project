@@ -10,6 +10,7 @@ import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
 import com.example.vibees.screens.home.HelpScreen
+import com.example.vibees.screens.home.host.HostAgreementScreen
 
 @Composable
 fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
@@ -35,12 +36,15 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(route = BottomBar.Host.route) {
-            GenericScreen(
-                name = BottomBar.Host.route,
-                onClick = { navController.navigate(HostScreens.Step1.route) {
-                    launchSingleTop = true
-                } }
-            )
+            HostAgreementScreen(onClick = { navController.navigate(HostScreens.Step1.route) {
+                launchSingleTop = true
+            } })
+//            GenericScreen(
+//                name = BottomBar.Host.route,
+//                onClick = { navController.navigate(HostScreens.Step1.route) {
+//                    launchSingleTop = true
+//                } }
+//            )
 //            HostScreen(
 //                name = BottomBar.Host.route,
 //                onClick = { }
