@@ -38,6 +38,10 @@ interface ApiService {
     @POST("/user")
     fun registerOrLoginUser(@Body requestModel: User): Call<ResponseMessage>
 
+
+    @GET("/party/qr/{party_id}/{guest_id}")
+    fun verifyAttendance(@Path("party_id") party_id: String, @Path("guest_id") guest_id:String): Call<ResponseMessage>
+
     @PUT("/user/{user_id}")
     fun updateUserDetails(@Path("user_id") user_id: String, @Body requestModel: User): Call<ResponseMessage>
 

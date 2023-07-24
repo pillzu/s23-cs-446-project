@@ -156,6 +156,24 @@ class VibeesApi {
     }
 
 
+    fun verifyAttendance(successfn: (Int) -> Unit, failurefn: () -> Unit, party_id: String) {
+        val callResponse = apiService.verifyAttendance(party_id, userID.toString())
+        return callResponse.enqueue(
+            object: Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    successfn(response.code())
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn()
+                }
+            }
+        )
+    }
+
 
     fun deleteUserAccount(
         user_id: String,
@@ -202,6 +220,4 @@ class VibeesApi {
             }
         )
     }
-
-
 }

@@ -74,9 +74,15 @@ class APIInterface {
     fun registerUser(requestModel: User): Call<ResponseMessage> {
         return apiService.registerOrLoginUser(requestModel)
     }
+
+    fun verifyAttendance(party_id: String, guest_id: String): Call<ResponseMessage> {
+        return apiService.verifyAttendance(party_id, guest_id)
+    }
+
     fun updateUserDetails(user_id: String, requestModel: User): Call<ResponseMessage> {
         return apiService.updateUserDetails(user_id, requestModel)
     }
+    
     fun deleteUserAccount(user_id: String): Call<ResponseMessage> {
         return apiService.deleteUserAccount(user_id)
     }
