@@ -15,10 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,13 +38,8 @@ import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
-import com.example.vibees.Models.User
 import com.example.vibees.screens.user.Header
-import com.example.vibees.ui.theme.GrayWhite
 import com.example.vibees.ui.theme.SubtleWhite
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,12 +67,17 @@ fun MyPartiesScreen(
         val successfn_attending: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
             attendingParties = response
-            Log.d("TAG", attendingParties.toString())
+            Log.d("TAG attending", attendingParties.toString())
         }
 
         // failed request
+        val failurefn_hosting: (Throwable) -> Unit = { t ->
+            Log.d("TAG", "FAILURE: hosting")
+            Log.d("TAG failure", t.printStackTrace().toString())
+        }
+
         val failurefn_attending: (Throwable) -> Unit = { t ->
-            Log.d("TAG", "FAILURE")
+            Log.d("TAG", "FAILURE: attending")
             Log.d("TAG", t.printStackTrace().toString())
         }
 
@@ -88,10 +85,10 @@ fun MyPartiesScreen(
         val successfn_hosting: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
             hostingParties = response
-            Log.d("TAG", hostingParties.toString())
+            Log.d("TAG hosting", hostingParties.toString())
         }
 
-        val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_attending)
+        val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_hosting)
 
         val responseAttending =
             vibeesApi.getPartiesAttending(successfn_attending, failurefn_attending)
@@ -155,69 +152,161 @@ fun MyPartiesScreen(
         ) {
 
         }
-        // parties
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
-        ) {
-            item {
-                Text(
-                    text = "Hosted by Me",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(bottom = 5.dp, top = 10.dp)
-                )
-            }
 
-            if (hostingParties.isEmpty()) {
+        if (searchText == "") {
+            // parties
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
+            ) {
                 item {
-                    Row(
+                    Text(
+                        text = "Hosted by Me",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineLarge,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .height(200.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else {
-                items(hostingParties.size) {
-                    PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
-                }
-            }
-
-            item {
-                Text(
-                    text = "Upcoming Parties",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(bottom = 5.dp, top = 10.dp)
-                )
-            }
-            if (attendingParties.isEmpty()) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .height(200.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else {
-                items(attendingParties.size) {
-                    PartyItem(
-                        partyInfo = attendingParties[it],
-                        isMyParty = true,
-                        onClick = onClick,
+                            .padding(bottom = 5.dp, top = 10.dp)
                     )
                 }
+
+                if (hostingParties.isEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .height(75.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "You are currently not hosting any parties",
+                                fontWeight = FontWeight.Light,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .padding(bottom = 5.dp, top = 10.dp)
+                            )
+//                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    items(hostingParties.size) {
+                        PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
+                    }
+                }
+
+                item {
+                    Text(
+                        text = "Upcoming Parties",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier
+                            .padding(bottom = 5.dp, top = 10.dp)
+                    )
+                }
+                if (attendingParties.isEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .height(75.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "You are currently not attending any parties",
+                                fontWeight = FontWeight.Light,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .padding(bottom = 5.dp, top = 10.dp)
+                            )
+//                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    items(attendingParties.size) {
+                        PartyItem(
+                            partyInfo = attendingParties[it],
+                            isMyParty = true,
+                            onClick = onClick,
+                        )
+                    }
+                }
             }
+        } else {
+            Text(
+                text = "Search Results",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier
+                    .padding(bottom = 5.dp, top = 10.dp)
+            )
         }
+
+//        // parties
+//        LazyColumn(
+//            verticalArrangement = Arrangement.spacedBy(20.dp),
+//            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
+//        ) {
+//            item {
+//                Text(
+//                    text = "Hosted by Me",
+//                    fontWeight = FontWeight.Bold,
+//                    style = MaterialTheme.typography.headlineLarge,
+//                    modifier = Modifier
+//                        .padding(bottom = 5.dp, top = 10.dp)
+//                )
+//            }
+//
+//            if (hostingParties.isEmpty()) {
+//                item {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .height(200.dp),
+//                        horizontalArrangement = Arrangement.Center,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                    ) {
+//                        CircularProgressIndicator()
+//                    }
+//                }
+//            } else {
+//                items(hostingParties.size) {
+//                    PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
+//                }
+//            }
+//
+//            item {
+//                Text(
+//                    text = "Upcoming Parties",
+//                    fontWeight = FontWeight.Bold,
+//                    style = MaterialTheme.typography.headlineLarge,
+//                    modifier = Modifier
+//                        .padding(bottom = 5.dp, top = 10.dp)
+//                )
+//            }
+//            if (attendingParties.isEmpty()) {
+//                item {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .height(200.dp),
+//                        horizontalArrangement = Arrangement.Center,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                    ) {
+//                        CircularProgressIndicator()
+//                    }
+//                }
+//            } else {
+//                items(attendingParties.size) {
+//                    PartyItem(
+//                        partyInfo = attendingParties[it],
+//                        isMyParty = true,
+//                        onClick = onClick,
+//                    )
+//                }
+//            }
+//        }
     }
 }

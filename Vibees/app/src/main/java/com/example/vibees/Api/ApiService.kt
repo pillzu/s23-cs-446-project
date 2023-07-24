@@ -8,9 +8,11 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.DELETE
 import retrofit2.http.Path
 
-interface ApiService  {
+interface ApiService {
 
     @POST("/parties/host")
     fun requestParty(@Body requestModel: Party): Call<ResponseMessage>
@@ -28,8 +30,22 @@ interface ApiService  {
     fun requestMyPartiesHosting(@Body requestModel: User): Call<List<Party>>
 
     @POST("/parties/attend/{party_id}")
-    fun registerUserForParty(@Path("party_id") party_id: String, @Body requestModel: User): Call<ResponseMessage>
+    fun registerUserForParty(
+        @Path("party_id") party_id: String,
+        @Body requestModel: User
+    ): Call<ResponseMessage>
 
     @POST("/user")
     fun registerOrLoginUser(@Body requestModel: User): Call<ResponseMessage>
+
+
+    @GET("/party/qr/{party_id}/{guest_id}")
+    fun verifyAttendance(@Path("party_id") party_id: String, @Path("guest_id") guest_id:String): Call<ResponseMessage>
+
+    @PUT("/user/{user_id}")
+    fun updateUserDetails(@Path("user_id") user_id: String, @Body requestModel: User): Call<ResponseMessage>
+
+    @DELETE("/user/{user_id}")
+    fun deleteUserAccount(@Path("user_id") user_id: String): Call<ResponseMessage>
+
 }

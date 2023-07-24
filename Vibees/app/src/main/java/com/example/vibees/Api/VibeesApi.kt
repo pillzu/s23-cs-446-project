@@ -1,10 +1,12 @@
 package com.example.vibees.Api
 
+import android.util.Log
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -13,6 +15,10 @@ class VibeesApi {
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
+    val profile_url = GlobalAppState.currentUser?.profile_url
+    val phone_no = GlobalAppState.currentUser?.phone_no
+    val email = GlobalAppState.currentUser?.email
+
 
     fun getAllParties(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit, tags: List<String>) {
         val callResponse = apiService.getAllParties(Tags(tags))
@@ -92,7 +98,7 @@ class VibeesApi {
         )
     }
 
-    fun createParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, obj: Party) {
+    fun createParty(successfn: (ResponseMessage) -> Unit, failurefn: (ResponseBody) -> Unit, obj: Party) {
         val callResponse = apiService.createParty(obj)
         return callResponse.enqueue(
             object: Callback<ResponseMessage> {
@@ -100,11 +106,15 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(response.errorBody()!!)
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                    failurefn(t)
+                    Log.d("ERROR", "FAILURE: Create party")
                 }
             }
         )
@@ -132,6 +142,72 @@ class VibeesApi {
         val callResponse = apiService.registerUser(user)
         return callResponse.enqueue(
             object: Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    successfn(response.body()!!)
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+
+    fun verifyAttendance(successfn: (Int) -> Unit, failurefn: () -> Unit, party_id: String) {
+        val callResponse = apiService.verifyAttendance(party_id, userID.toString())
+        return callResponse.enqueue(
+            object: Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    successfn(response.code())
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn()
+                }
+            }
+        )
+    }
+
+
+    fun deleteUserAccount(
+        user_id: String,
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit
+    ) {
+        val callResponse = apiService.deleteUserAccount(user_id)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    successfn(response.body()!!)
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+
+    fun updateUserDetails(
+        user_id: String,
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+        requestModel: User
+    ) {
+        val callResponse = apiService.updateUserDetails(user_id, requestModel)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
                 override fun onResponse(
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>

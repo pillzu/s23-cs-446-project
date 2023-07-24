@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.example.vibees.R
 import com.example.vibees.ui.theme.Yellow
 
+
 @Composable
 fun HelpScreen() {
     Box(

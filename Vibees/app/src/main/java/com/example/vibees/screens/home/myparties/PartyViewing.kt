@@ -75,6 +75,20 @@ fun PartyViewing(
         Log.d("TAG", t.printStackTrace().toString())
     }
 
+    var attends by remember {
+        mutableStateOf(false)
+    }
+
+    // verify the user attends the party
+    val attendfn: (Int) -> Unit = { code ->
+        attends = code == 200
+    }
+
+    // verify the user does not attend the part
+    val unattendfn: () -> Unit = {
+        attends = false
+    }
+
     // get success and failure functions for getting data for id
     // Successful request for id
     val idsuccessfn: (Party) -> Unit = { response ->
@@ -118,6 +132,7 @@ fun PartyViewing(
     } else {
         // check if id found or not
         if (idfound or (partyDetails != null)) {
+            val att = vibeesApi.verifyAttendance(attendfn, unattendfn, id)
             idfound = true
             // show party details
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -248,10 +263,11 @@ fun PartyViewing(
                             val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
                         },
                         modifier = Modifier.padding(20.dp),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary),
+                        enabled = !attends
                     ) {
                         androidx.compose.material.Text(
-                            text = "Attend Party",
+                            text = if (attends) "Attended" else "Attend Party",
                             color = Color.Black
                         )
                     }

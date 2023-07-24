@@ -135,7 +135,7 @@ fun PartyItem(
                     modifier = Modifier.weight(0.6f)
                 ) {
                     PartyCardAttribute(
-                        key = "Time", value = partyInfo.date_time.toLocalTime().format(
+                        key = "Time", value = partyInfo.date_time.format(
                             DateTimeFormatter.ofPattern("hh:mm a")
                         )
                     )

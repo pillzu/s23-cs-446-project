@@ -115,7 +115,8 @@ class DatabaseConnection:
             return None
 
     """
-    add_new_party(party_avatar_url, party_name, date_time, host_id, max_capacity, description, entry_fee): 
+    add_new_party(party_avatar_url, party_name, date_time, host_id, max_capacity, description, 
+    entry_fee, type, drug, byob, image, host_name, qr_endpoint): 
     Insert a new party entry with the given information into the Parties table. 
     The party's creation time will be filled as the current system time.
         Parameters: 
@@ -127,6 +128,11 @@ class DatabaseConnection:
             - max_capacity: The maximum capacity of the guests in the party (integer)
             - description: The description of the party, entered by the host (string)
             - entry_fee: The entry fee of the party (integer)
+            - type: the type of the party (string)
+            - drug: if the party is related to drug (boolean)
+            - byob: if the party is related to alcohol (boolean)
+            - host_name: username of the host (string)
+            - qr_endpoint: url of the qrcode of the party (string)
         Returns:
             - uuid: if exec_stmt=True and the party is inserted successfully, return the party's id
             - statement, uuid: if exec_stmt=False, return the SQL statement to be executed and the generated party id 
@@ -136,8 +142,8 @@ class DatabaseConnection:
     """
 
     def add_new_party(self, party_avatar_url, party_name, date_time, host_id, max_capacity,
-                      description, entry_fee, party_id=None,
-                      exec_stmt=True):
+                      description, entry_fee, type, drug, byob, host_name, qr_endpoint,
+                      party_id=None, exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
 
@@ -146,11 +152,10 @@ class DatabaseConnection:
                     cur.execute("SELECT gen_random_uuid()")
                     party_id = cur.fetchone()[0]
 
-            # TODO: Remove parties and thumbnail
             statement = f"INSERT INTO Parties " \
                         f"VALUES ('{party_id}', '{party_avatar_url}', '{party_name}', '{date_time}', '{host_id}', '{datetime.now(timez)}', " \
-                        f"{max_capacity}, '{description}', " \
-                        f"{entry_fee});\n"
+                        f"{max_capacity}, '{description}', {entry_fee}, '{type}', {drug}, {byob}, '{host_name}', '{qr_endpoint}'" \
+                        f");\n"
 
             if exec_stmt:
                 assert self.exec_DDL(statement)
@@ -512,7 +517,7 @@ class DatabaseConnection:
                 sub_queries.append(f" address_postal = '{address_postal}'")
 
             if email is not None:
-                sub_queries.append(f" email = '{email}")
+                sub_queries.append(f" email = '{email}'")
 
             stmt = self.__join_subqueries(
                 "UPDATE Users SET", sub_queries)
@@ -920,10 +925,12 @@ class DatabaseConnection:
             return False
 
     """
-    exec_host_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description, entry_fee, street, city, prov, 
-    postal_code, tag_list): Adds the party into the database, sets its location and tags
+    exec_host_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description, 
+    entry_fee, street, city, prov, postal_code, tag_list, type, drug, byob, host_name,
+    qr_endpoint): Adds the party into the database, sets its location and tags
         Parameters:
-            - party_name, date_time, host_id, max_capacity, description, entry_fee: identifies a party
+            - party_name, date_time, host_id, max_capacity, description, entry_fee, type, drug,
+              byob, image, host_name, qr_endpoint: identifies a party
             - street, city, prov, postal_code: identifies a party location
             - tag_list: a list of party tags
         Returns:
@@ -932,12 +939,13 @@ class DatabaseConnection:
     """
 
     def exec_host_party(self, party_name, party_avatar_url, date_time, host_id, max_capacity,
-                        description, entry_fee, street, city,
-                        prov, postal_code, tag_list):
+                        description, entry_fee, street, city, prov, postal_code, tag_list,
+                        type, drug, byob, host_name, qr_endpoint):
         try:
             add_party = self.add_new_party(party_avatar_url, party_name, date_time, host_id,
-                                           max_capacity, description,
-                                           entry_fee, exec_stmt=False)
+                                           max_capacity, description, entry_fee, type, drug,
+                                           byob, host_name, qr_endpoint,
+                                           exec_stmt=False)
             statements = add_party[0]
             party_id = add_party[1]
             statements += self.set_location(party_id, street,
@@ -1030,6 +1038,11 @@ class DatabaseConnection:
                         "max_capacity INTEGER NOT NULL, " \
                         "description VARCHAR(250) NOT NULL, " \
                         "entry_fee INTEGER, " \
+                        "type VARCHAR(30), " \
+                        "drug BOOLEAN, " \
+                        "byob BOOLEAN, " \
+                        "host_name VARCHAR(50) NOT NULL, " \
+                        "qr_endpoint VARCHAR(100), " \
                         "CONSTRAINT host_user_id " \
                         "FOREIGN KEY (host_id) REFERENCES Users(user_id) ON DELETE SET NULL)"
             self.exec_DDL(statement)
