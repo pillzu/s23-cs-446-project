@@ -27,7 +27,10 @@ def host_party():
                                   req["max_cap"], req["desc"],
                                   req["entry_fee"], req["street"],
                                   req["city"], req["prov"],
-                                  req["postal_code"], req["tags"])
+                                  req["postal_code"], req["tags"],
+                                  req["type"], req["drug"],
+                                  req["byob"], req["image"],
+                                  req["host_name"], req["qr_endpoint"])
 
     if not party_id:
         return jsonify({"message": "Unable to create party. Please try again..."}), 400
@@ -234,4 +237,4 @@ if __name__ == "__main__":
         exit(1)
 
     db.create_tables()
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=8080)
