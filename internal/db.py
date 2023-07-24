@@ -131,7 +131,6 @@ class DatabaseConnection:
             - type: the type of the party (string)
             - drug: if the party is related to drug (boolean)
             - byob: if the party is related to alcohol (boolean)
-            - image: url of the thumbnail of the party (string)
             - host_name: username of the host (string)
             - qr_endpoint: url of the qrcode of the party (string)
         Returns:
@@ -143,7 +142,7 @@ class DatabaseConnection:
     """
 
     def add_new_party(self, party_avatar_url, party_name, date_time, host_id, max_capacity,
-                      description, entry_fee, type, drug, byob, image, host_name, qr_endpoint,
+                      description, entry_fee, type, drug, byob, host_name, qr_endpoint,
                       party_id=None, exec_stmt=True):
         try:
             timez = pytz.timezone("Canada/Eastern")
@@ -155,7 +154,7 @@ class DatabaseConnection:
 
             statement = f"INSERT INTO Parties " \
                         f"VALUES ('{party_id}', '{party_avatar_url}', '{party_name}', '{date_time}', '{host_id}', '{datetime.now(timez)}', " \
-                        f"{max_capacity}, '{description}', {entry_fee}, '{type}', {drug}, {byob}, '{image}', '{host_name}', '{qr_endpoint}'" \
+                        f"{max_capacity}, '{description}', {entry_fee}, '{type}', {drug}, {byob}, '{host_name}', '{qr_endpoint}'" \
                         f");\n"
 
             if exec_stmt:
@@ -927,7 +926,7 @@ class DatabaseConnection:
 
     """
     exec_host_party(party_name, party_avatar_url, date_time, host_id, max_capacity, description, 
-    entry_fee, street, city, prov, postal_code, tag_list, type, drug, byob, image, host_name,
+    entry_fee, street, city, prov, postal_code, tag_list, type, drug, byob, host_name,
     qr_endpoint): Adds the party into the database, sets its location and tags
         Parameters:
             - party_name, date_time, host_id, max_capacity, description, entry_fee, type, drug,
@@ -941,11 +940,11 @@ class DatabaseConnection:
 
     def exec_host_party(self, party_name, party_avatar_url, date_time, host_id, max_capacity,
                         description, entry_fee, street, city, prov, postal_code, tag_list,
-                        type, drug, byob, image, host_name, qr_endpoint):
+                        type, drug, byob, host_name, qr_endpoint):
         try:
             add_party = self.add_new_party(party_avatar_url, party_name, date_time, host_id,
                                            max_capacity, description, entry_fee, type, drug,
-                                           byob, image, host_name, qr_endpoint,
+                                           byob, host_name, qr_endpoint,
                                            exec_stmt=False)
             statements = add_party[0]
             party_id = add_party[1]
@@ -1042,7 +1041,6 @@ class DatabaseConnection:
                         "type VARCHAR(30), " \
                         "drug BOOLEAN, " \
                         "byob BOOLEAN, " \
-                        "image VARCHAR(100), " \
                         "host_name VARCHAR(50) NOT NULL, " \
                         "qr_endpoint VARCHAR(100), " \
                         "CONSTRAINT host_user_id " \
