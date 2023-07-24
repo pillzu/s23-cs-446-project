@@ -14,14 +14,13 @@ def row_to_party(party):
         "type": party[9],
         "drug": party[10],
         "byob": party[11],
-        "image": party[12],
-        "host_name": party[13],
-        "qr_endpoint": party[14],
-        "street": party[15],
-        "city": party[16],
-        "prov": party[17],
-        "postal_code": party[18],
-        "tags": party[19],
+        "host_name": party[12],
+        "qr_endpoint": party[13],
+        "street": party[14],
+        "city": party[15],
+        "prov": party[16],
+        "postal_code": party[17],
+        "tags": party[18],
     }
 
 
