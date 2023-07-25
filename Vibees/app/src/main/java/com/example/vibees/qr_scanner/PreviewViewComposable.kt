@@ -18,12 +18,14 @@ import androidx.core.app.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.example.vibees.Api.VibeesApi
+import com.example.vibees.utils.extractLastTwoUUIDs
 import java.util.concurrent.Executors
 
 @androidx.camera.core.ExperimentalGetImage
 @Composable
 fun PreviewViewComposable(
     navController: NavHostController,
+    party_id: String,
 ) {
 
     var api = VibeesApi()
@@ -50,17 +52,29 @@ fun PreviewViewComposable(
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, BarcodeAnalyser(callback = {qr_endpoint ->
-                        api.checkQrAttendee(
-                            qr_endpoint!!,
-                            successfn = { response ->
-                                Toast.makeText(context, "${response.message}", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack()
-                            },
-                            failurefn = {error ->
-                                Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack()
-                            }
-                        )
+                        var ids = extractLastTwoUUIDs(qr_endpoint!!)
+
+                        fun partyFailed(error: Throwable) {
+                            Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
+                        }
+
+                        if (ids[0] != party_id) {
+                            partyFailed(Throwable("Invalid party attendee! Please try another party"))
+                        } else {
+                            api.checkQrAttendee(
+                                qr_endpoint!!,
+                                successfn = { response ->
+                                    Toast.makeText(
+                                        context,
+                                        "${response.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    navController.popBackStack()
+                                },
+                                failurefn = { error -> partyFailed(error) }
+                            )
+                        }
 
                     }))
                 }

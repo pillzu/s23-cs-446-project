@@ -200,7 +200,7 @@ fun PartyDetails(
                     modifier = Modifier
                     .clip(RoundedCornerShape(15.dp))
                 ) {
-                    PreviewViewComposable(navController)
+                    PreviewViewComposable(navController, partyDetails?.party_id!!)
                 }
             }
         }
