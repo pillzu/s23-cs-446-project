@@ -65,8 +65,8 @@ fun HostPartyAttributesScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val apiService = APIInterface()
-    val userID by GlobalAppState::UserID
-    val userName by GlobalAppState::UserName
+    var userID by GlobalAppState::UserID
+    var userName by GlobalAppState::UserName
     val vibeesApi = VibeesApi()
     val partyContext = LocalContext.current
 
@@ -94,7 +94,7 @@ fun HostPartyAttributesScreen(
         ) {
             Text(
                 text = "Host a Party",
-                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontSize = MaterialTheme.typography.headlineMedium.fontSize,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
@@ -271,11 +271,18 @@ fun HostPartyAttributesScreen(
                         Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
                     }
 
-                    val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
-                        userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
-                        partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
-                        partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-                        partystore?.taglist!!)
+//                val obj = Party(userID, partystore?.name, partystore?.date_time!!, partystore?.type,
+//                    partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
+//                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+//                    partystore?.drug!!, partystore?.byob!!, Gson().toJson(partystore?.taglist).replace("\"", "'"),
+//                    partystore?.image.toString(),"", userName, "")
+
+                val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                    userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
+                    partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
+                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+//                    Gson().toJson(partystore?.taglist).replace("\"", "'").replace("[", "'").replace("]", "'"))
+                    partystore?.taglist!!, partystore?.attend_count!!)
 
                     Log.d("Obj value", obj.toString())
 
@@ -298,8 +305,6 @@ fun HostPartyAttributesScreen(
                 )
             }
         }
-
-
 
 
     }

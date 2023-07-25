@@ -528,8 +528,9 @@ connection = DatabaseConnection(db_url)
 # print(connection.add_new_user("NULL", "JM_Test_User_1", "JM_Test_User_1", 5198884567, "200 University Ave",
 #                               "Waterloo", "ON", "A1B 2C3", "jerry_test_1@gmail.com"))
 # print(connection.exec_attend_party("9c261503-02d2-4fd4-8399-3e905de39588", "04afd1a3-9be3-469a-9f10-bc5937d68de4", 5.0))
-# print(connection.show_attended_parties("9c261503-02d2-4fd4-8399-3e905de39588", show_detail=True))
+print(connection.show_hosted_parties("b4ed87aa-c770-15bb-f749-20071f2c4106", show_detail=True, show_attend_count=True))
 # print(connection.show_attended_parties("6515c9f8-57f1-406f-8707-20033dcd764e", show_detail=True))
 # print(connection.exec_host_party("JM_Test_Party", "NULL", datetime.now(), "9c261503-02d2-4fd4-8399-3e905de39588",
 #                                  50, "A test party", 15.0, "123 Lester St", "Waterloo", "ON", "N2L 3H8", ["Tag"]))
-# print(connection.query_party(tag_subset=["EDM"]))
+# print(connection.query_party(tag_subset=["EDM"], show_detail=True, show_attend_count=True))
+# print(connection.query_party(party_name="Test 111"))
