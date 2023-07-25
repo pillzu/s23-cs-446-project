@@ -22,7 +22,8 @@ def row_to_party(party):
         "city": party[15],
         "prov": party[16],
         "postal_code": party[17],
-        "tags": list(party[18])
+        "tags": list(party[18]),
+        "attend_count": party[19] if party[19] is not None else 0
     }
 
 

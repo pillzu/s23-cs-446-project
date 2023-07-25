@@ -1,7 +1,5 @@
 package com.example.vibees.screens.home.host
 
-import android.net.Uri
-import java.time.LocalDateTime
 import java.util.UUID
 
 // class to store data when filling in from host screen
@@ -18,7 +16,7 @@ data class PartyStore(
     var drug: Boolean? = null,
     var byob: Boolean? = null,
     var taglist: List<String>? = null,
-    var image: Uri? = null,
+    var image: String? = null,
     var user_id: UUID? = null,
     var max_cap: Int? = null,
     var party_id: String? = null,
@@ -26,4 +24,5 @@ data class PartyStore(
     var qr_endpoint: String? = null,
     // this keeps track of whether edit or host form
     var isedit: Boolean,
+    var attend_count: Int? = 0,
 )

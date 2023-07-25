@@ -8,13 +8,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.vibees.GlobalAppState
-import com.example.vibees.screens.GenericScreen
 import com.example.vibees.screens.bottombar.BottomBar
+import com.example.vibees.screens.home.HelpScreen
+import com.example.vibees.screens.home.host.HostAgreementScreen
+import com.example.vibees.screens.home.host.PartyStore
 import com.example.vibees.screens.home.myparties.MyPartiesScreen
 import com.example.vibees.screens.user.UserScreen
-import com.example.vibees.screens.home.HelpScreen
-import com.example.vibees.screens.home.host.PartyStore
-import com.example.vibees.screens.home.host.HostAgreementScreen
 
 // import settingsNavGraph
 
@@ -49,16 +48,6 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
                 navController.navigate(HostScreens.Step1.route) {
                 launchSingleTop = true
             } })
-//            GenericScreen(
-//                name = BottomBar.Host.route,
-//                onClick = { navController.navigate(HostScreens.Step1.route) {
-//                    launchSingleTop = true
-//                } }
-//            )
-//            HostScreen(
-//                name = BottomBar.Host.route,
-//                onClick = { }
-//            )
         }
         composable(route = BottomBar.Settings.route) {
             SettingsScreen(navController = navController)

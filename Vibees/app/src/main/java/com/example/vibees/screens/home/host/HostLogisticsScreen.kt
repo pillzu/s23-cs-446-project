@@ -90,7 +90,14 @@ fun HostLogisticsScreen(
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
 
+    var unitFirst by remember { mutableStateOf(true) }
+    var cityFirst by remember { mutableStateOf(true) }
+    var provinceFirst by remember { mutableStateOf(true) }
+    var postalFirst by remember { mutableStateOf(true) }
+
     val partystore by GlobalAppState::PartyStore
+
+    //Log.d("Initial Store", partystore.toString())
 
     Column(
         modifier = Modifier
@@ -105,7 +112,7 @@ fun HostLogisticsScreen(
             ) {
                 Text(
                     text = "Host a Party",
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
@@ -115,7 +122,8 @@ fun HostLogisticsScreen(
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = FontWeight.Normal,
                     color = Color.Black,
-                    modifier = Modifier.padding(20.dp)
+                    modifier = Modifier
+                        .padding(20.dp)
                         .padding(bottom = 20.dp),
                     textAlign = TextAlign.Start
                 )
@@ -123,6 +131,11 @@ fun HostLogisticsScreen(
                 val focusManager = LocalFocusManager.current
 
                 field(HostLogistics::unitandstreet) {
+                    if (partystore?.isedit == true and unitFirst) {
+                        setField(partystore?.street)
+                        unitStreet = partystore?.street.toString()
+                        unitFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -149,6 +162,11 @@ fun HostLogisticsScreen(
                     )
                 }
                 field(HostLogistics::city) {
+                    if (partystore?.isedit == true and cityFirst) {
+                        setField(partystore?.city)
+                        city = partystore?.city.toString()
+                        cityFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -175,6 +193,11 @@ fun HostLogisticsScreen(
                     )
                 }
                 field(HostLogistics::postalcode) {
+                    if (partystore?.isedit == true and postalFirst) {
+                        setField(partystore?.postal_code)
+                        postalCode = partystore?.postal_code.toString()
+                        postalFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -205,6 +228,11 @@ fun HostLogisticsScreen(
                     )
                 }
                 field(HostLogistics::province) {
+                    if (partystore?.isedit == true and provinceFirst) {
+                        setField(partystore?.prov)
+                        province = partystore?.prov.toString()
+                        provinceFirst = false
+                    }
                     province = provinceDropdownMenu()
                     setField(province)
                 }

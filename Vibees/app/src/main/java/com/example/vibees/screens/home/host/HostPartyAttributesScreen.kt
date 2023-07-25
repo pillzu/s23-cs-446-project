@@ -53,7 +53,6 @@ import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
-import com.google.gson.Gson
 import okhttp3.ResponseBody
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -201,61 +200,104 @@ fun HostPartyAttributesScreen(
             }
         }
 
+        if (partystore?.isedit == true) {
+            TextButton(
+                onClick = {
+                    partystore?.taglist = selectedlist
+                    partystore?.image = selectedImageUri.toString()
 
-        TextButton(
-            onClick = {
-                partystore?.taglist = selectedlist
-                partystore?.image = selectedImageUri
+                    Log.d("STORE update", partystore.toString())
 
-                Log.d("STORE", partystore.toString())
+                    val successfn: (ResponseMessage) -> Unit = { response ->
+                        Log.d("TAG", response.message)
+                        Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
+                        selectedlist.clear()
+                        onClick()
+                    }
 
-                val successfn: (ResponseMessage) -> Unit = { response ->
-                    Log.d("TAG", response.message)
-                    Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
-                    selectedlist.clear()
-                    onClick()
-                }
+                    // failed request
+                    val failurefn: (ResponseBody) -> Unit = { response ->
+                        Log.d("TAG", "FAILURE: could not update party.")
+                        Log.d("TAG", response.toString())
+                        Toast.makeText(partyContext, "ERROR: Could not update party.", Toast.LENGTH_LONG).show()
+                    }
+
+                    val obj = Party(partystore?.party_id, partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                        userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
+                        partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, partystore?.qr_endpoint,
+                        partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+                        partystore?.taglist!!,  partystore?.attend_count!!)
+
+                    Log.d("Obj value", obj.toString())
+
+                    // call endpoint to update a party
+                    //vibeesApi.createParty(successfn, failurefn, obj)
+                },
+                modifier = Modifier.align(Alignment.End),
+                enabled = (selectedcount > 0) and (selectedcount < 6)
+            ) {
+                Text(
+                    "Update",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                    color = if ((selectedcount > 0) and (selectedcount < 6)) Color.Blue
+                    else Color.Gray
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Arrow right"
+                )
+            }
+        } else {
+            TextButton(
+                onClick = {
+                    partystore?.taglist = selectedlist
+                    partystore?.image = selectedImageUri.toString()
+
+                    Log.d("STORE", partystore.toString())
+
+                    val successfn: (ResponseMessage) -> Unit = { response ->
+                        Log.d("TAG", response.message)
+                        Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
+                        selectedlist.clear()
+                        onClick()
+                    }
 
 
-                // failed request
-                val failurefn: (ResponseBody) -> Unit = { response ->
-                    Log.d("TAG", "FAILURE: could not create party.")
-                    Log.d("TAG", response.toString())
-                    Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
-                }
+                    // failed request
+                    val failurefn: (ResponseBody) -> Unit = { response ->
+                        Log.d("TAG", "FAILURE: could not create party.")
+                        Log.d("TAG", response.toString())
+                        Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
+                    }
 
-//                val obj = Party(userID, partystore?.name, partystore?.date_time!!, partystore?.type,
-//                    partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
-//                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-//                    partystore?.drug!!, partystore?.byob!!, Gson().toJson(partystore?.taglist).replace("\"", "'"),
-//                    partystore?.image.toString(),"", userName, "")
 
-                val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
-                    userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
-                    partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
-                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-//                    Gson().toJson(partystore?.taglist).replace("\"", "'").replace("[", "'").replace("]", "'"))
-                    partystore?.taglist!!)
+                    val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                        userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
+                        partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
+                        partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+                        partystore?.taglist!!, partystore?.attend_count!!)
 
-                Log.d("Obj value", obj.toString())
+                    Log.d("Obj value", obj.toString())
 
-                // call endpoint /parties/host to create a party
-                val callResponse = vibeesApi.createParty(successfn, failurefn, obj)
-                      },
-            modifier = Modifier.align(Alignment.End),
-            enabled = (selectedcount > 0) and (selectedcount < 6)
-        ) {
-            Text(
-                "Create",
-                fontWeight = FontWeight.SemiBold,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = if ((selectedcount > 0) and (selectedcount < 6)) Color.Blue
-                        else Color.Gray
-            )
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
-                contentDescription = "Arrow right"
-            )
+                    // call endpoint /parties/host to create a party
+                    vibeesApi.createParty(successfn, failurefn, obj)
+                },
+                modifier = Modifier.align(Alignment.End),
+                enabled = (selectedcount > 0) and (selectedcount < 6)
+            ) {
+                Text(
+                    "Create",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                    color = if ((selectedcount > 0) and (selectedcount < 6)) Color.Blue
+                    else Color.Gray
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Arrow right"
+                )
+            }
         }
 
 

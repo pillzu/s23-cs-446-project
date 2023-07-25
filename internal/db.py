@@ -395,16 +395,29 @@ class DatabaseConnection:
             - None: otherwise
     """
 
-    def show_attended_parties(self, user_id, show_detail=False, limit=50):
+    def show_attended_parties(self, user_id, show_detail=False, show_attend_count=False, limit=50):
         try:
             if show_detail:
-                statement = f"SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, tag.tag_list FROM Transactions t " \
-                            f"JOIN Parties p ON t.party_id = p.party_id " \
-                            f"JOIN PartyLocations pl ON t.party_id = pl.party_id " \
-                            f"JOIN Tags tag ON t.party_id = tag.party_id " \
-                            f"WHERE t.guest_id = '{user_id}'"
+                if show_attend_count:
+                    statement = f"SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, tag.tag_list, count.attend_count FROM Transactions t "
+                else:
+                    statement = f"SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, tag.tag_list FROM Transactions t "
+                statement += f"JOIN Parties p ON t.party_id = p.party_id " \
+                             f"JOIN PartyLocations pl ON t.party_id = pl.party_id " \
+                             f"JOIN Tags tag ON t.party_id = tag.party_id "
             else:
-                statement = f"SELECT t.party_id FROM Transactions t WHERE t.guest_id = '{user_id}'"
+                statement = f"SELECT t.party_id AS p.party_id FROM Transactions t "
+
+            if show_attend_count:
+                statement += " LEFT OUTER JOIN (SELECT t.party_id AS pid, COUNT(*) AS attend_count " \
+                          "FROM Transactions t " \
+                          "GROUP BY t.party_id) " \
+                          "AS count ON p.party_id = count.pid "
+
+            statement += f"WHERE t.guest_id = '{user_id}'"
+
+            print(statement)
+
             return self.exec_DML(statement, limit)
 
         except Exception as e:
@@ -425,16 +438,9 @@ class DatabaseConnection:
             - None: otherwise
     """
 
-    def show_hosted_parties(self, user_id, show_detail=False, limit=50):
+    def show_hosted_parties(self, user_id, show_detail=False, show_attend_count=False, limit=50):
         try:
-            if show_detail:
-                statement = f"SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, t.tag_list FROM Parties p " \
-                            f"JOIN PartyLocations pl ON p.party_id = pl.party_id " \
-                            f"JOIN Tags t ON p.party_id = t.party_id " \
-                            f"WHERE p.host_id = '{user_id}'"
-            else:
-                statement = f"SELECT p.party_id FROM Parties p WHERE p.host_id = '{user_id}'"
-            return self.exec_DML(statement, limit)
+            return self.query_party(hosted_by=user_id, show_detail=show_detail, show_attend_count=show_attend_count)
 
         except Exception as e:
             logging.fatal("Displaying hosted parties failed")
@@ -729,6 +735,7 @@ class DatabaseConnection:
             - street, city, prov: Return parties with matching addresses
             - tag_subset: Return parties whose tags contains all tags in tag_subset
             - show_detail: Returns all party info (including addresses) if set to true, otherwise only return the ids.
+            - show_attend_count: Returns number of users registered to the party
             - limit: if specified return at most this amount of rows. Defaulted to 50.
         Returns:
             - row: The query result, if stmt is queried successfully.
@@ -741,7 +748,7 @@ class DatabaseConnection:
     def query_party(self, party_id=None, party_avatar_url=None, party_name=None, start_date=None,
                     end_date=None, hosted_by=None, created_after=None, max_capacity=None,
                     entry_fee=None, street=None, city=None, prov=None, tag_subset=None,
-                    show_detail=False, limit=50):
+                    show_detail=False, show_attend_count=False, limit=50):
         try:
             sub_queries = []
 
@@ -790,11 +797,22 @@ class DatabaseConnection:
                 prefix = "SELECT p.*, pl.street, pl.city, pl.prov, pl.postal_code, t.tag_list "
             else:
                 prefix = "SELECT p.party_id "
+
+            if show_attend_count:
+                prefix += ", count.attend_count "
+
             prefix += "FROM Parties p " \
                       "JOIN PartyLocations pl ON p.party_id = pl.party_id " \
                       "JOIN Tags t ON t.party_id = p.party_id"
 
+            if show_attend_count:
+                prefix += " LEFT OUTER JOIN (SELECT t.party_id AS party_id, COUNT(*) AS attend_count " \
+                             "FROM Transactions t " \
+                             "GROUP BY t.party_id) " \
+                             "AS count ON p.party_id = count.party_id"
+
             statement = self.__create_query_statement(prefix, sub_queries)
+
             print(statement)
 
             return self.exec_DML(statement, limit)

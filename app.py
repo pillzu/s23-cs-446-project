@@ -3,8 +3,6 @@ from internal.db import DatabaseConnection
 from decouple import config
 import logging
 import internal.helpers as hp
-import uuid
-import json
 from email_validator import validate_email, EmailNotValidError
 from internal.helpers import is_valid_phone_number, return_message_response
 import spotipy
@@ -63,9 +61,9 @@ def get_tagged_parties():
     tags = req.get("tags", None)
 
     # TODO: Get hostname as well (don't need ID)
-    parties = db.query_party(show_detail=True)
+    parties = db.query_party(show_detail=True, show_attend_count=True)
     if tags is not None and len(tags) != 0:
-        parties = db.query_party(tag_subset=tags, show_detail=True)
+        parties = db.query_party(tag_subset=tags, show_detail=True, show_attend_count=True)
 
     if parties is None:
         return jsonify({"message": "Unable to fetch tagged parties. Please try again..."}), 500
@@ -76,7 +74,7 @@ def get_tagged_parties():
 
 @ app.get("/parties/<party_id>")
 def get_party_details(party_id):
-    party = db.query_party(party_id=party_id, show_detail=True)
+    party = db.query_party(party_id=party_id, show_detail=True, show_attend_count=True)
     if party is None:
         return {"message": "Party does not exist! Please try again..."}, 404
 
@@ -154,7 +152,7 @@ def get_user_attendee_parties():
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
 
-    parties = db.show_attended_parties(user_id, show_detail=True)
+    parties = db.show_attended_parties(user_id, show_detail=True, show_attend_count=True)
 
     if parties is None:
         return {"message": "Failed to get user attended parties! Please contact help"}, 500
@@ -178,7 +176,11 @@ def get_user_attendee_parties():
 def get_user_host_parties():
     """Endpoint to retrieve user's hosted parties"""
     req = request.json
-    parties = db.show_hosted_parties(req["user_id"], show_detail=True)
+    user_id = req.get("user_id", None)
+    if user_id is None:
+        return {"message": "No user id provided! Please try again..."}, 400
+
+    parties = db.show_hosted_parties(user_id, show_detail=True, show_attend_count=True)
 
     if parties is None:
         return {"message": "Failed to get user hosted parties! Please contact help"}, 500
