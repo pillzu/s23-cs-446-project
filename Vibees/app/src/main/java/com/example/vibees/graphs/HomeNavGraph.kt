@@ -43,7 +43,10 @@ fun HomeNavGraph(navController: NavHostController, modifier: Modifier) {
             )
         }
         composable(route = BottomBar.Host.route) {
-            HostAgreementScreen(onClick = { navController.navigate(HostScreens.Step1.route) {
+            HostAgreementScreen(onClick = {
+                // reset party store to empty
+                partystore = PartyStore(isedit = false)
+                navController.navigate(HostScreens.Step1.route) {
                 launchSingleTop = true
             } })
 //            GenericScreen(
