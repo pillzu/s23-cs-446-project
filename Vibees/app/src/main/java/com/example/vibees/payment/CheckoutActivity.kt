@@ -10,7 +10,9 @@ import com.example.vibees.Api.VibeesApi
 import com.example.vibees.MainActivity
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.PaymentMetaData
+import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Transaction
+import com.example.vibees.screens.bottombar.BottomBar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -39,8 +41,15 @@ class CheckoutActivity : AppCompatActivity() {
         Log.d("TAG", t.printStackTrace().toString())
     }
 
+    // Successful request
+    val attend: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG", "${response.message}")
+    }
+
+
     var userId = ""
     var userName = ""
+    var partyId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +59,7 @@ class CheckoutActivity : AppCompatActivity() {
         val response = vibeesApi.getPaymentInfo(transaction, successfn, failurefn)
         userId = intent.getStringExtra("userID")!!
         Log.d(ContentValues.TAG, "UserID: ${userId}")
+        partyId = intent.getStringExtra("partyID")!!
         userName = intent.getStringExtra("userName")!!
         Log.d(ContentValues.TAG, "UserName: ${userName}")
     }
@@ -85,15 +95,18 @@ class CheckoutActivity : AppCompatActivity() {
                 Log.d("TAG", "TRANSACTION COMPLETED")
                 showToast("Transaction Completed")
 
-                val intentNew = Intent(this, MainActivity::class.java)
-                intentNew.putExtra("navigateToHome", true)
-                intentNew.putExtra("userID", userId)
-                intentNew.putExtra("userName", userName)
-
-                startActivity(intentNew)
-                finish()
+                // user will attend party
+                val callResponse = vibeesApi.registerUserForParty(attend, failurefn, partyId)
             }
         }
+
+        val intentNew = Intent(this, MainActivity::class.java)
+        intentNew.putExtra("navigateToHome", true)
+        intentNew.putExtra("userID", userId)
+        intentNew.putExtra("userName", userName)
+
+        startActivity(intentNew)
+        finish()
     }
 
     private fun showToast(message: String) {

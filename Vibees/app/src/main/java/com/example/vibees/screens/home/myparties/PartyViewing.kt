@@ -90,18 +90,6 @@ fun PartyViewing(
     var idfound by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
 
-    // Successful request
-    val successfn: (ResponseMessage) -> Unit = { response ->
-        Log.d("TAG", "${response.message}")
-        navController.navigate(BottomBar.MyParties.route)
-    }
-
-    // failed request
-    val failurefn: (Throwable) -> Unit = { t ->
-        Log.d("TAG", "FAILURE")
-        Log.d("TAG", t.printStackTrace().toString())
-    }
-
     var attends by remember {
         mutableStateOf(false)
     }
@@ -299,8 +287,8 @@ fun PartyViewing(
                             intent.putExtra("userID", userId)
                             val userName: String = UserName!!
                             intent.putExtra("userName", userName)
+                            intent.putExtra("partyID", partyDetails?.party_id!!)
                             launcher.launch(intent)
-                            val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
                         },
                         modifier = Modifier.padding(20.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary),
