@@ -1,6 +1,7 @@
 package com.example.vibees.Api
 
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.Playlist
 import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
@@ -34,7 +35,7 @@ interface ApiService {
     @POST("/parties/attend/{party_id}")
     fun registerUserForParty(
         @Path("party_id") party_id: String,
-        @Body requestModel: User
+        @Body requestModel: Playlist
     ): Call<ResponseMessage>
 
     @POST("/user")
@@ -49,6 +50,9 @@ interface ApiService {
 
     @DELETE("/user/{user_id}")
     fun deleteUserAccount(@Path("user_id") user_id: String): Call<ResponseMessage>
+
+    @GET("/{qr_url}")
+    fun checkQrAttendee(@Path("qr_url") qr_endpoint: String): Call<ResponseMessage>
 
 
     @POST("/payment-sheet")

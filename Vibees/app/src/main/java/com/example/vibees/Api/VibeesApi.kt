@@ -3,6 +3,7 @@ package com.example.vibees.Api
 import android.util.Log
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.Playlist
 import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Transaction
@@ -72,7 +73,11 @@ class VibeesApi {
                     call: Call<List<Party>>,
                     response: Response<List<Party>>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<List<Party>>, t: Throwable) {
@@ -92,7 +97,11 @@ class VibeesApi {
                     call: Call<List<Party>>,
                     response: Response<List<Party>>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<List<Party>>, t: Throwable) {
@@ -124,15 +133,19 @@ class VibeesApi {
         )
     }
 
-    fun registerUserForParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, party_id: String) {
-        val callResponse = apiService.attendParty(party_id, User(userID!!))
+    fun registerUserForParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, party_id: String, songList: List<String>) {
+        val callResponse = apiService.attendParty(party_id, Playlist(User(userID!!), songList))
         return callResponse.enqueue(
             object: Callback<ResponseMessage> {
                 override fun onResponse(
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
@@ -150,7 +163,11 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
@@ -209,7 +226,11 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
@@ -233,7 +254,39 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+    fun checkQrAttendee(
+        user_endpoint: String,
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+    ) {
+        val callResponse = apiService.checkQrAttendee(user_endpoint)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    if (response.code() == 404) {
+                        failurefn(Throwable("Invalid URL!"))
+                    } else if (response.code() == 401) {
+                        failurefn(Throwable("Invalid Attendee!"))
+                    } else {
+                        successfn(response.body()!!)
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
