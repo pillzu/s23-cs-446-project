@@ -1,12 +1,15 @@
 package com.example.vibees.screens.home.host
 
-import android.content.Context
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,17 +51,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.utils.URIPathHelper
 import com.example.vibees.utils.toFileUri
 import com.example.vibees.utils.uploadToCloudinary
 import okhttp3.ResponseBody
-import java.net.URI
 
+@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HostPartyAttributesScreen(
@@ -80,6 +85,17 @@ fun HostPartyAttributesScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
     )
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("HostScreen","PERMISSION GRANTED")
+
+        } else {
+            Log.d("HostScreen","PERMISSION DENIED")
+        }
+    }
 
     val tags = listOf("Dance", "Board game", "Karaoke", "Barbecue", "Pool", "Disco", "Birthday",
         "Graduation", "Adult only", "Business", "Formal", "Wedding", "Sports", "Bar Hopping", "Day",
@@ -213,6 +229,40 @@ fun HostPartyAttributesScreen(
                     partystore?.image = selectedImageUri.toString()
 
                     Log.d("STORE update", partystore.toString())
+
+                    val uriPathHelper = URIPathHelper()
+                    val filePath = uriPathHelper.getPath(partyContext, selectedImageUri!!)
+                    Log.i("FilePath", filePath.toString())
+
+                    when (PackageManager.PERMISSION_GRANTED) {
+                        ContextCompat.checkSelfPermission(
+                            partyContext,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        ) -> {
+                            // Some works that require permission
+                            Log.d("HostScreen","Code has write permission")
+                        }
+                        else -> {
+                            // Asking for permission
+                            launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
+                    }
+                    when (PackageManager.PERMISSION_GRANTED) {
+                        ContextCompat.checkSelfPermission(
+                            partyContext,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        ) -> {
+                            // Some works that require permission
+                            Log.d("HostScreen","Code has read permission")
+                        }
+                        else -> {
+                            // Asking for permission
+                            launcher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        }
+                    }
+
+                    // upload to cloudinary
+                    val imgUri = filePath?.let { uploadToCloudinary(it) }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
