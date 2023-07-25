@@ -22,7 +22,7 @@ def row_to_party(party):
         "city": party[15],
         "prov": party[16],
         "postal_code": party[17],
-        "tags": party[18],
+        "tags": list(party[18])
     }
 
 
