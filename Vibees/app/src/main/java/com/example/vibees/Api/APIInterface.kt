@@ -1,6 +1,7 @@
 package com.example.vibees.Api
 
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.Playlist
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
@@ -15,7 +16,7 @@ import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val url = "http://192.168.0.43:5000"
+const val url = "http://10.34.57.82:8080"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -66,7 +67,7 @@ class APIInterface {
         return apiService.requestMyPartiesHosting(requestModel)
     }
 
-    fun attendParty(party_id: String, requestModel: User): Call<ResponseMessage> {
+    fun attendParty(party_id: String, requestModel: Playlist): Call<ResponseMessage> {
         return apiService.registerUserForParty(party_id, requestModel)
     }
 

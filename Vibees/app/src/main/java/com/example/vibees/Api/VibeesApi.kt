@@ -3,6 +3,7 @@ package com.example.vibees.Api
 import android.util.Log
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.Playlist
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
@@ -120,8 +121,8 @@ class VibeesApi {
         )
     }
 
-    fun registerUserForParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, party_id: String) {
-        val callResponse = apiService.attendParty(party_id, User(userID!!))
+    fun registerUserForParty(successfn: (ResponseMessage) -> Unit, failurefn: (Throwable) -> Unit, party_id: String, songList: List<String>) {
+        val callResponse = apiService.attendParty(party_id, Playlist(User(userID!!), songList))
         return callResponse.enqueue(
             object: Callback<ResponseMessage> {
                 override fun onResponse(

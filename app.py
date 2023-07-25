@@ -95,10 +95,13 @@ def get_party_details(party_id):
 def attend_party(party_id):
     """Endpoint to register attendee to a party"""
     req = request.json
-    user_id = req.get("user_id", None)
+    user = req["user"]
+    user_id = user["user_id"]
+#     user_id = req.get("user_id", None)
     
     # TODO: Edit frontend connecting to attend_party to ask attendee for a list of Spotify track names
-    track_names = req.get("track_names")
+#     track_names = req.get("track_names")
+    track_names = req["songList"]
 
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
