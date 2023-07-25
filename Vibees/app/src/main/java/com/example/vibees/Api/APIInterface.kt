@@ -15,7 +15,7 @@ import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val url = "http://192.168.0.43:5000"
+const val url = "http://192.168.183.85:5000"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
