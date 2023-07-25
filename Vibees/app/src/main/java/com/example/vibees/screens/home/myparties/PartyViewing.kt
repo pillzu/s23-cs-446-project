@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Face
@@ -150,7 +151,13 @@ fun PartyViewing(
                             .size(40.dp)
                             .clickable {
                                 clipboardManager.setText(AnnotatedString("https://vibees.ca/party/${id}"))
-                                Toast.makeText(context, "Invite link copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Invite link copied to clipboard!",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                    .show()
                             }
                     )
                 }
@@ -254,17 +261,50 @@ fun PartyViewing(
                     }
                 }
 
+                var songString by remember { mutableStateOf("") }
+                if (!attends) {
+                    Column(modifier = Modifier.fillMaxWidth(),
+                           horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "Attending this party? Give us your song recommendations!",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            modifier = Modifier.fillMaxWidth().padding(12.dp, 5.dp, 12.dp, 5.dp),
+                            color = Color.Black)
+                        Text(text = "Enter song names separated by a comma (minimum 1)",
+                            fontWeight = FontWeight.Light,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            modifier = Modifier.fillMaxWidth().padding(12.dp, 0.dp, 12.dp, 5.dp),
+                            color = Color.Black)
+                        OutlinedTextField(modifier = Modifier.fillMaxWidth().padding(12.dp, 0.dp, 12.dp, 0.dp),
+                            value = songString,
+                            onValueChange = {
+                                songString = it
+                            },
+                            placeholder = {
+                                androidx.compose.material3.Text(
+                                    "eg: Calm Down, Dynamite",
+                                    color = Color.Gray
+                                )
+                            }
+                        )
+                    }
+                }
+                val songList = mutableListOf(*songString.split(",").toTypedArray())
+                var canAttend by remember { mutableStateOf(false) }
+                if (songString != "") { canAttend = true }
+
                 Row(modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp),
                     horizontalArrangement = Arrangement.Center) {
                     androidx.compose.material.Button(
                         onClick = {
-                            val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
+                            val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!, songList)
                         },
                         modifier = Modifier.padding(20.dp),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary),
-                        enabled = !attends
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary,
+                        disabledContentColor = Color.Gray),
+                        enabled = (!attends && canAttend)
                     ) {
                         androidx.compose.material.Text(
                             text = if (attends) "Attended" else "Attend Party",
