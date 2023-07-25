@@ -26,4 +26,5 @@ data class PartyStore(
     var qr_endpoint: String? = null,
     // this keeps track of whether edit or host form
     var isedit: Boolean,
+    var attend_count: Int? = 0,
 )

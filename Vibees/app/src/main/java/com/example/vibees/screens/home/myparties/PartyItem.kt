@@ -167,6 +167,32 @@ fun PartyItem(
                     )
                 }
             }
+
+            var notice = ""
+            if (partyInfo.drug)
+                notice += "drug "
+            if (partyInfo.byob)
+                notice += "alcohol"
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (notice.isEmpty()) "drug-free, alcohol-free" else notice,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (notice.isEmpty()) Color(20, 100, 20) else Color.Red,
+                    modifier = Modifier.weight(0.3f)
+                )
+                Text(
+                    text = "${partyInfo.attend_count}/${partyInfo.max_cap}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(end = 15.dp),
+                    color = Color.Black
+                )
+            }
         }
     }
 }

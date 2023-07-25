@@ -235,7 +235,7 @@ fun HostPartyAttributesScreen(
                     partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
                     partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
 //                    Gson().toJson(partystore?.taglist).replace("\"", "'").replace("[", "'").replace("]", "'"))
-                    partystore?.taglist!!)
+                    partystore?.taglist!!, partystore?.attend_count!!)
 
                 Log.d("Obj value", obj.toString())
 
