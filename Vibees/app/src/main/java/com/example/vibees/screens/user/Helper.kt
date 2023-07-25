@@ -1,14 +1,16 @@
 package com.example.vibees.screens.user
 
 import android.annotation.SuppressLint
+import android.util.Log
 import com.example.vibees.Models.Party
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.util.Locale
 
 class Helper {
     companion object {
         @SuppressLint("SimpleDateFormat")
-        val formatter = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz")
+        val formatter = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH)
 
         fun sortPartiesBy(
             parties: List<Party>,
@@ -42,7 +44,9 @@ class Helper {
                 "Date" -> {
                     return parties.sortedWith <Party> (object: Comparator <Party> {
                         override fun compare (p0: Party, p1: Party) : Int {
+                            Log.d("TAG sort", "Comparing A: ${p0.name}")
                             val date1 = formatter.parse(p0.date_time)
+                            Log.d("TAG sort", "Comparing B: ${p1.name}")
                             val date2 = formatter.parse(p1.date_time)
                             return date1.compareTo(date2)
                         }
