@@ -344,6 +344,7 @@ fun UserScreen(
                 }
             }
         } else {
+            parties = emptyList()
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -356,17 +357,16 @@ fun UserScreen(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineSmall
                 )
+            }
 
-                // Parties
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(30.dp),
-                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
-                ) {
-                    Log.d("TAG", parties.toString())
-
-                    items(parties.size) {
-                        PartyItem(partyInfo = parties[it], isMyParty = false, onClick = onClick)
-                    }
+            // Parties
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(30.dp),
+                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
+            ) {
+                Log.d("TAG", parties.toString())
+                items(parties.size) {
+                    PartyItem(partyInfo = parties[it], isMyParty = false, onClick = onClick)
                 }
             }
         }
