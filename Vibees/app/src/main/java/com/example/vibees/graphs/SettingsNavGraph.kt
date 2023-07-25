@@ -1,31 +1,28 @@
-package com.example.vibees.graphs
+// Vibees/app/src/main/java/com/example/vibees/graphs/SettingsNavGraph.kt
 
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.vibees.graphs.Graph
 import com.example.vibees.screens.GenericScreen
+import SettingsScreen
 
-
+/*
+@Composable
 fun NavGraphBuilder.settingsNavGraph(navController: NavHostController) {
     navigation(
         route = Graph.SETTINGS,
-        startDestination = SettingsScreen.Setting1.route
+        startDestination = SettingsScreen(navController).Setting1.route
     ) {
         composable(
-            route = SettingsScreen.Setting1.route
+            route = SettingsScreen(navController).Setting1.route
         ) {
-            GenericScreen(
-                name = "Setting1",
-                onClick = { /* can navigate to other page here (use navController) */ }
-            )
+            SettingsScreen(navController)
         }
-        // add other composable sections for each additional page
-        // see other graphs for reference
+        // Add other composable sections for each additional page
+        // See other graphs for reference
     }
 }
-
-sealed class SettingsScreen(val route: String) {
-    object Setting1 : SettingsScreen(route = "Setting1")
-    // add other pages here as an object to access the route
-}
+*/

@@ -24,11 +24,13 @@ def host_party():
     req = request.json
 
     party_id = db.exec_host_party(req["name"], req["party_avatar_url"],
-                                  req["date_time"], req["user_id"],
+                                  req["date_time"], req["host_id"],
                                   req["max_cap"], req["desc"],
                                   req["entry_fee"], req["street"],
                                   req["city"], req["prov"],
-                                  req["postal_code"], req["tags"])
+                                  req["postal_code"], req["tags"],
+                                  req["type"], req["drug"],
+                                  req["byob"], req["host_name"], req["qr_endpoint"])
 
     if not party_id:
         return jsonify({"message": "Unable to create party. Please try again..."}), 400
@@ -45,9 +47,9 @@ def get_tagged_parties():
     tags = req.get("tags", None)
 
     # TODO: Get hostname as well (don't need ID)
-    parties = db.query_party(show_detail=True)
+    parties = db.query_party(show_detail=True, show_attend_count=True)
     if tags is not None and len(tags) != 0:
-        parties = db.query_party(tag_subset=tags, show_detail=True)
+        parties = db.query_party(tag_subset=tags, show_detail=True, show_attend_count=True)
 
     if parties is None:
         return jsonify({"message": "Unable to fetch tagged parties. Please try again..."}), 500
@@ -56,24 +58,24 @@ def get_tagged_parties():
     return jsonify(list(parties)), 200
 
 
-# TODO: Don't know if we need this right now
-# @ app.get("/parties/<party_id>")
-# def get_party_details(party_id):
-#     party = db.query_party(party_id=party_id)
-#     if party is None:
-#         return {"message": "Party does not exist! Please try again..."}, 404
-#
-#     location = db.query_locations(party_id=party_id)
-#     if location is None:
-#         return {"message": "Error retrieving party location! Please try again..."}, 500
-#
-#     party = hp.row_to_party(party[0])
-#     location = hp.row_to_location(location[0])
-#
-#     resp = {**party, **location}
-#
-#     return jsonify(resp), 200
-#
+@ app.get("/parties/<party_id>")
+def get_party_details(party_id):
+    party = db.query_party(party_id=party_id, show_detail=True, show_attend_count=True)
+    if party is None:
+        return {"message": "Party does not exist! Please try again..."}, 404
+
+    # location = db.query_locations(party_id=party_id)
+    # if location is None:
+    #     return {"message": "Error retrieving party location! Please try again..."}, 500
+
+    party = hp.row_to_party(party[0])
+    # location = hp.row_to_location(location[0])
+
+    # resp = {**party, **location}
+    resp = {**party}
+
+    return jsonify(resp), 200
+
 
 @app.post("/parties/attend/<party_id>")
 def attend_party(party_id):
@@ -113,7 +115,7 @@ def get_user_attendee_parties():
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
 
-    parties = db.show_attended_parties(user_id, show_detail=True)
+    parties = db.show_attended_parties(user_id, show_detail=True, show_attend_count=True)
 
     if parties is None:
         return {"message": "Failed to get user attended parties! Please contact help"}, 500
@@ -137,7 +139,11 @@ def get_user_attendee_parties():
 def get_user_host_parties():
     """Endpoint to retrieve user's hosted parties"""
     req = request.json
-    parties = db.show_hosted_parties(req["user_id"], show_detail=True)
+    user_id = req.get("user_id", None)
+    if user_id is None:
+        return {"message": "No user id provided! Please try again..."}, 400
+
+    parties = db.show_hosted_parties(user_id, show_detail=True, show_attend_count=True)
 
     if parties is None:
         return {"message": "Failed to get user hosted parties! Please contact help"}, 500
@@ -178,37 +184,63 @@ def register_or_login_user():
         return return_message_response("User with user_id {} successfully logged in".format(result), 201)
 
 
-@app.route('/user', methods=['PUT'])
-def update_user_details():
+# ... (existing imports remain unchanged)
+
+@app.route('/user/<user_id>', methods=['PUT'])
+def update_user_details(user_id):
     req = request.json
 
+    # Check if the user_id is provided
+    if not user_id:
+        return return_message_response("Failed: Please provide user_id.", 400)
+
     # Email validation
-    try:
-        if req.get("email"):
-            emailinfo = validate_email(req.get("email"), check_deliverability=False)
-    except EmailNotValidError:
-        return return_message_response("Email does not have valid format.", 400)
+    email = req.get("email", None)
+    if email:
+        try:
+            emailinfo = validate_email(email, check_deliverability=False)
+        except EmailNotValidError:
+            return return_message_response("Email does not have a valid format.", 400)
 
     # Phone number validation
-    if req.get("phone_no") and not is_valid_phone_number(req.get("phone_no")):
-        return return_message_response("Phone number does not have valid format.", 400)
+    phone_no = req.get("phone_no", None)
+    if phone_no and not is_valid_phone_number(phone_no):
+        return return_message_response("Phone number does not have a valid format.", 400)
 
+    # Extract the user details from the request
+    first_name = req.get("first_name", None)
+    last_name = req.get("last_name", None)
+    address_street = req.get("address_street", None)
+    address_city = req.get("address_city", None)
+    address_prov = req.get("address_prov", None)
+    address_postal = req.get("address_postal", None)
+
+    # Update the user details in the database
     try:
-        result = db.update_user(req.get("user_id"), req.get("profile_url"), req.get("first_name"), req.get("last_name"), req.get("phone_no"), req.get("address_street"),
-                req.get("address_city"), req.get("address_prov"), req.get("address_postal"), req.get("email"))
+        result = db.update_user(
+            user_id,
+            first_name=first_name,
+            last_name=last_name,
+            phone_no=phone_no,
+            address_street=address_street,
+            address_city=address_city,
+            address_prov=address_prov,
+            address_postal=address_postal,
+            email=email
+        )
     except:
         return return_message_response("Internal Server Error", 500)
 
     if not result:
         return return_message_response("Could not update user details.", 500)
     else:
-        return return_message_response("Successfully updated user details.", 500)
+        return return_message_response("Successfully updated user details.", 200)
 
 
 
-@app.route('/user', methods=['DELETE'])
-def delete_user_account():
-    user_id = request.args.get('user_id')
+
+@app.route('/user/<user_id>', methods=['DELETE'])
+def delete_user_account(user_id):
     if user_id is None:
          return return_message_response("Failed: Please provide user_id.", 500)
 

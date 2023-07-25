@@ -2,14 +2,12 @@ package com.example.vibees.screens.home.host
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.widget.DatePicker
 import android.app.TimePickerDialog
 import android.graphics.Bitmap
 import android.media.Image
 import android.net.Uri
-import android.util.Log
+import android.widget.DatePicker
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,13 +29,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
@@ -52,11 +50,8 @@ import androidx.compose.ui.unit.sp
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
-import com.example.vibees.Models.Party
-import com.example.vibees.Models.ResponseMessage
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -645,23 +640,23 @@ fun HostScreen(name: String, onClick: () -> Unit) {
                 var dateString = host_date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 //                dateString = LocalDate.now()
 
-                val obj = Party(userID, partyName, LocalDateTime.now(), partyType,  maxCapacity.toInt(),
-                    entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
-
-                // Successful request
-                val successfn: (ResponseMessage) -> Unit = { response ->
-                    Log.d("TAG", "${response.message}")
-                    Toast.makeText(partyContext, "${response.message}", Toast.LENGTH_LONG).show()
-                }
-
-                // failed request
-                val failurefn: (Throwable) -> Unit = { t ->
-                    Log.d("TAG", "FAILURE")
-                    Log.d("TAG", t.message.toString())
-                }
-
-                // call endpoint /parties/host to create a party
-                val callResponse = vibeesApi.createParty(successfn, failurefn, obj)
+//                val obj = Party(userID, partyName, LocalDateTime.now(), partyType,  maxCapacity.toInt(),
+//                    entryFee.toDouble(), description, unitStreet, city, province, postalCode, "", "", "")
+//
+//                // Successful request
+//                val successfn: (ResponseMessage) -> Unit = { response ->
+//                    Log.d("TAG", "${response.message}")
+//                    Toast.makeText(partyContext, "${response.message}", Toast.LENGTH_LONG).show()
+//                }
+//
+//                // failed request
+//                val failurefn: (Throwable) -> Unit = { t ->
+//                    Log.d("TAG", "FAILURE")
+//                    Log.d("TAG", t.message.toString())
+//                }
+//
+//                // call endpoint /parties/host to create a party
+//                val callResponse = vibeesApi.createParty(successfn, failurefn, obj)
             },
             modifier = Modifier.padding(10.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)) {

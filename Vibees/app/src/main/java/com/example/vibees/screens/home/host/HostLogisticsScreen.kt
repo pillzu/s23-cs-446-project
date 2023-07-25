@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -65,18 +67,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.vibees.GlobalAppState
 import me.naingaungluu.formconductor.FieldResult
 import me.naingaungluu.formconductor.FormResult
 import me.naingaungluu.formconductor.composeui.field
 import me.naingaungluu.formconductor.composeui.form
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun HostLogisticsScreen(
-
+    onClick: () -> Unit,
 ) {
     var unitStreet by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -85,9 +90,19 @@ fun HostLogisticsScreen(
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
 
+    var unitFirst by remember { mutableStateOf(true) }
+    var cityFirst by remember { mutableStateOf(true) }
+    var provinceFirst by remember { mutableStateOf(true) }
+    var postalFirst by remember { mutableStateOf(true) }
+
+    val partystore by GlobalAppState::PartyStore
+
+    //Log.d("Initial Store", partystore.toString())
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(start = 10.dp, top = 25.dp, end = 10.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -97,7 +112,7 @@ fun HostLogisticsScreen(
             ) {
                 Text(
                     text = "Host a Party",
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
@@ -107,7 +122,8 @@ fun HostLogisticsScreen(
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = FontWeight.Normal,
                     color = Color.Black,
-                    modifier = Modifier.padding(20.dp)
+                    modifier = Modifier
+                        .padding(20.dp)
                         .padding(bottom = 20.dp),
                     textAlign = TextAlign.Start
                 )
@@ -115,6 +131,11 @@ fun HostLogisticsScreen(
                 val focusManager = LocalFocusManager.current
 
                 field(HostLogistics::unitandstreet) {
+                    if (partystore?.isedit == true and unitFirst) {
+                        setField(partystore?.street)
+                        unitStreet = partystore?.street.toString()
+                        unitFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -123,7 +144,7 @@ fun HostLogisticsScreen(
                         } ,
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Unit and Street")},
-                        placeholder = { Text("Unit and Street", color = Color.Gray)},
+                        placeholder = { Text("Unit and Street*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -134,10 +155,18 @@ fun HostLogisticsScreen(
                             imeAction = ImeAction.Next,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(64.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostLogistics::city) {
+                    if (partystore?.isedit == true and cityFirst) {
+                        setField(partystore?.city)
+                        city = partystore?.city.toString()
+                        cityFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -146,7 +175,7 @@ fun HostLogisticsScreen(
                         },
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("City")},
-                        placeholder = { Text("City", color = Color.Gray)},
+                        placeholder = { Text("City*", color = Color.Gray)},
                         enabled = true,
                         keyboardActions = KeyboardActions(
                             onNext = {
@@ -157,10 +186,18 @@ fun HostLogisticsScreen(
                             imeAction = ImeAction.Next,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(64.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostLogistics::postalcode) {
+                    if (partystore?.isedit == true and postalFirst) {
+                        setField(partystore?.postal_code)
+                        postalCode = partystore?.postal_code.toString()
+                        postalFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -169,7 +206,7 @@ fun HostLogisticsScreen(
                         },
                         isError = resultState.value is FieldResult.Error,
                         label = { Text("Postal Code")},
-                        placeholder = { Text("Postal Code", color = Color.Gray)},
+                        placeholder = { Text("Postal Code*", color = Color.Gray)},
                         supportingText = {
                             if (resultState.value is FieldResult.Error) Text("6 characters only")
                             else Text("")
@@ -184,10 +221,18 @@ fun HostLogisticsScreen(
                             imeAction = ImeAction.Done,//Show next as IME button
                             keyboardType = KeyboardType.Text, //Plain text keyboard
                         ),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .height(84.dp)
+                            .fillMaxWidth()
                     )
                 }
                 field(HostLogistics::province) {
+                    if (partystore?.isedit == true and provinceFirst) {
+                        setField(partystore?.prov)
+                        province = partystore?.prov.toString()
+                        provinceFirst = false
+                    }
                     province = provinceDropdownMenu()
                     setField(province)
                 }
@@ -202,7 +247,17 @@ fun HostLogisticsScreen(
             }
 
             TextButton(
-                onClick = { Log.d("clicked", "CLick") },
+                onClick = {
+                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy,hh:mm a")
+                    partystore?.street = unitStreet
+                    partystore?.city = city
+                    partystore?.postal_code = postalCode
+                    partystore?.prov = province
+                    val l = LocalDateTime.parse("$date,$time", formatter)
+                    partystore?.date_time = l.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    Log.d("STORE", partystore.toString())
+                    onClick()
+                          },
                 modifier = Modifier.align(Alignment.End),
                 enabled = this.formState.value is FormResult.Success
             ) {
@@ -247,7 +302,11 @@ fun provinceDropdownMenu(): String {
                 label = { Text("Province") },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier
+                    .menuAnchor()
+                    .padding(horizontal = 4.dp)
+                    .height(64.dp)
+                    .fillMaxWidth()
             )
 
             ExposedDropdownMenu(
@@ -301,6 +360,8 @@ fun datePickerMenu(): String {
                 }
             }
             .padding(4.dp)
+            .height(64.dp)
+            .fillMaxWidth()
     )
 
     if (openDialog) {
@@ -392,6 +453,8 @@ fun timePickerMenu(): String {
                 }
             }
             .padding(4.dp)
+            .height(64.dp)
+            .fillMaxWidth()
     )
 
     if (openDialog) {

@@ -1,6 +1,8 @@
 from flask import jsonify
 
 def row_to_party(party):
+    # print("PARTY\n")
+    # print(party)
     return {
         "party_id": party[0],
         "party_avatar_url": party[1],
@@ -11,11 +13,17 @@ def row_to_party(party):
         "max_cap": party[6],
         "desc": party[7],
         "entry_fee": party[8],
-        "street": party[9],
-        "city": party[10],
-        "prov": party[11],
-        "postal_code": party[12],
-        "tags": party[13],
+        "type": party[9],
+        "drug": party[10],
+        "byob": party[11],
+        "host_name": party[12],
+        "qr_endpoint": party[13],
+        "street": party[14],
+        "city": party[15],
+        "prov": party[16],
+        "postal_code": party[17],
+        "tags": list(party[18]),
+        "attend_count": party[19] if party[19] is not None else 0
     }
 
 

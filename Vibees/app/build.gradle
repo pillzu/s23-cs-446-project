@@ -83,4 +83,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.6.0")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation 'com.stripe:stripe-android:20.27.0'
+    implementation("io.coil-kt:coil-compose:2.1.0")
 }

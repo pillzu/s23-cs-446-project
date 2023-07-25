@@ -15,16 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,13 +36,8 @@ import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
-import com.example.vibees.Models.User
 import com.example.vibees.screens.user.Header
-import com.example.vibees.ui.theme.GrayWhite
 import com.example.vibees.ui.theme.SubtleWhite
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,12 +65,17 @@ fun MyPartiesScreen(
         val successfn_attending: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
             attendingParties = response
-            Log.d("TAG", attendingParties.toString())
+            Log.d("TAG attending", attendingParties.toString())
         }
 
         // failed request
+        val failurefn_hosting: (Throwable) -> Unit = { t ->
+            Log.d("TAG", "FAILURE: hosting")
+            Log.d("TAG failure", t.printStackTrace().toString())
+        }
+
         val failurefn_attending: (Throwable) -> Unit = { t ->
-            Log.d("TAG", "FAILURE")
+            Log.d("TAG", "FAILURE: attending")
             Log.d("TAG", t.printStackTrace().toString())
         }
 
@@ -88,136 +83,161 @@ fun MyPartiesScreen(
         val successfn_hosting: (List<Party>) -> Unit = { response ->
             Log.d("TAG", "success")
             hostingParties = response
-            Log.d("TAG", hostingParties.toString())
+            Log.d("TAG hosting", hostingParties.toString())
         }
 
-        val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_attending)
+        val responseHosting = vibeesApi.getPartiesHosting(successfn_hosting, failurefn_hosting)
 
         val responseAttending =
             vibeesApi.getPartiesAttending(successfn_attending, failurefn_attending)
 
         // Header
         Header(firstLine = "MY", secondLine = "PARTIES")
-
-        // Search bar
-        var searchText by remember { mutableStateOf("") }
-        var searchActive by remember { mutableStateOf(false) }
-
-        SearchBar(
-            query = searchText,
-            onQueryChange = {
-                searchText = it
-            },
-            onSearch = {
-                searchActive = false
-            },
-            active = false,
-            onActiveChange = {
-                searchActive = it
-            },
-            colors = SearchBarDefaults.colors(containerColor = SubtleWhite),
-            tonalElevation = 50.dp,
-            placeholder = {
-                Text(text = "Search for a party")
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search, contentDescription = "Search Icon"
-                )
-            },
-            trailingIcon = {
-                if (searchActive and searchText.isNotEmpty()) {
-                    IconButton(onClick = {
-                        searchText = ""
-                    }, content = {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Close Icon"
-                        )
-                    })
-                } else if (searchActive) {
-                    IconButton(onClick = {
-                        searchActive = false
-                    }, content = {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close Icon"
-                        )
-                    })
-                }
-            },
-            shape = RoundedCornerShape(25.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp, top = 20.dp)
-                .shadow(5.dp, RoundedCornerShape(25.dp))
-                .padding(bottom=5.dp, start=5.dp, end=5.dp)
-        ) {
-
-        }
-        // parties
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
-        ) {
-            item {
-                Text(
-                    text = "Hosted by Me",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(bottom = 5.dp, top = 10.dp)
-                )
-            }
-
-            if (hostingParties.isEmpty()) {
+        Divider(modifier = Modifier.padding(vertical=10.dp),thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)
+            // parties
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
+            ) {
                 item {
-                    Row(
+                    Text(
+                        text = "Hosted by Me",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineLarge,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .height(200.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else {
-                items(hostingParties.size) {
-                    PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
-                }
-            }
-
-            item {
-                Text(
-                    text = "Upcoming Parties",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(bottom = 5.dp, top = 10.dp)
-                )
-            }
-            if (attendingParties.isEmpty()) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .height(200.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else {
-                items(attendingParties.size) {
-                    PartyItem(
-                        partyInfo = attendingParties[it],
-                        isMyParty = true,
-                        onClick = onClick,
+                            .padding(bottom = 5.dp, top = 10.dp)
                     )
                 }
+
+                if (hostingParties.isEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .height(75.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "You are currently not hosting any parties",
+                                fontWeight = FontWeight.Light,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .padding(bottom = 5.dp, top = 10.dp)
+                            )
+//                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    items(hostingParties.size) {
+                        PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
+                    }
+                }
+
+                item {
+                    Text(
+                        text = "Upcoming Parties",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier
+                            .padding(bottom = 5.dp, top = 10.dp)
+                    )
+                }
+                if (attendingParties.isEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .height(75.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "You are currently not attending any parties",
+                                fontWeight = FontWeight.Light,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .padding(bottom = 5.dp, top = 10.dp)
+                            )
+//                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    items(attendingParties.size) {
+                        PartyItem(
+                            partyInfo = attendingParties[it],
+                            isMyParty = true,
+                            onClick = onClick,
+                        )
+                    }
+                }
             }
-        }
+
+//        // parties
+//        LazyColumn(
+//            verticalArrangement = Arrangement.spacedBy(20.dp),
+//            contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
+//        ) {
+//            item {
+//                Text(
+//                    text = "Hosted by Me",
+//                    fontWeight = FontWeight.Bold,
+//                    style = MaterialTheme.typography.headlineLarge,
+//                    modifier = Modifier
+//                        .padding(bottom = 5.dp, top = 10.dp)
+//                )
+//            }
+//
+//            if (hostingParties.isEmpty()) {
+//                item {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .height(200.dp),
+//                        horizontalArrangement = Arrangement.Center,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                    ) {
+//                        CircularProgressIndicator()
+//                    }
+//                }
+//            } else {
+//                items(hostingParties.size) {
+//                    PartyItem(partyInfo = hostingParties[it], isMyParty = true, onClick = onClick)
+//                }
+//            }
+//
+//            item {
+//                Text(
+//                    text = "Upcoming Parties",
+//                    fontWeight = FontWeight.Bold,
+//                    style = MaterialTheme.typography.headlineLarge,
+//                    modifier = Modifier
+//                        .padding(bottom = 5.dp, top = 10.dp)
+//                )
+//            }
+//            if (attendingParties.isEmpty()) {
+//                item {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .height(200.dp),
+//                        horizontalArrangement = Arrangement.Center,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                    ) {
+//                        CircularProgressIndicator()
+//                    }
+//                }
+//            } else {
+//                items(attendingParties.size) {
+//                    PartyItem(
+//                        partyInfo = attendingParties[it],
+//                        isMyParty = true,
+//                        onClick = onClick,
+//                    )
+//                }
+//            }
+//        }
     }
 }
