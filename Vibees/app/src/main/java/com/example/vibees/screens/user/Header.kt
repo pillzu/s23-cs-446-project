@@ -20,12 +20,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.vibees.R
+import coil.compose.rememberImagePainter
+import com.example.vibees.GlobalAppState
+
 
 @Composable
 fun Header(
     firstLine: String,
     secondLine: String
 ) {
+    val profile_url = GlobalAppState.currentUser?.profile_url
+    val imagePainter = rememberImagePainter(
+        data = profile_url,
+        builder = {
+            // Optional: Add additional image loading options if needed
+        }
+    )
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -45,7 +56,7 @@ fun Header(
             )
         }
         Image(
-            painter = painterResource(R.drawable.saly_7),
+            painter = imagePainter,
             contentDescription = "User Avatar",
             modifier = Modifier
                 .size(80.dp)
