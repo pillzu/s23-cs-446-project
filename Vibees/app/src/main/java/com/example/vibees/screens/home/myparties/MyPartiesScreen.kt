@@ -15,13 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -95,65 +93,7 @@ fun MyPartiesScreen(
 
         // Header
         Header(firstLine = "MY", secondLine = "PARTIES")
-
-        // Search bar
-        var searchText by remember { mutableStateOf("") }
-        var searchActive by remember { mutableStateOf(false) }
-
-        SearchBar(
-            query = searchText,
-            onQueryChange = {
-                searchText = it
-            },
-            onSearch = {
-                searchActive = false
-            },
-            active = false,
-            onActiveChange = {
-                searchActive = it
-            },
-            colors = SearchBarDefaults.colors(containerColor = SubtleWhite),
-            tonalElevation = 50.dp,
-            placeholder = {
-                Text(text = "Search for a party")
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search, contentDescription = "Search Icon"
-                )
-            },
-            trailingIcon = {
-                if (searchActive and searchText.isNotEmpty()) {
-                    IconButton(onClick = {
-                        searchText = ""
-                    }, content = {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Close Icon"
-                        )
-                    })
-                } else if (searchActive) {
-                    IconButton(onClick = {
-                        searchActive = false
-                    }, content = {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close Icon"
-                        )
-                    })
-                }
-            },
-            shape = RoundedCornerShape(25.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp, top = 20.dp)
-                .shadow(5.dp, RoundedCornerShape(25.dp))
-                .padding(bottom=5.dp, start=5.dp, end=5.dp)
-        ) {
-
-        }
-
-        if (searchText == "") {
+        Divider(modifier = Modifier.padding(vertical=10.dp),thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)
             // parties
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -234,15 +174,6 @@ fun MyPartiesScreen(
                     }
                 }
             }
-        } else {
-            Text(
-                text = "Search Results",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier
-                    .padding(bottom = 5.dp, top = 10.dp)
-            )
-        }
 
 //        // parties
 //        LazyColumn(
