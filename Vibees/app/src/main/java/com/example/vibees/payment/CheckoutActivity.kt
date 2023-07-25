@@ -1,5 +1,6 @@
 package com.example.vibees.payment
 
+import android.content.ContentValues
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -38,12 +39,19 @@ class CheckoutActivity : AppCompatActivity() {
         Log.d("TAG", t.printStackTrace().toString())
     }
 
+    var userId = ""
+    var userName = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
         val amount: Double = intent.getDoubleExtra("entryFee", 0.0) * 100
         val transaction = Transaction(amount.toInt())
         val response = vibeesApi.getPaymentInfo(transaction, successfn, failurefn)
+        userId = intent.getStringExtra("userID")!!
+        Log.d(ContentValues.TAG, "UserID: ${userId}")
+        userName = intent.getStringExtra("userName")!!
+        Log.d(ContentValues.TAG, "UserName: ${userName}")
     }
 
     fun presentPaymentSheet() {
@@ -77,9 +85,12 @@ class CheckoutActivity : AppCompatActivity() {
                 Log.d("TAG", "TRANSACTION COMPLETED")
                 showToast("Transaction Completed")
 
-                val intent = Intent(this,   MainActivity::class.java)
-                intent.putExtra("navigateToHome", true)
-                startActivity(intent)
+                val intentNew = Intent(this, MainActivity::class.java)
+                intentNew.putExtra("navigateToHome", true)
+                intentNew.putExtra("userID", userId)
+                intentNew.putExtra("userName", userName)
+
+                startActivity(intentNew)
                 finish()
             }
         }

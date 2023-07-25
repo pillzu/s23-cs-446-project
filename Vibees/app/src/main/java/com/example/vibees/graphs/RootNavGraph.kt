@@ -9,21 +9,35 @@ import kotlinx.coroutines.CompletableDeferred
 
 
 @Composable
-fun RootNavigationGraph(navController: NavHostController, signIn: suspend (signInComplete: CompletableDeferred<Unit>, ) -> Unit, navigateToHome: Boolean) {
-    NavHost(
-        navController = navController,
-        route = Graph.ROOT,
-        startDestination = Graph.AUTHENTICATION
-    ) {
-        if (navigateToHome) {
-            navController.navigate(Graph.HOME)
+fun RootNavigationGraph(navController: NavHostController, signIn: suspend (signInComplete: CompletableDeferred<Unit>) -> Unit, navigateToHome: Boolean) {
+    // Check if navigateToHome is true, and if so, navigate to the Home screen directly
+    if (navigateToHome) {
+        NavHost(
+            navController = navController,
+            route = Graph.ROOT,
+            startDestination = Graph.HOME // Set the Home screen as the start destination
+        ) {
+            composable(route = Graph.HOME) {
+                HomeScreen()
+            }
+            // Add other composables for the rest of your screens if needed
         }
-        authNavGraph(signIn, navController = navController)
-        composable(route = Graph.HOME) {
-            HomeScreen()
+    } else {
+        // If navigateToHome is false, follow the regular navigation flow
+        NavHost(
+            navController = navController,
+            route = Graph.ROOT,
+            startDestination = Graph.AUTHENTICATION
+        ) {
+            authNavGraph(signIn, navController = navController)
+            composable(route = Graph.HOME) {
+                HomeScreen()
+            }
+            // Add other composables for the rest of your screens if needed
         }
     }
 }
+
 
 // Top level graph containing sub graphs
 object Graph {

@@ -34,6 +34,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     private val REQ_ONE_TAP = 2
@@ -46,6 +47,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val userId = intent.getStringExtra("userID")
+        Log.d(ContentValues.TAG, "ID FROM MAIN: $userId")
+        if (userId != null) {
+            GlobalAppState.UserID = UUID.fromString(userId)
+        }
+        GlobalAppState.UserName = intent.getStringExtra("userName")
         setContent {
             VibeesTheme {
                 RootNavigationGraph(navController = rememberNavController(), signIn = ::signInUsingGoogle, navigateToHome = intent.getBooleanExtra("navigateToHome", false))

@@ -168,11 +168,11 @@ class VibeesApi {
                     call: Call<PaymentMetaData>,
                     response: Response<PaymentMetaData>
                 ) {
-                    successfn(response.code())
+                    successfn(response.body()!!)
                 }
 
-                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                    failurefn()
+                override fun onFailure(call: Call<PaymentMetaData>, t: Throwable) {
+                    failurefn(t)
                 }
             }
         )

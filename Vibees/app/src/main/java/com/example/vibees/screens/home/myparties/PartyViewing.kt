@@ -1,6 +1,7 @@
 package com.example.vibees.screens.home.myparties
 
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -68,6 +69,7 @@ fun PartyViewing(
 ) {
 
     var userID by GlobalAppState::UserID
+    var UserName by GlobalAppState::UserName
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     val vibeesApi = VibeesApi()
@@ -175,7 +177,13 @@ fun PartyViewing(
                             .size(40.dp)
                             .clickable {
                                 clipboardManager.setText(AnnotatedString("https://vibees.ca/party/${id}"))
-                                Toast.makeText(context, "Invite link copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Invite link copied to clipboard!",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                    .show()
                             }
                     )
                 }
@@ -287,8 +295,11 @@ fun PartyViewing(
                         onClick = {
                             val intent = Intent(activity, CheckoutActivity::class.java)
                             intent.putExtra("entryFee", partyDetails?.entry_fee)
+                            val userId = userID.toString()
+                            intent.putExtra("userID", userId)
+                            val userName: String = UserName!!
+                            intent.putExtra("userName", userName)
                             launcher.launch(intent)
-                            val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
                             val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!)
                         },
                         modifier = Modifier.padding(20.dp),
