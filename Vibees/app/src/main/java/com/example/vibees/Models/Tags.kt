@@ -1,5 +1,5 @@
 package com.example.vibees.Models
 
 data class Tags(
-    val tags: String? = null
+    val tags: List<String>? = null
 )

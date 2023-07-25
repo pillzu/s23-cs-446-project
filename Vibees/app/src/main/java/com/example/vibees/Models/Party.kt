@@ -21,8 +21,5 @@ data class Party (
     val city: String,
     val prov: String,
     val postal_code: String,
-    val tags: String,
-
-
-
+    val tags: List<String>,
 )

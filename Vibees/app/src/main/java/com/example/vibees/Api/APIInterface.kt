@@ -15,7 +15,7 @@ import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val url = "http://192.168.8.9:5000"
+const val url = "http://10.32.122.130:8080"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -54,8 +54,7 @@ class APIInterface {
         return apiService.requestGeneralParty(party_id)
     }
 
-    fun getAllParties(): Call<List<Party>> {
-        val tags = Tags()
+    fun getAllParties(tags: Tags): Call<List<Party>> {
         return apiService.requestAllParties(tags)
     }
 
@@ -79,11 +78,11 @@ class APIInterface {
         return apiService.verifyAttendance(party_id, guest_id)
     }
 
-    fun updateUserDetails(user_id: String, requestModel: User): Call<ResponseMessage> {
-        return apiService.updateUserDetails(user_id, requestModel)
-    }
-    
     fun deleteUserAccount(user_id: String): Call<ResponseMessage> {
         return apiService.deleteUserAccount(user_id)
+    }
+
+    fun updateUserDetails(user_id: String, user_model: User): Call<ResponseMessage> {
+        return apiService.updateUserDetails(user_id, user_model)
     }
 }
