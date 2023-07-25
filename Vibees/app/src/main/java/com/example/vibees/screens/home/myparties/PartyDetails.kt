@@ -52,8 +52,6 @@ import com.simonsickle.compose.barcodes.BarcodeType
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
-var URL = "https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran"
-
 @Composable
 fun checkAndRequestCameraPermission(
     context: Context,
@@ -167,7 +165,7 @@ fun PartyDetails(
                             .height(250.dp),
                         resolutionFactor = 10, // Optionally, increase the resolution of the generated image
                         type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
-                        value = "${URL}${partyDetails?.qr_endpoint}" // The textual representation of this code
+                        value = "${partyDetails?.qr_endpoint}" // The textual representation of this code
                     )
                     Text(
                         text = partyDetails?.name!!,
