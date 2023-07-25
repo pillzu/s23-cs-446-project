@@ -135,9 +135,13 @@ fun PartyItem(
                     modifier = Modifier.weight(0.6f)
                 ) {
                     PartyCardAttribute(
-                        key = "Time", value = partyInfo.date_time.format(
-                            DateTimeFormatter.ofPattern("hh:mm a")
-                        )
+//                        key = "Time", value = partyInfo.date_time.format(
+//                            DateTimeFormatter.ofPattern("hh:mm a")
+//                        )
+                        key = "Tags", value = partyInfo.tags.toString()
+                            .replace("[", "")
+                            .replace("\"", "")
+                            .replace("]", "")
                     )
                     PartyCardAttribute(key = "Entry Fee", value = "$${partyInfo.entry_fee}")
                     PartyCardAttribute(key = "Host", value = partyInfo.host_name)
