@@ -88,7 +88,7 @@ fun PartyDetails(
                                 partyDetails?.entry_fee?.roundToInt(), partyDetails?.desc, partyDetails?.drug, partyDetails?.byob,
                                 partyDetails?.tags, partyDetails?.party_avatar_url, partyDetails?.host_id,
                                 partyDetails?.max_cap, partyDetails?.party_id, partyDetails?.host_name,
-                                partyDetails?.qr_endpoint, isedit = true)
+                                partyDetails?.qr_endpoint, isedit = true, partyDetails?.attend_count)
                             navController.navigate(HostScreens.Step1.route)
                         }
                 )

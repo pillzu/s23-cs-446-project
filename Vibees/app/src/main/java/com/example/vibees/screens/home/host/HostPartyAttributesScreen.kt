@@ -226,7 +226,7 @@ fun HostPartyAttributesScreen(
                         userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
                         partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, partystore?.qr_endpoint,
                         partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-                        partystore?.taglist!!)
+                        partystore?.taglist!!,  partystore?.attend_count!!)
 
                     Log.d("Obj value", obj.toString())
 
@@ -271,18 +271,12 @@ fun HostPartyAttributesScreen(
                         Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
                     }
 
-//                val obj = Party(userID, partystore?.name, partystore?.date_time!!, partystore?.type,
-//                    partystore?.max_cap!!, partystore?.entry_fee!!.toDouble(), partystore?.desc!!,
-//                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-//                    partystore?.drug!!, partystore?.byob!!, Gson().toJson(partystore?.taglist).replace("\"", "'"),
-//                    partystore?.image.toString(),"", userName, "")
 
-                val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
-                    userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
-                    partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
-                    partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
-//                    Gson().toJson(partystore?.taglist).replace("\"", "'").replace("[", "'").replace("]", "'"))
-                    partystore?.taglist!!, partystore?.attend_count!!)
+                    val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                        userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
+                        partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
+                        partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
+                        partystore?.taglist!!, partystore?.attend_count!!)
 
                     Log.d("Obj value", obj.toString())
 
