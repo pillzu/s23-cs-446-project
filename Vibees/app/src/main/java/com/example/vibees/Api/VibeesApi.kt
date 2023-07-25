@@ -70,7 +70,11 @@ class VibeesApi {
                     call: Call<List<Party>>,
                     response: Response<List<Party>>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<List<Party>>, t: Throwable) {
@@ -88,7 +92,11 @@ class VibeesApi {
                     call: Call<List<Party>>,
                     response: Response<List<Party>>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<List<Party>>, t: Throwable) {
@@ -128,7 +136,11 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
@@ -146,7 +158,11 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
@@ -188,7 +204,11 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
@@ -212,7 +232,11 @@ class VibeesApi {
                     call: Call<ResponseMessage>,
                     response: Response<ResponseMessage>
                 ) {
-                    successfn(response.body()!!)
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
