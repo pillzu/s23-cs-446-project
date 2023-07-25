@@ -12,7 +12,7 @@ import com.google.mlkit.vision.common.InputImage
 
 @ExperimentalGetImage
 class BarcodeAnalyser(
-    val callback: () -> Unit
+    val callback: (qr: String?) -> Unit
 ) : ImageAnalysis.Analyzer {
     override fun analyze(imageProxy: ImageProxy) {
         val options = BarcodeScannerOptions.Builder()
@@ -27,8 +27,7 @@ class BarcodeAnalyser(
             scanner.process(image)
                 .addOnSuccessListener { barcodes ->
                     if (barcodes.size > 0) {
-                        Log.d("TAG barcode", "${barcodes[0].rawValue}")
-                        callback()
+                        callback(barcodes[0].rawValue)
                     }
                 }
                 .addOnFailureListener {

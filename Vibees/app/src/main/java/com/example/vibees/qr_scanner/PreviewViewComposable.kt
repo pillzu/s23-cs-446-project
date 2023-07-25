@@ -16,11 +16,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ComponentActivity
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
+import com.example.vibees.Api.VibeesApi
 import java.util.concurrent.Executors
 
 @androidx.camera.core.ExperimentalGetImage
 @Composable
-fun PreviewViewComposable() {
+fun PreviewViewComposable(
+    navController: NavHostController,
+) {
+
+    var api = VibeesApi()
+
     AndroidView({ context ->
         val cameraExecutor = Executors.newSingleThreadExecutor()
         val previewView = PreviewView(context).also {
@@ -42,9 +49,20 @@ fun PreviewViewComposable() {
             val imageAnalyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, BarcodeAnalyser{
-                        Toast.makeText(context, "Barcode found", Toast.LENGTH_SHORT).show()
-                    })
+                    it.setAnalyzer(cameraExecutor, BarcodeAnalyser(callback = {qr_endpoint ->
+                        api.checkQrAttendee(
+                            qr_endpoint!!,
+                            successfn = { response ->
+                                Toast.makeText(context, "${response.message}", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            },
+                            failurefn = {error ->
+                                Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            }
+                        )
+
+                    }))
                 }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA

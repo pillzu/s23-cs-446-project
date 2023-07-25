@@ -85,4 +85,8 @@ class APIInterface {
     fun updateUserDetails(user_id: String, user_model: User): Call<ResponseMessage> {
         return apiService.updateUserDetails(user_id, user_model)
     }
+
+    fun checkQrAttendee(user_qr: String): Call<ResponseMessage> {
+        return apiService.checkQrAttendee(qr_endpoint = user_qr )
+    }
 }

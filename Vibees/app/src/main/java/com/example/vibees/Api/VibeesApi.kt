@@ -221,4 +221,32 @@ class VibeesApi {
             }
         )
     }
+
+    fun checkQrAttendee(
+        user_endpoint: String,
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+    ) {
+        val callResponse = apiService.checkQrAttendee(user_endpoint)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    if (response.code() == 404) {
+                        failurefn(Throwable("Invalid URL!"))
+                    } else if (response.code() == 401) {
+                        failurefn(Throwable("Invalid Attendee!"))
+                    } else {
+                        successfn(response.body()!!)
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
 }
