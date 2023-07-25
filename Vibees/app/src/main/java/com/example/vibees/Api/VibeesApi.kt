@@ -274,4 +274,31 @@ class VibeesApi {
             }
         )
     }
+
+    fun unattendUserFromParty(
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+        party_id: String,
+        user_id: String,
+    ) {
+        val callResponse = apiService.unattendParty(party_id, user_id)
+        return callResponse.enqueue(
+            object: Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
 }

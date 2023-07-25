@@ -353,6 +353,7 @@ class DatabaseConnection:
     def leave_party(self, user_id, party_id):
         try:
             statement = f"DELETE FROM Transactions t WHERE t.guest_id = '{user_id}' AND t.party_id = '{party_id}'"
+            print(statement)
             assert self.exec_DDL(statement)
             return True
 

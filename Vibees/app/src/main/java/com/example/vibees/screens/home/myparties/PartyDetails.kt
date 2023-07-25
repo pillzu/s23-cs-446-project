@@ -3,6 +3,7 @@ package com.example.vibees.screens.home.myparties
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -54,7 +55,10 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.graphs.HostScreens
 import com.example.vibees.qr_scanner.PreviewViewComposable
 import com.example.vibees.screens.bottombar.BottomBar
@@ -91,9 +95,20 @@ fun PartyDetails(
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
+    val vibeesApi = VibeesApi()
 
     val openDeleteDialog = remember { mutableStateOf(false) }
     val openLeaveDialog = remember { mutableStateOf(false) }
+
+    val successfn_unattend: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG UNATTEND", "success: unattending")
+    }
+
+    val failurefn_unattend: (Throwable) -> Unit = { t ->
+        Log.d("TAG UNATTEND", "FAILURE: unattending")
+        Log.d("TAG UNATTEND", t.printStackTrace().toString())
+    }
+
 
     if (openDeleteDialog.value) {
         AlertDialog(
@@ -172,6 +187,7 @@ fun PartyDetails(
                         openLeaveDialog.value = false
 
                         // leave party
+                        vibeesApi.unattendUserFromParty(successfn_unattend, failurefn_unattend, partyDetails?.party_id!!, userID.toString())
 
                         navController.navigate(BottomBar.MyParties.route) {
                             popUpTo(BottomBar.MyParties.route) {

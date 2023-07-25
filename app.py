@@ -296,6 +296,19 @@ def delete_user_account(user_id):
 
 
 
+@app.route('/parties/unattend/<party_id>/<user_id>', methods=['DELETE'])
+def unattend_party(party_id, user_id):
+    if user_id is None:
+        return {"message": "No user id provided! Please try again..."}, 400
+
+    # add guest to hosties party
+    if not db.leave_party(user_id, party_id):
+        return {"message": "Unable to unattend the party! Please call help..."}, 500
+
+    return {"message": "Unattended party successfully!"}, 200
+
+
+
 if __name__ == "__main__":
     DB_URL = config("CDB_URL")
 

@@ -52,4 +52,9 @@ interface ApiService {
     @GET("/{qr_url}")
     fun checkQrAttendee(@Path("qr_url") qr_endpoint: String): Call<ResponseMessage>
 
+    @DELETE("/parties/unattend/{party_id}/{user_id}")
+    fun unattendUserFromParty(
+        @Path("party_id") party_id: String,
+        @Path("user_id") user_id: String
+    ): Call<ResponseMessage>
 }

@@ -16,7 +16,7 @@ import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val url = "http://192.168.183.85:5000"
+const val url = "http://10.34.8.23:8080"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -89,5 +89,9 @@ class APIInterface {
 
     fun checkQrAttendee(user_qr: String): Call<ResponseMessage> {
         return apiService.checkQrAttendee(qr_endpoint = user_qr )
+    }
+
+    fun unattendParty(party_id: String, user_id: String): Call<ResponseMessage> {
+        return apiService.unattendUserFromParty(party_id, user_id)
     }
 }
