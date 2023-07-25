@@ -39,11 +39,13 @@ class CheckoutActivity : AppCompatActivity() {
     val failurefn: (Throwable) -> Unit = { t ->
         Log.d("TAG", "FAILURE")
         Log.d("TAG", t.printStackTrace().toString())
+        showToast("Something went wrong! Coundn't register")
     }
 
     // Successful request
     val attend: (ResponseMessage) -> Unit = { response ->
         Log.d("TAG", "${response.message}")
+        showToast("Successfully Completed")
     }
 
 
@@ -55,13 +57,19 @@ class CheckoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
         val amount: Double = intent.getDoubleExtra("entryFee", 0.0) * 100
-        val transaction = Transaction(amount.toInt())
-        val response = vibeesApi.getPaymentInfo(transaction, successfn, failurefn)
         userId = intent.getStringExtra("userID")!!
         Log.d(ContentValues.TAG, "UserID: ${userId}")
         partyId = intent.getStringExtra("partyID")!!
         userName = intent.getStringExtra("userName")!!
         Log.d(ContentValues.TAG, "UserName: ${userName}")
+        if (amount <= 0.5) {
+            val callResponse = vibeesApi.registerUserForParty(attend, failurefn, partyId)
+            navigateToMainActivity()
+        }
+        else {
+            val transaction = Transaction(amount.toInt())
+            val response = vibeesApi.getPaymentInfo(transaction, successfn, failurefn)
+        }
     }
 
     fun presentPaymentSheet() {
@@ -100,6 +108,10 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
+        navigateToMainActivity()
+    }
+
+    fun navigateToMainActivity() {
         val intentNew = Intent(this, MainActivity::class.java)
         intentNew.putExtra("navigateToHome", true)
         intentNew.putExtra("userID", userId)
