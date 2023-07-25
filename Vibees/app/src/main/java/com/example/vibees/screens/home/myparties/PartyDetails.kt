@@ -15,12 +15,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +42,7 @@ import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
 import com.example.vibees.graphs.HostScreens
+import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.host.PartyStore
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
@@ -56,10 +63,62 @@ fun PartyDetails(
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
+    val openDialog = remember { mutableStateOf(false) }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openDialog.value = false
+            },
+            icon = { Icon(Icons.Filled.Warning, contentDescription = "Warning", tint = Color.Red) },
+            title = {
+                Text(text = "Confirm Delete", color = Color.Black,
+                    fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+            },
+            text = {
+                Text(
+                    "Are you sure you want to delete this party? " +
+                            " This action is irreversible!.",
+                    color = Color.Black,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+
+                        // delete party
+
+                        navController.navigate(BottomBar.MyParties.route) {
+                            popUpTo(BottomBar.MyParties.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                ) {
+                    Text("Confirm", color = Color.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                    }
+                ) {
+                    Text("Dismiss", color = Color.Black)
+                }
+            },
+        )
+    }
+
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Icon(
                 imageVector = Icons.Default.Share,
@@ -90,6 +149,19 @@ fun PartyDetails(
                                 partyDetails?.max_cap, partyDetails?.party_id, partyDetails?.host_name,
                                 partyDetails?.qr_endpoint, isedit = true, partyDetails?.attend_count)
                             navController.navigate(HostScreens.Step1.route)
+                        }
+                )
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 20.dp)
+                        .size(40.dp)
+                        .clickable {
+                            // show modal
+                            openDialog.value = true
+
                         }
                 )
             }
