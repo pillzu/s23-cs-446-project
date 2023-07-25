@@ -177,16 +177,12 @@ fun UserScreen(
 
         }
 
-        // Recommended Header with dropdown
-        val options = listOf("Proximity", "Price", "Date", "Capacity")
-        var expanded by remember { mutableStateOf(false) }
-        var selectedOptionText by remember { mutableStateOf(options[0]) }
 
-//        if (searchText == "") {
-            // Recommended Header with dropdown
-//            val options = listOf("Proximity", "Price", "Date", "Day")
-//            var expanded by remember { mutableStateOf(false) }
-//            var selectedOptionText by remember { mutableStateOf(options[0]) }
+        if (searchText == "") {
+//             Recommended Header with dropdown
+            val options = listOf("Proximity", "Price", "Date", "Capacity")
+            var expanded by remember { mutableStateOf(false) }
+            var selectedOptionText by remember { mutableStateOf(options[0]) }
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -213,13 +209,9 @@ fun UserScreen(
                             onClick = {
                                 selectedOptionText = selectionOption
 
-                                var user = GlobalAppState::currentUser.get()
-                                var city = ""
-                                var prov = ""
-                                if (user != null) {
-                                    city = user.address_city.toString()
-                                    prov = user.address_prov.toString()
-                                }
+                                val user = GlobalAppState::currentUser.get()
+                                val city = user!!.address_city.toString()
+                                val prov = user.address_prov.toString()
 
                                 parties = Helper.sortPartiesBy(
                                         originalParties,
@@ -269,13 +261,9 @@ fun UserScreen(
                                 onClick = {
                                     selectedOptionText = selectionOption
 
-                                    var user = GlobalAppState::currentUser.get()
-                                    var city = ""
-                                    var prov = ""
-                                    if (user != null) {
-                                        city = user.address_city.toString()
-                                        prov = user.address_prov.toString()
-                                    }
+                                    val user = GlobalAppState::currentUser.get()
+                                    val city = user!!.address_city.toString()
+                                    val prov = user.address_prov.toString()
 
                                     parties = Helper.sortPartiesBy(
                                         originalParties,
@@ -355,21 +343,33 @@ fun UserScreen(
                     }
                 }
             }
-//        } else {
-//            Row(
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 22.dp, bottom = 5.dp)
-//            ) {
-//                Text(
-//                    text = "Search Results",
-//                    fontWeight = FontWeight.Bold,
-//                    style = MaterialTheme.typography.headlineSmall
-//                )
-//            }
-//        }
+        } else {
+            parties = emptyList()
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 22.dp, bottom = 5.dp)
+            ) {
+                Text(
+                    text = "Search Results",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            // Parties
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(30.dp),
+                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp),
+            ) {
+                Log.d("TAG", parties.toString())
+                items(parties.size) {
+                    PartyItem(partyInfo = parties[it], isMyParty = false, onClick = onClick)
+                }
+            }
+        }
 
 //        // Recommended Header with dropdown
 //        val options = listOf("Proximity", "Price", "Date", "Day")
