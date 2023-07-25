@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home.host
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -53,7 +54,10 @@ import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.utils.toFileUri
+import com.example.vibees.utils.uploadToCloudinary
 import okhttp3.ResponseBody
+import java.net.URI
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -191,6 +195,8 @@ fun HostPartyAttributesScreen(
                     }
                 }
             } else {
+
+
                 AsyncImage(
                     model = selectedImageUri,
                     contentDescription = "image",
@@ -252,7 +258,7 @@ fun HostPartyAttributesScreen(
             TextButton(
                 onClick = {
                     partystore?.taglist = selectedlist
-                    partystore?.image = selectedImageUri.toString()
+                    partystore?.image = selectedImageUri!!.toFileUri(partyContext).toString()
 
                     Log.d("STORE", partystore.toString())
 
@@ -271,8 +277,13 @@ fun HostPartyAttributesScreen(
                         Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
                     }
 
+                    // set default image here
+                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
+                    if (partystore?.image!! != "") {
+                         imgUri = uploadToCloudinary(partystore?.image!!)
+                    }
 
-                    val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                    val obj = Party("", imgUri, partystore?.name, partystore?.date_time!!,
                         userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
                         partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
                         partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,

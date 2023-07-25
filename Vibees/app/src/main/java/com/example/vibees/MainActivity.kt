@@ -22,6 +22,10 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import android.Manifest
 import android.location.Address
+import com.cloudinary.android.LogLevel
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
@@ -53,6 +57,7 @@ class MainActivity : ComponentActivity() {
         }
         initializeAuth()
         initializeSignInRequest()
+        MediaManager.init(this)
     }
 
     private fun initializeAuth() {
