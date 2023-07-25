@@ -45,7 +45,7 @@ def host_party():
 
     # Create a public Spotify playlist for the party and add its ID to the DB
     playlist_name = f"{party_id}"
-    playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name, public=True, collaborative=True)
+    playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name)
     playlist_id = playlist["id"]
     db.set_playlist_id(party_id, playlist_id)
     
