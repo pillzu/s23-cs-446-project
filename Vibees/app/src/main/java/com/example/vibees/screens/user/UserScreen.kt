@@ -293,7 +293,9 @@ fun UserScreen(
             }
 
             // User Interest Tags
-            var tagList = listOf("Default", "Anime", "EDM", "Board Games", "Fraternity", "FIFA")
+            var tagList = listOf("All", "Anime", "EDM", "Dance", "Board game", "Karaoke", "Barbecue", "Pool", "Disco", "Birthday",
+                "Graduation", "Adult only", "Business", "Formal", "Wedding", "Sports", "Bar Hopping", "Day",
+                "Late Night")
 
             var selectedChipIndex by remember {
                 mutableIntStateOf(0)
