@@ -36,9 +36,11 @@ import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
 import com.example.vibees.graphs.HostScreens
+import com.example.vibees.screens.home.host.PartyStore
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 var URL = "https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran"
 
@@ -50,6 +52,7 @@ fun PartyDetails(
     var userID by GlobalAppState::UserID
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
+    var partystore by GlobalAppState::PartyStore
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
@@ -79,7 +82,13 @@ fun PartyDetails(
                         .padding(top = 20.dp)
                         .size(40.dp)
                         .clickable {
-
+                            // populate fields
+                            partystore = PartyStore(partyDetails?.street, partyDetails?.city, partyDetails?.prov,
+                                partyDetails?.postal_code, partyDetails?.date_time, partyDetails?.name, partyDetails?.type,
+                                partyDetails?.entry_fee?.roundToInt(), partyDetails?.desc, partyDetails?.drug, partyDetails?.byob,
+                                partyDetails?.tags, partyDetails?.party_avatar_url, partyDetails?.host_id,
+                                partyDetails?.max_cap, partyDetails?.party_id, partyDetails?.host_name,
+                                partyDetails?.qr_endpoint, isedit = true)
                             navController.navigate(HostScreens.Step1.route)
                         }
                 )

@@ -58,6 +58,14 @@ fun HostPartyDetailsScreen(
     var drugfriendly by remember { mutableStateOf(false)}
     var byob by remember { mutableStateOf(false)}
 
+    var nameFirst by remember { mutableStateOf(true) }
+    var themeFirst by remember { mutableStateOf(true) }
+    var feeFirst by remember { mutableStateOf(true) }
+    var capacityFirst by remember { mutableStateOf(true) }
+    var descFirst by remember { mutableStateOf(true) }
+    var drugFirst by remember { mutableStateOf(true) }
+    var byobFirst by remember { mutableStateOf(true) }
+
     val partystore by GlobalAppState::PartyStore
 
     Column(
@@ -74,7 +82,7 @@ fun HostPartyDetailsScreen(
             ) {
                 Text(
                     text = "Host a Party",
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
@@ -92,6 +100,11 @@ fun HostPartyDetailsScreen(
                 val focusManager = LocalFocusManager.current
 
                 field(HostPartyDetails::name) {
+                    if (partystore?.isedit == true and nameFirst) {
+                        setField(partystore?.name)
+                        partyname = partystore?.name.toString()
+                        nameFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -118,6 +131,11 @@ fun HostPartyDetailsScreen(
                     )
                 }
                 field(HostPartyDetails::theme) {
+                    if (partystore?.isedit == true and themeFirst) {
+                        setField(partystore?.type)
+                        theme = partystore?.type.toString()
+                        themeFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -144,6 +162,11 @@ fun HostPartyDetailsScreen(
                     )
                 }
                 field(HostPartyDetails::description) {
+                    if (partystore?.isedit == true and descFirst) {
+                        setField(partystore?.desc)
+                        description = partystore?.desc.toString()
+                        descFirst = false
+                    }
                     OutlinedTextField(
                         value = state.value?.value.orEmpty(),
                         onValueChange = {
@@ -174,6 +197,11 @@ fun HostPartyDetailsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     field(HostPartyDetails::fee) {
+                        if (partystore?.isedit == true and feeFirst) {
+                            setField(partystore?.entry_fee.toString())
+                            fee = partystore?.entry_fee ?: 0
+                            feeFirst = false
+                        }
                         OutlinedTextField(
                             value = state.value?.value.orEmpty(),
                             onValueChange = {
@@ -181,7 +209,12 @@ fun HostPartyDetailsScreen(
                                     fee = it.toInt()
                                     setField(it)
                                 } catch (_: NumberFormatException) {
-                                    Log.d("Invalid number", "Invalid number entered in fee")
+                                    if (it == "") {
+                                        setField("")
+                                        fee = 0
+                                    } else {
+                                        Log.d("Invalid number", "Invalid number entered in fee")
+                                    }
                                 }
                             } ,
                             isError = resultState.value is FieldResult.Error,
@@ -190,7 +223,7 @@ fun HostPartyDetailsScreen(
                             enabled = true,
                             keyboardActions = KeyboardActions(
                                 onNext = {
-                                    focusManager.moveFocus(FocusDirection.Down)
+                                    focusManager.moveFocus(FocusDirection.Right)
                                 }
                             ),
                             keyboardOptions = KeyboardOptions(
@@ -204,6 +237,11 @@ fun HostPartyDetailsScreen(
                         )
                     }
                     field(HostPartyDetails::capacity) {
+                        if (partystore?.isedit == true and capacityFirst) {
+                            setField(partystore?.max_cap.toString())
+                            capacity = partystore?.max_cap ?: 0
+                            capacityFirst = false
+                        }
                         OutlinedTextField(
                             value = state.value?.value.orEmpty(),
                             onValueChange = {
@@ -211,7 +249,12 @@ fun HostPartyDetailsScreen(
                                     capacity = it.toInt()
                                     setField(it)
                                 } catch (_: NumberFormatException) {
-                                    Log.d("Invalid number", "Invalid number entered in capacity")
+                                    if (it == "") {
+                                        setField("")
+                                        capacity = 0
+                                    } else {
+                                        Log.d("Invalid number", "Invalid number entered in capacity")
+                                    }
                                 }
                             } ,
                             isError = resultState.value is FieldResult.Error,
@@ -236,6 +279,11 @@ fun HostPartyDetailsScreen(
                 }
 
                 field(HostPartyDetails::drugfriendly) {
+                    if (partystore?.isedit == true and drugFirst) {
+                        setField(if (partystore?.drug == true) "Yes" else "No")
+                        drugfriendly = partystore?.drug == true
+                        drugFirst = false
+                    }
                     Text(
                         text = "Does this party allow drug usage?",
                         fontSize = MaterialTheme.typography.titleMedium.fontSize,
@@ -292,6 +340,11 @@ fun HostPartyDetailsScreen(
                     )
                 }
                 field(HostPartyDetails::byob) {
+                    if (partystore?.isedit == true and byobFirst) {
+                        setField(if (partystore?.byob == true) "Yes" else "No")
+                        byob = partystore?.byob == true
+                        byobFirst = false
+                    }
                     Text(
                         text = "Bring Your Own Booze/Snacks?",
                         fontSize = MaterialTheme.typography.titleMedium.fontSize,
