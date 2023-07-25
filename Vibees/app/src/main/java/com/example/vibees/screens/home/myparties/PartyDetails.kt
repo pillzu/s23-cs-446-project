@@ -3,7 +3,6 @@ package com.example.vibees.screens.home.myparties
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,17 +21,29 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +57,7 @@ import com.example.vibees.Api.APIInterface
 import com.example.vibees.GlobalAppState
 import com.example.vibees.graphs.HostScreens
 import com.example.vibees.qr_scanner.PreviewViewComposable
+import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.host.PartyStore
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
@@ -80,10 +92,113 @@ fun PartyDetails(
     val context = LocalContext.current
 
 
+    val openDeleteDialog = remember { mutableStateOf(false) }
+    val openLeaveDialog = remember { mutableStateOf(false) }
+
+    if (openDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openDeleteDialog.value = false
+            },
+            icon = { Icon(Icons.Filled.Warning, contentDescription = "Warning", tint = Color.Red) },
+            title = {
+                Text(text = "Confirm Delete", color = Color.Black,
+                    fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+            },
+            text = {
+                Text(
+                    "Are you sure you want to delete this party? " +
+                            " This action is irreversible!.",
+                    color = Color.Black,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDeleteDialog.value = false
+
+                        // delete party
+
+                        navController.navigate(BottomBar.MyParties.route) {
+                            popUpTo(BottomBar.MyParties.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                ) {
+                    Text("Confirm", color = Color.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDeleteDialog.value = false
+                    }
+                ) {
+                    Text("Dismiss", color = Color.Black)
+                }
+            },
+        )
+    }
+
+    if (openLeaveDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openLeaveDialog.value = false
+            },
+            icon = { Icon(Icons.Filled.Warning, contentDescription = "Warning", tint = Color.Red) },
+            title = {
+                Text(text = "Confirm Leave", color = Color.Black,
+                    fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+            },
+            text = {
+                Text(
+                    "Are you sure you want to leave this party? " +
+                            " You will need to register again if you change your mind later.",
+                    color = Color.Black,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openLeaveDialog.value = false
+
+                        // leave party
+
+                        navController.navigate(BottomBar.MyParties.route) {
+                            popUpTo(BottomBar.MyParties.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                ) {
+                    Text("Confirm", color = Color.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openLeaveDialog.value = false
+                    }
+                ) {
+                    Text("Dismiss", color = Color.Black)
+                }
+            },
+        )
+    }
+
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Icon(
                 imageVector = Icons.Default.Share,
@@ -136,6 +251,32 @@ fun PartyDetails(
                                 partyDetails?.attend_count
                             )
                             navController.navigate(HostScreens.Step1.route)
+                        }
+                )
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 20.dp)
+                        .size(40.dp)
+                        .clickable {
+                            // show modal
+                            openDeleteDialog.value = true
+
+                        }
+                )
+            } else {
+                Icon(
+                    imageVector = Leave(),
+                    contentDescription = "Share",
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 20.dp)
+                        .size(40.dp)
+                        .clickable {
+                            // show modal
+                            openLeaveDialog.value = true
                         }
                 )
             }
@@ -320,5 +461,82 @@ fun PartyDetails(
                 Text(color = Color.Black, text = partyDetails?.desc!!)
             }
         }
+    }
+}
+
+@Composable
+fun Leave(): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "leave",
+            defaultWidth = 40.0.dp,
+            defaultHeight = 40.0.dp,
+            viewportWidth = 40.0f,
+            viewportHeight = 40.0f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1f,
+                stroke = null,
+                strokeAlpha = 1f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(16.375f, 26.958f)
+                quadToRelative(-0.375f, -0.416f, -0.375f, -1f)
+                quadToRelative(0f, -0.583f, 0.375f, -0.958f)
+                lineToRelative(3.667f, -3.708f)
+                horizontalLineToRelative(-13.5f)
+                quadToRelative(-0.584f, 0f, -0.959f, -0.375f)
+                reflectiveQuadTo(5.208f, 20f)
+                quadToRelative(0f, -0.542f, 0.375f, -0.938f)
+                quadToRelative(0.375f, -0.395f, 0.959f, -0.395f)
+                horizontalLineToRelative(13.5f)
+                lineToRelative(-3.709f, -3.709f)
+                quadToRelative(-0.375f, -0.375f, -0.375f, -0.937f)
+                quadToRelative(0f, -0.563f, 0.417f, -0.979f)
+                quadToRelative(0.375f, -0.417f, 0.958f, -0.417f)
+                quadToRelative(0.584f, 0f, 0.959f, 0.375f)
+                lineToRelative(6.041f, 6.083f)
+                quadToRelative(0.209f, 0.209f, 0.313f, 0.438f)
+                quadToRelative(0.104f, 0.229f, 0.104f, 0.479f)
+                quadToRelative(0f, 0.292f, -0.104f, 0.5f)
+                quadToRelative(-0.104f, 0.208f, -0.313f, 0.417f)
+                lineTo(18.292f, 27f)
+                quadToRelative(-0.417f, 0.417f, -0.959f, 0.396f)
+                quadToRelative(-0.541f, -0.021f, -0.958f, -0.438f)
+                close()
+                moveTo(7.833f, 34.75f)
+                quadToRelative(-1.041f, 0f, -1.833f, -0.792f)
+                quadToRelative(-0.792f, -0.791f, -0.792f, -1.875f)
+                verticalLineToRelative(-6.791f)
+                quadToRelative(0f, -0.584f, 0.375f, -0.959f)
+                reflectiveQuadToRelative(0.959f, -0.375f)
+                quadToRelative(0.541f, 0f, 0.916f, 0.375f)
+                reflectiveQuadToRelative(0.375f, 0.959f)
+                verticalLineToRelative(6.791f)
+                horizontalLineToRelative(24.292f)
+                verticalLineTo(7.833f)
+                horizontalLineTo(7.833f)
+                verticalLineToRelative(6.875f)
+                quadToRelative(0f, 0.584f, -0.375f, 0.959f)
+                reflectiveQuadToRelative(-0.916f, 0.375f)
+                quadToRelative(-0.584f, 0f, -0.959f, -0.375f)
+                reflectiveQuadToRelative(-0.375f, -0.959f)
+                verticalLineTo(7.833f)
+                quadToRelative(0f, -1.083f, 0.792f, -1.854f)
+                quadToRelative(0.792f, -0.771f, 1.833f, -0.771f)
+                horizontalLineToRelative(24.292f)
+                quadToRelative(1.083f, 0f, 1.875f, 0.771f)
+                reflectiveQuadToRelative(0.792f, 1.854f)
+                verticalLineToRelative(24.25f)
+                quadToRelative(0f, 1.084f, -0.792f, 1.875f)
+                quadToRelative(-0.792f, 0.792f, -1.875f, 0.792f)
+                close()
+            }
+        }.build()
     }
 }
