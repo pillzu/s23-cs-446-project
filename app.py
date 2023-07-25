@@ -13,9 +13,9 @@ from spotipy.oauth2 import SpotifyOAuth
 
 app = Flask(__name__)
 
-SPOTIFY_CLIENT_ID = "Preeti should probably check her Discord DMs"
-SPOTIFY_CLIENT_SECRET = "Preeti should probably check her Discord DMs"
-SPOTIFY_USER_ID = "Preeti should probably check her Discord DMs"
+SPOTIFY_CLIENT_ID = "0ffac1d3b8c545ada41939e91ee75d30"
+SPOTIFY_CLIENT_SECRET = "643a8dcc608d4d00af2bd6387e3853df"
+SPOTIFY_USER_ID = "31wjtvhoqm75rg3qlyhzqmtslcce"
 
 '''
 Parties Endpoints
@@ -302,4 +302,4 @@ if __name__ == "__main__":
         exit(1)
 
     db.create_tables()
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=8080)
