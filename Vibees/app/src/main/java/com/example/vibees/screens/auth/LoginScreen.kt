@@ -155,11 +155,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Text(text = "WELCOME TO VIBEES",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
 //            Text(text = "Let's get Vibees",
 //                style = MaterialTheme.typography.headlineSmall,
 //                color = MaterialTheme.colorScheme.tertiary,
