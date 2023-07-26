@@ -65,7 +65,12 @@ class MainActivity : ComponentActivity() {
         }
         initializeAuth()
         initializeSignInRequest()
-        MediaManager.init(this)
+        try {
+            MediaManager.get()
+        }
+        catch (e: Exception) {
+            MediaManager.init(this)
+        }
     }
 
     private fun initializeAuth() {

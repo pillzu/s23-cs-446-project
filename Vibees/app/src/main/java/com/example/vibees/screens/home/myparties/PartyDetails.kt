@@ -1,8 +1,13 @@
 package com.example.vibees.screens.home.myparties
 
 import android.Manifest
+import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,8 +16,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -57,11 +64,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import coil.compose.rememberAsyncImagePainter
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.R
 import com.example.vibees.graphs.HostScreens
 import com.example.vibees.qr_scanner.PreviewViewComposable
@@ -95,16 +106,53 @@ fun PartyDetails(
     navController: NavHostController,
     id: String,
 ) {
+
     var userID by GlobalAppState::UserID
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     var partystore by GlobalAppState::PartyStore
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
+    val openUrlLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Handle any post-action logic here if needed
+        }
+    }
 
+    val vibeesApi = VibeesApi()
 
     val openDeleteDialog = remember { mutableStateOf(false) }
     val openLeaveDialog = remember { mutableStateOf(false) }
+
+    val successfn_unattend: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG UNATTEND", "success: unattended party")
+    }
+
+    val failurefn_unattend: (Throwable) -> Unit = { t ->
+        Log.d("TAG UNATTEND", "FAILURE: unattend party")
+        Log.d("TAG UNATTEND", t.printStackTrace().toString())
+    }
+
+    val successfn_cancel_party: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG CANCEL PARTY", "success: party cancelled")
+    }
+
+    val failurefn_cancel_party: (Throwable) -> Unit = { t ->
+        Log.d("TAG CANCEL PARTY", "FAILURE: party cancelling")
+        Log.d("TAG CANCEL PARTY", t.printStackTrace().toString())
+    }
+
+    val successfn_update_party: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG UPDATE PARTY", "success: party updated")
+    }
+
+    val failurefn_update_party: (Throwable) -> Unit = { t ->
+        Log.d("TAG UPDATE PARTY", "FAILURE: party updating")
+        Log.d("TAG UPDATE PARTY", t.printStackTrace().toString())
+    }
+
 
     if (openDeleteDialog.value) {
         AlertDialog(
@@ -133,6 +181,7 @@ fun PartyDetails(
                         openDeleteDialog.value = false
 
                         // delete party
+                        vibeesApi.cancelParty(successfn_cancel_party, failurefn_cancel_party, partyDetails?.party_id!!)
 
                         navController.navigate(BottomBar.MyParties.route) {
                             popUpTo(BottomBar.MyParties.route) {
@@ -183,6 +232,7 @@ fun PartyDetails(
                         openLeaveDialog.value = false
 
                         // leave party
+                        vibeesApi.unattendUserFromParty(successfn_unattend, failurefn_unattend, partyDetails?.party_id!!, userID.toString())
 
                         navController.navigate(BottomBar.MyParties.route) {
                             popUpTo(BottomBar.MyParties.route) {
@@ -440,7 +490,6 @@ fun PartyDetails(
                     color = Color.Black, text = formatDate(party_datetime),
                     textAlign = TextAlign.Center,
                 )
-
             }
         }
 
@@ -530,8 +579,11 @@ fun PartyDetails(
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
                 )
-                Text(color = Color.Black, text = "EDM")
-                Text(color = Color.Black, text = "Alcohol-free")
+                for (tag in partyDetails?.tags!!) {
+                    Text(color = Color.Black, text = tag)
+                }
+//                    Text(color = Color.Black, text = "EDM")
+//                    Text(color = Color.Black, text = "Alcohol-free")
                 Text("")
 
             }
@@ -552,8 +604,61 @@ fun PartyDetails(
             }
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.Center
+
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable {
+                        // Successful request
+                        val successfn: (ResponseMessage) -> Unit = { response ->
+                            Log.d("TAG", "success")
+                            val playlist_id = response.message
+                            val uri = Uri.parse("https://open.spotify.com/playlist/$playlist_id")
+                            Log.d("Spotify:", "${uri.toString()}")
+                            val intent = Intent(Intent.ACTION_VIEW, uri)
+                            try {
+                                openUrlLauncher.launch(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                // Handle the case where there's no app to handle the URL
+                                Toast.makeText(context, "Spotify is not available", Toast.LENGTH_LONG).show()
+                            }
+                        }
+
+                        // failed request
+                        val failurefn: (Throwable) -> Unit = { t ->
+                            Log.d("SPTM", "FAILURE: SPOTIFY FAILED")
+                            Log.d("TAG", t.printStackTrace().toString())
+                            Toast.makeText(context, "Could not retrieve spotify playlist", Toast.LENGTH_LONG).show()
+                        }
+
+                        val response = vibeesApi.getPlaylistInfo(successfn, failurefn, partyDetails?.party_id!!)
+
+                    }
+                    .clip(RoundedCornerShape(40.dp))
+                    .background(
+                        Color(0xFF1DB954)
+                    )
+                    .padding(15.dp, 10.dp)
+                    .defaultMinSize(50.dp)
+            ) {
+                androidx.compose.material.Text(
+                    text = "Party Playlist",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
     }
 }
+
 
 @Composable
 fun Leave(): ImageVector {

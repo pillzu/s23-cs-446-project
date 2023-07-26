@@ -61,6 +61,25 @@ def host_party():
     }), 200
 
 
+@app.get("/parties/playlist/<party_id>")
+def get_playlist_id(party_id):
+
+    if not party_id:
+        return jsonify({
+            "message": "Error retrieving playlist info"
+        }), 400
+
+    try:
+        playlist_id = db.query_spotify_IDs(party_id)[0][1]
+    except:
+        return jsonify({
+            "message": "Error fetching playlist id"
+        }), 400
+
+    return jsonify({
+        "message": playlist_id
+    })
+
 @app.post("/parties")
 def get_tagged_parties():
     """Endpoint to get parties with a specific tag"""
@@ -325,6 +344,92 @@ def payment_sheet():
                     ephemeralKey=ephemeralKey.secret,
                     customer=customer.id,
                     publishableKey='pk_test_51NWutYB9GlqxPfMYGmeB1XiOm376R1cASdzAO5oB37UiDZ9NEb7wJLyx8qN0A2KyhbaxI2LiIqjqhmHHGooY743t00JnjAvV1W')
+
+
+
+@app.route('/parties/unattend/<party_id>/<user_id>', methods=['DELETE'])
+def unattend_party(party_id, user_id):
+    if user_id is None:
+        return {"message": "No user id provided! Please try again..."}, 400
+    if party_id is None:
+        return {"message": "No party id provided! Please try again..."}, 400
+
+    # remove the guest from the party
+    if not db.leave_party(user_id, party_id):
+        return {"message": "Unable to unattend the party! Please call help..."}, 500
+
+    return {"message": "Unattended party successfully!"}, 200
+
+
+@app.route('/parties/cancel/<party_id>', methods=['DELETE'])
+def cancel_party(party_id):
+    if party_id is None:
+        return {"message": "No party id provided! Please try again..."}, 400
+
+    # cancel the party and remove all attendees
+    if not db.cancel_party(party_id):
+        return {"message": "Unable to cancel the party! Please call help..."}, 500
+
+    return {"message": "Party cancelled successfully!"}, 200
+
+
+
+@app.route('/party/update/<party_id>', methods=['PUT'])
+def update_party_details(party_id):
+    req = request.json
+
+    # Check if the user_id is provided
+    if not party_id:
+        return {"message": "No party id provided! Please try again..."}, 400
+
+    # Extract the party details from the request
+    party_avatar_url = req.get("party_avatar_url", None)
+    name = req.get("name", None)
+    date_time = req.get("date_time", None)
+    host_id = req.get("host_id", None)
+    max_cap = req.get("max_cap", None)
+    desc = req.get("desc", None)
+    entry_fee = req.get("entry_fee", None)
+    type = req.get("type", None)
+    drug = req.get("drug", None)
+    byob = req.get("byob", None)
+    host_name = req.get("host_name", None)
+    qr_endpoint = req.get("qr_endpoint", None)
+    street = req.get("street", None)
+    city = req.get("city", None)
+    prov = req.get("prov", None)
+    postal_code = req.get("postal_code", None)
+    tags = req.get("tags", None)
+
+    # Update the party details in the database
+    try:
+        result = db.update_party(
+            party_id,
+            party_avatar_url,
+            name,
+            date_time,
+            host_id,
+            max_cap,
+            desc,
+            entry_fee,
+            type,
+            drug,
+            byob,
+            host_name,
+            qr_endpoint,
+            street,
+            city,
+            prov,
+            postal_code,
+            tags
+        )
+    except:
+        return return_message_response("Internal Server Error", 500)
+
+    if not result:
+        return return_message_response("Could not update party details.", 500)
+    else:
+        return return_message_response("Successfully updated party details.", 200)
 
 
 

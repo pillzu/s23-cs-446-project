@@ -40,8 +40,8 @@ class APIInterface {
     init {
 
         val httpClientBuilder = OkHttpClient.Builder()
-        httpClientBuilder.connectTimeout(30, TimeUnit.SECONDS) // Increase the connect timeout to 30 seconds
-        httpClientBuilder.readTimeout(30, TimeUnit.SECONDS)    // Increase the read timeout to 30 seconds
+        httpClientBuilder.connectTimeout(3, TimeUnit.SECONDS) // Increase the connect timeout to 30 seconds
+        httpClientBuilder.readTimeout(3, TimeUnit.SECONDS)    // Increase the read timeout to 30 seconds
         val httpClient = httpClientBuilder.build()
 
         val gson = GsonBuilder()
@@ -101,7 +101,23 @@ class APIInterface {
         return apiService.checkQrAttendee(qr_endpoint = user_qr )
     }
 
+    fun unattendParty(party_id: String, user_id: String): Call<ResponseMessage> {
+        return apiService.unattendUserFromParty(party_id, user_id)
+    }
+
+    fun cancelParty(party_id: String): Call<ResponseMessage> {
+        return apiService.cancelParty(party_id)
+    }
+
+    fun updatePartyDetails(party_id: String, party_model: Party): Call<ResponseMessage> {
+        return apiService.updatePartyDetails(party_id, party_model)
+    }
+
     fun getPartyInfo(requestModel: Transaction): Call<PaymentMetaData> {
         return apiService.getPaymentInfo(requestModel)
+    }
+
+    fun getPlaylistInfo(party_id: String): Call<ResponseMessage> {
+        return apiService.getPlaylistInfo(party_id)
     }
 }

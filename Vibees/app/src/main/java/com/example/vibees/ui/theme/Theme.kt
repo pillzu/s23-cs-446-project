@@ -19,7 +19,7 @@ import androidx.core.view.WindowCompat
 private val LightColorScheme = lightColorScheme(
     primary = Yellow,
     secondary = SubtleWhite,
-    tertiary = GrayWhite,
+    tertiary = GrayWhite
 //    background = Color.White
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

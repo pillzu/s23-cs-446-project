@@ -336,7 +336,6 @@ fun PartyViewing(
                             fontWeight = FontWeight.Bold
                         )
                         Text(color = Color.Black, text = partyDetails?.entry_fee.toString())
-
                     }
                 }
                 // third row
@@ -382,10 +381,10 @@ fun PartyViewing(
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
-                        Text(color = Color.Black, text = "EDM")
-                        Text(color = Color.Black, text = "Alcohol-free")
+                        for (tag in partyDetails?.tags!!) {
+                            Text(color = Color.Black, text = tag)
+                        }
                         Text("")
-
                     }
                 }
 
