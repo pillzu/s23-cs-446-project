@@ -604,59 +604,61 @@ fun PartyDetails(
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.Center
-
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
+        if (partyDetails?.host_id == userID) {
+            Row(
                 modifier = Modifier
-                    .padding(end = 10.dp)
-                    .clickable {
-                        // Successful request
-                        val successfn: (ResponseMessage) -> Unit = { response ->
-                            Log.d("TAG", "success")
-                            val playlist_id = response.message
-                            val uri = Uri.parse("https://open.spotify.com/playlist/$playlist_id")
-                            Log.d("Spotify:", "${uri.toString()}")
-                            val intent = Intent(Intent.ACTION_VIEW, uri)
-                            try {
-                                openUrlLauncher.launch(intent)
-                            } catch (e: ActivityNotFoundException) {
-                                // Handle the case where there's no app to handle the URL
-                                Toast.makeText(context, "Spotify is not available", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.Center
 
-                        // failed request
-                        val failurefn: (Throwable) -> Unit = { t ->
-                            Log.d("SPTM", "FAILURE: SPOTIFY FAILED")
-                            Log.d("TAG", t.printStackTrace().toString())
-                            Toast.makeText(context, "Could not retrieve spotify playlist", Toast.LENGTH_LONG).show()
-                        }
-
-                        val response = vibeesApi.getPlaylistInfo(successfn, failurefn, partyDetails?.party_id!!)
-
-                    }
-                    .clip(RoundedCornerShape(40.dp))
-                    .background(
-                        Color(0xFF1DB954)
-                    )
-                    .padding(15.dp, 10.dp)
-                    .defaultMinSize(50.dp)
             ) {
-                androidx.compose.material.Text(
-                    text = "Party Playlist",
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .clickable {
+                            // Successful request
+                            val successfn: (ResponseMessage) -> Unit = { response ->
+                                Log.d("TAG", "success")
+                                val playlist_id = response.message
+                                val uri = Uri.parse("https://open.spotify.com/playlist/$playlist_id")
+                                Log.d("Spotify:", "${uri.toString()}")
+                                val intent = Intent(Intent.ACTION_VIEW, uri)
+                                try {
+                                    openUrlLauncher.launch(intent)
+                                } catch (e: ActivityNotFoundException) {
+                                    // Handle the case where there's no app to handle the URL
+                                    Toast.makeText(context, "Spotify is not available", Toast.LENGTH_LONG).show()
+                                }
+                            }
+
+                            // failed request
+                            val failurefn: (Throwable) -> Unit = { t ->
+                                Log.d("SPTM", "FAILURE: SPOTIFY FAILED")
+                                Log.d("TAG", t.printStackTrace().toString())
+                                Toast.makeText(context, "Could not retrieve spotify playlist", Toast.LENGTH_LONG).show()
+                            }
+
+                            val response = vibeesApi.getPlaylistInfo(successfn, failurefn, partyDetails?.party_id!!)
+
+                        }
+                        .clip(RoundedCornerShape(40.dp))
+                        .background(
+                            Color(0xFF1DB954)
+                        )
+                        .padding(15.dp, 10.dp)
+                        .defaultMinSize(50.dp)
+                ) {
+                    androidx.compose.material.Text(
+                        text = "Party Playlist",
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
-    }
+        }
 }
 
 
