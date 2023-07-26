@@ -180,11 +180,13 @@ fun PartyItem(
                 }
             }
 
-            var notice = "May have "
-            if (partyInfo.drug)
+            var notice = "Has "
+            if (partyInfo.drug && partyInfo.byob)
+                notice += "drugs, alcohol"
+            else if (partyInfo.byob)
+                notice += "alcohol"
+            else if (partyInfo.drug)
                 notice += "drugs"
-            if (partyInfo.byob)
-                notice += ", alcohol"
 
             Row(
                 modifier = Modifier
