@@ -1,11 +1,17 @@
 package com.example.vibees.screens.home.host
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,17 +50,25 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.cloudinary.android.MediaManager
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.R
+import com.example.vibees.utils.URIPathHelper
+import com.example.vibees.utils.toFileUri
+import com.example.vibees.utils.uploadToCloudinary
 import okhttp3.ResponseBody
 
+@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HostPartyAttributesScreen(
@@ -63,6 +77,7 @@ fun HostPartyAttributesScreen(
     val selectedlist by GlobalAppState::TagList
     var selectedcount by remember { mutableIntStateOf(0) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var imgUri = stringResource(R.string.default_avatar)
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
@@ -76,6 +91,17 @@ fun HostPartyAttributesScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
     )
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("HostScreen","PERMISSION GRANTED")
+
+        } else {
+            Log.d("HostScreen","PERMISSION DENIED")
+        }
+    }
 
     val tags = listOf("Dance", "Board game", "Karaoke", "Barbecue", "Pool", "Disco", "Birthday",
         "Graduation", "Adult only", "Business", "Formal", "Wedding", "Sports", "Bar Hopping", "Day",
@@ -191,6 +217,8 @@ fun HostPartyAttributesScreen(
                     }
                 }
             } else {
+
+
                 AsyncImage(
                     model = selectedImageUri,
                     contentDescription = "image",
@@ -207,6 +235,15 @@ fun HostPartyAttributesScreen(
                     partystore?.image = selectedImageUri.toString()
 
                     Log.d("STORE update", partystore.toString())
+
+                    Log.d("UPDATE", imgUri)
+                    // set default image here
+                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
+                    if (partystore?.image!! != "") {
+                        var publicId = "${partystore?.name}-${userName}"
+                        uriToCloudinary(partyContext, selectedImageUri, publicId, launcher)
+                        imgUri = MediaManager.get().url().generate(publicId)
+                    }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
@@ -252,9 +289,15 @@ fun HostPartyAttributesScreen(
             TextButton(
                 onClick = {
                     partystore?.taglist = selectedlist
-                    partystore?.image = selectedImageUri.toString()
 
                     Log.d("STORE", partystore.toString())
+
+                    // set default image here
+                    if (selectedImageUri != null){
+                        var publicId = "${partystore?.name}-${userName}"
+                        uriToCloudinary(partyContext, selectedImageUri, publicId, launcher)
+                        imgUri = MediaManager.get().url().generate(publicId)
+                    }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
@@ -272,8 +315,7 @@ fun HostPartyAttributesScreen(
                         Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
                     }
 
-
-                    val obj = Party("", partystore?.image.toString(), partystore?.name, partystore?.date_time!!,
+                    val obj = Party("", imgUri, partystore?.name, partystore?.date_time!!,
                         userID, partystore?.max_cap!!, partystore?.desc!!, partystore?.entry_fee!!.toDouble(),
                         partystore?.type, partystore?.drug!!, partystore?.byob!!, userName, "",
                         partystore?.street!!, partystore?.city!!, partystore?.prov!!, partystore?.postal_code!!,
@@ -333,4 +375,41 @@ fun FilterChipTag(
         },
         modifier = Modifier.padding(4.dp)
     )
+}
+
+fun uriToCloudinary(partyContext: Context, selectedImageUri:Uri?, publicId: String , launcher: ManagedActivityResultLauncher<String, Boolean>): String {
+    val uriPathHelper = URIPathHelper()
+    val filePath = uriPathHelper.getPath(partyContext, selectedImageUri!!)
+    Log.i("FilePath", filePath.toString())
+
+    when (PackageManager.PERMISSION_GRANTED) {
+        ContextCompat.checkSelfPermission(
+            partyContext,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) -> {
+            // Some works that require permission
+            Log.d("HostScreen","Code has write permission")
+        }
+        else -> {
+            // Asking for permission
+            launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+    when (PackageManager.PERMISSION_GRANTED) {
+        ContextCompat.checkSelfPermission(
+            partyContext,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) -> {
+            // Some works that require permission
+            Log.d("HostScreen","Code has read permission")
+        }
+        else -> {
+            // Asking for permission
+            launcher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
+
+    // upload to cloudinary
+    val imgUri = filePath?.let { uploadToCloudinary(it, publicId) }
+    return imgUri!!
 }

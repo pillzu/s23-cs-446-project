@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,62 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cloudinary.android.MediaManager
 import com.example.vibees.R
 import com.example.vibees.ui.theme.Yellow
-
-@Composable
-fun HelpScreen2() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-//        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-//            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
-            Image(painter = painterResource(id = R.drawable.saly_10), contentDescription = "Help infographic")
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "Need a hand at something?",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            CollapsableLazyColumn(
-                sections = listOf(
-                    CollapsableSection(
-                        title = stringResource(id = R.string.title_about_us),
-                        rows = listOf(stringResource(id = R.string.description_about_us))
-                    ),
-                    CollapsableSection(
-                        title = stringResource(id = R.string.title_contact_us),
-                        rows = listOf(
-                            stringResource(id = R.string.description_contact_email),
-                            stringResource(id = R.string.description_contact_phone),
-                            stringResource(id = R.string.description_contact_twitter),
-                            stringResource(id = R.string.description_contact_discord),
-                            stringResource(id = R.string.description_contact_facebook),
-                            stringResource(id = R.string.description_contact_instagram)
-                        )
-                    ),
-                    CollapsableSection(
-                        title = stringResource(id = R.string.title_faq),
-                        rows = listOf(
-                            stringResource(id = R.string.description_faq_vibees_work),
-                            stringResource(id = R.string.description_faq_dietary_restrictions),
-                            stringResource(id = R.string.description_faq_cancel_attendance)
-                        )
-                    ),
-                    CollapsableSection(
-                        title = stringResource(id = R.string.title_privacy_policy),
-                        rows = listOf(stringResource(id = R.string.description_privacy_policy))
-                    ),
-
-                    ),
-            )
-        }
-        }
-    }
 
 @Composable
 fun HelpScreen() {

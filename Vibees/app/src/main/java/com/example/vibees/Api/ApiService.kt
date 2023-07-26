@@ -51,8 +51,8 @@ interface ApiService {
     @DELETE("/user/{user_id}")
     fun deleteUserAccount(@Path("user_id") user_id: String): Call<ResponseMessage>
 
-    @GET("/{qr_url}")
-    fun checkQrAttendee(@Path("qr_url") qr_endpoint: String): Call<ResponseMessage>
+    @GET("{qr_url}")
+    fun checkQrAttendee(@Path("qr_url", encoded = true) qr_endpoint: String): Call<ResponseMessage>
 
 
     @POST("/payment-sheet")

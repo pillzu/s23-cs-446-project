@@ -22,6 +22,10 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import android.Manifest
 import android.location.Address
+import com.cloudinary.android.LogLevel
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import android.net.Uri
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.Models.ResponseMessage
@@ -61,6 +65,7 @@ class MainActivity : ComponentActivity() {
         }
         initializeAuth()
         initializeSignInRequest()
+        MediaManager.init(this)
     }
 
     private fun initializeAuth() {
@@ -88,6 +93,7 @@ class MainActivity : ComponentActivity() {
             result = oneTapClient.beginSignIn(signInRequest).await()
         }
         catch (e: Exception) {
+            Log.d("TAG error", "${e.message}")
             showToast("Google One Tap Sign in is not available.")
         }
         try {
