@@ -27,11 +27,13 @@ def host_party():
     req = request.json
 
     party_id = db.exec_host_party(req["name"], req["party_avatar_url"],
-                                  req["date_time"], req["user_id"],
+                                  req["date_time"], req["host_id"],
                                   req["max_cap"], req["desc"],
                                   req["entry_fee"], req["street"],
                                   req["city"], req["prov"],
-                                  req["postal_code"], req["tags"])
+                                  req["postal_code"], req["tags"],
+                                  req["type"], req["drug"],
+                                  req["byob"], req["host_name"], req["qr_endpoint"])
 
     if not party_id:
         return jsonify({"message": "Unable to create party. Please try again..."}), 400
