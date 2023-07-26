@@ -52,6 +52,7 @@ class CheckoutActivity : AppCompatActivity() {
     var userId = ""
     var userName = ""
     var partyId = ""
+    var songList: kotlin.collections.ArrayList<String?> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,9 +62,11 @@ class CheckoutActivity : AppCompatActivity() {
         Log.d(ContentValues.TAG, "UserID: ${userId}")
         partyId = intent.getStringExtra("partyID")!!
         userName = intent.getStringExtra("userName")!!
+        songList = intent.getStringArrayListExtra("songList") as ArrayList<String?>
+        Log.d("TAG", "songlist check: ${songList}")
         Log.d(ContentValues.TAG, "UserName: ${userName}")
         if (amount <= 0.5) {
-            val callResponse = vibeesApi.registerUserForParty(attend, failurefn, partyId)
+            val callResponse = vibeesApi.registerUserForParty(attend, failurefn, partyId, songList as List<String>)
             navigateToMainActivity()
         }
         else {
@@ -104,7 +107,7 @@ class CheckoutActivity : AppCompatActivity() {
                 showToast("Transaction Completed")
 
                 // user will attend party
-                val callResponse = vibeesApi.registerUserForParty(attend, failurefn, partyId)
+                val callResponse = vibeesApi.registerUserForParty(attend, failurefn, partyId, songList as List<String>)
             }
         }
 

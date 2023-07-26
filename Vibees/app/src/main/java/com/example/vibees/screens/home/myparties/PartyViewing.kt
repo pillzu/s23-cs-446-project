@@ -321,6 +321,9 @@ fun PartyViewing(
                             val userName: String = UserName!!
                             intent.putExtra("userName", userName)
                             intent.putExtra("partyID", partyDetails?.party_id!!)
+                            val songArrayList: ArrayList<String?> = ArrayList(songList)
+                            Log.d("TAG", "songlist: ${songArrayList}")
+                            intent.putStringArrayListExtra("songList", songArrayList)
                             launcher.launch(intent)
                         },
                         modifier = Modifier.padding(20.dp),
