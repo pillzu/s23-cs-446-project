@@ -11,4 +11,5 @@ pytz==2023.3
 Werkzeug==2.3.6
 zipp==3.15.0
 email-validator==2.0.0
+stripe==5.0.0
 spotipy==2.23.0

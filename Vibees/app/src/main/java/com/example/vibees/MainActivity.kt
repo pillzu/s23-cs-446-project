@@ -22,6 +22,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import android.Manifest
 import android.location.Address
+import com.cloudinary.android.LogLevel
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
+import android.net.Uri
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.User
@@ -34,6 +39,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     private val REQ_ONE_TAP = 2
@@ -46,13 +52,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val userId = intent.getStringExtra("userID")
+        Log.d(ContentValues.TAG, "ID FROM MAIN: $userId")
+        if (userId != null) {
+            GlobalAppState.UserID = UUID.fromString(userId)
+        }
+        GlobalAppState.UserName = intent.getStringExtra("userName")
         setContent {
             VibeesTheme {
-                RootNavigationGraph(navController = rememberNavController(), signIn = ::signInUsingGoogle)
+                RootNavigationGraph(navController = rememberNavController(), signIn = ::signInUsingGoogle, navigateToHome = intent.getBooleanExtra("navigateToHome", false))
             }
         }
         initializeAuth()
         initializeSignInRequest()
+        MediaManager.init(this)
     }
 
     private fun initializeAuth() {
@@ -80,6 +93,7 @@ class MainActivity : ComponentActivity() {
             result = oneTapClient.beginSignIn(signInRequest).await()
         }
         catch (e: Exception) {
+            Log.d("TAG error", "${e.message}")
             showToast("Google One Tap Sign in is not available.")
         }
         try {
@@ -153,7 +167,7 @@ class MainActivity : ComponentActivity() {
             val lastName = parts?.getOrNull(1)
             val email = user?.email
             val phoneNo = 0
-            val profileURL = user?.photoUrl
+            var profileURL = user?.photoUrl
             val uid = hashToUUID(user!!.uid)
             var latitude = 0.00
             var longitude = 0.00
@@ -172,7 +186,9 @@ class MainActivity : ComponentActivity() {
                 city = address.locality
                 province = address.adminArea
                 postalCode = address.postalCode
-
+                if (profileURL == null) {
+                    profileURL = Uri.parse("https://media.istockphoto.com/id/871547412/photo/here-to-secure-my-future.jpg?s=612x612&w=0&k=20&c=u4bCPxz4eO5JeWdcDHgTwFzzgbAftMdVxPH-tcfjA0c=")
+                }
                 val user = User(
                     uid,
                     profileURL,

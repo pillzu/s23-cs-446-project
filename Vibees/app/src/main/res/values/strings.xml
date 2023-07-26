@@ -19,4 +19,5 @@
     <string name="description_contact_discord">Discord: VibeesApp#1234</string>
     <string name="description_contact_facebook">Facebook: VibeesApp</string>
     <string name="description_contact_instagram">Instagram: @VibeesApp</string>
+    <string name="default_avatar">https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690343034/xkbdbwouzecmwsrfkkzm.jpg</string>
 </resources>

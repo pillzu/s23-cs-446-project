@@ -322,12 +322,12 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
-    def set_playlist_id(self, party_id, playlist_id, exec_stmt=True):
+    def set_playlist_id(self, party_id, playlist_id, access_token, exec_stmt=True):
         try:
             location = self.query_locations
-            statement = f"INSERT INTO SpotifyIDs VALUES ('{party_id}', '{playlist_id}') " \
+            statement = f"INSERT INTO SpotifyIDs VALUES ('{party_id}', '{playlist_id}', '{access_token}') " \
                         f"ON CONFLICT (party_id) DO UPDATE " \
-                        f"SET (playlist_id) = ('{playlist_id}');\n"
+                        f"SET (playlist_id, access_token) = ('{playlist_id}', '{access_token}');\n"
 
             if exec_stmt:
                 assert self.exec_DDL(statement)
@@ -1248,8 +1248,10 @@ class DatabaseConnection:
             statement = "CREATE TABLE IF NOT EXISTS SpotifyIDs (" \
                         "party_id UUID, " \
                         "playlist_id VARCHAR(30), " \
+                        "access_token VARCHAR(300), " \
                         "UNIQUE(party_id), " \
                         "UNIQUE(playlist_id), " \
+                        "UNIQUE(access_token), " \
                         "CONSTRAINT party_id " \
                         "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)

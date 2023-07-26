@@ -18,6 +18,7 @@ import androidx.core.app.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.example.vibees.Api.VibeesApi
+import com.example.vibees.utils.decodeValue
 import com.example.vibees.utils.extractLastTwoUUIDs
 import java.util.concurrent.Executors
 
@@ -58,12 +59,14 @@ fun PreviewViewComposable(
                             Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
                             navController.popBackStack()
                         }
+                        Log.d("TAG party QR", "${ids}")
+                        Log.d("TAG party QR host", "${party_id}")
 
                         if (ids[0] != party_id) {
                             partyFailed(Throwable("Invalid party attendee! Please try another party"))
                         } else {
                             api.checkQrAttendee(
-                                qr_endpoint!!,
+                                decodeValue(qr_endpoint!!),
                                 successfn = { response ->
                                     Toast.makeText(
                                         context,

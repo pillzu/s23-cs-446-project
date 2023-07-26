@@ -2,8 +2,10 @@ package com.example.vibees.Api
 
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.Playlist
+import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
+import com.example.vibees.Models.Transaction
 import com.example.vibees.Models.User
 import retrofit2.Call
 import retrofit2.http.Body
@@ -49,8 +51,12 @@ interface ApiService {
     @DELETE("/user/{user_id}")
     fun deleteUserAccount(@Path("user_id") user_id: String): Call<ResponseMessage>
 
-    @GET("/{qr_url}")
-    fun checkQrAttendee(@Path("qr_url") qr_endpoint: String): Call<ResponseMessage>
+    @GET("{qr_url}")
+    fun checkQrAttendee(@Path("qr_url", encoded = true) qr_endpoint: String): Call<ResponseMessage>
+
+
+    @POST("/payment-sheet")
+    fun getPaymentInfo(@Body requestModel: Transaction): Call<PaymentMetaData>
 
     @DELETE("/parties/unattend/{party_id}/{user_id}")
     fun unattendUserFromParty(

@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.hardware.camera"  android:required="true"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <application
@@ -38,6 +40,17 @@
                     android:host="vibees.ca"
                     android:scheme="https" />
             </intent-filter>
+        </activity>
+        <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://555289532233172:QE2Ve_szf-zrbImJmhVBHpag4f4@dw9xmrzlz"/>
+        <!-- Declare your CheckoutActivity -->
+        <activity
+            android:name=".payment.CheckoutActivity"
+            android:label="Checkout"
+            android:theme="@style/AppTheme.CheckoutActivity">
+
+            <!-- Intent filters if needed -->
+            <!-- ... -->
+
         </activity>
     </application>
 
