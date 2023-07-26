@@ -50,9 +50,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
@@ -65,6 +67,9 @@ import com.example.vibees.graphs.HostScreens
 import com.example.vibees.qr_scanner.PreviewViewComposable
 import com.example.vibees.screens.bottombar.BottomBar
 import com.example.vibees.screens.home.host.PartyStore
+import com.example.vibees.utils.formatDate
+import com.example.vibees.utils.formatTime
+import com.example.vibees.utils.parseDate
 import com.simonsickle.compose.barcodes.Barcode
 import com.simonsickle.compose.barcodes.BarcodeType
 import java.time.format.DateTimeFormatter
@@ -314,14 +319,6 @@ fun PartyDetails(
                         type = BarcodeType.QR_CODE, // pick the type of barcode you want to render
                         value = "party/qr/${partyDetails?.party_id}/${userID}" // The textual representation of this code
                     )
-                    Text(
-                        text = partyDetails?.name!!,
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        modifier = Modifier
-                            .padding(15.dp)
-                    )
                 }
             } else {
                 val context = LocalContext.current
@@ -343,13 +340,14 @@ fun PartyDetails(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                    .clip(RoundedCornerShape(15.dp))
+                        .clip(RoundedCornerShape(15.dp))
                 ) {
                     PreviewViewComposable(navController, partyDetails?.party_id!!)
                 }
             }
         }
 
+        var party_datetime = parseDate(partyDetails?.date_time!!)
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
@@ -364,7 +362,7 @@ fun PartyDetails(
                 painter = rememberAsyncImagePainter(imgUri),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier.size(80.dp).clip(CircleShape)
+                modifier = Modifier.size(140.dp).clip(CircleShape)
             )
         }
 
@@ -384,7 +382,8 @@ fun PartyDetails(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(10.dp)
+                .padding(bottom = 20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -394,75 +393,156 @@ fun PartyDetails(
             )
         }
 
+        // first row
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp)
+                .padding(horizontal = 30.dp, vertical = 20.dp).padding(start = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Date",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        color = Color.Black, text = partyDetails?.date_time!!.format(
-                            DateTimeFormatter.ISO_DATE
-                        )
-                    )
-                }
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Location",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(color = Color.Black, text = partyDetails?.street!!)
-                    Text(
-                        color = Color.Black,
-                        text = "${partyDetails?.city}, ${partyDetails?.prov}"
-                    )
-                    Text(color = Color.Black, text = partyDetails?.postal_code!!)
-                }
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Maximum Capacity",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(color = Color.Black, text = partyDetails?.max_cap.toString())
-                }
+            Column(
+                modifier = Modifier.width(100.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.timer1),
+                    contentDescription = "Time Icon",
+                    tint = Color.Black
+                )
+                Text(
+                    text = "Date",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    color = Color.Black, text = formatTime(party_datetime),
+                    textAlign = TextAlign.Center,
+                )
             }
 
-            Column {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Type",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(color = Color.Black, text = "EDM")
-                    Text(color = Color.Black, text = "Alcohol-free")
-                    Text("")
-                }
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Entry Fees",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(color = Color.Black, text = partyDetails?.entry_fee.toString())
-                }
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.width(70.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.calendar),
+                    contentDescription = "Calendar Icon",
+                    tint = Color.Black,
+                )
+                Text(
+                    text = "Date",
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
+                )
+                Text(
+                    color = Color.Black, text = formatDate(party_datetime),
+                    textAlign = TextAlign.Center,
+                )
+
             }
         }
+
+        // second row
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp)
+                .padding(horizontal = 30.dp, vertical = 20.dp).padding(start = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(
+                modifier = Modifier.width(100.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.people),
+                    contentDescription = "Capacity Icon",
+                    tint = Color.Black
+                )
+                Text(
+                    text = "Capacity",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(color = Color.Black, text = partyDetails?.max_cap.toString())
+            }
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.width(70.dp),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.walletmoney),
+                    contentDescription = "Entry Fee Icon",
+                    tint = Color.Black,
+                )
+                Text(
+                    text = "Entry Fees",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(color = Color.Black, text = partyDetails?.entry_fee.toString())
+
+            }
+        }
+        // third row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 30.dp, vertical = 20.dp).padding(start = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.width(100.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.location),
+                    contentDescription = "Location Icon",
+                    tint = Color.Black
+                )
+                Text(
+                    text = "Location",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(color = Color.Black, text = partyDetails?.street!!)
+                Text(
+                    color = Color.Black,
+                    text = "${partyDetails?.city}, ${partyDetails?.prov}"
+                )
+                Text(color = Color.Black, text = partyDetails?.postal_code!!)
+            }
+
+            Column(
+                modifier = Modifier.width(70.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.notepad2),
+                    contentDescription = "Type Icon",
+                    tint = Color.Black,
+                )
+                Text(
+                    text = "Type",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(color = Color.Black, text = "EDM")
+                Text(color = Color.Black, text = "Alcohol-free")
+                Text("")
+
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 50.dp)
+        ) {
+            Column() {
                 Text(
                     text = "Description",
                     color = Color.Black,
@@ -471,6 +551,7 @@ fun PartyDetails(
                 Text(color = Color.Black, text = partyDetails?.desc!!)
             }
         }
+
     }
 }
 
