@@ -3,6 +3,12 @@ from datetime import datetime
 from db import DatabaseConnection
 from decouple import config
 import logging
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+
+SPOTIFY_CLIENT_ID = "0ffac1d3b8c545ada41939e91ee75d30"
+SPOTIFY_CLIENT_SECRET = "643a8dcc608d4d00af2bd6387e3853df"
+SPOTIFY_USER_ID = "31wjtvhoqm75rg3qlyhzqmtslcce"
 
 """
 Helper for creating test users
@@ -10,9 +16,8 @@ Helper for creating test users
 
 
 def createTestUser(conn, username, first_name, last_name, email, uid=None):
-    uid = conn.add_new_user(username, "TestPassword", first_name, last_name, "12345678", "123 University Ave",
-                            "Waterloo",
-                            "ON", "A1B 2C3", email, uid)
+    uid = conn.add_new_user(username, first_name, last_name, "12345678", "123 University Ave",
+                            "Waterloo", "ON", "A1B 2C3", email, uid)
     return uid
 
 
@@ -448,25 +453,54 @@ Test for attending parties
 def testAttendParties(conn):
     print("********** TEST_ATTEND_PARTIES STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1",
-                              "Jerry", "Meng", "jerry1@gmail.com")
-        uid2 = createTestUser(conn, "JM_Test_User_2",
-                              "Jerry", "Meng", "jerry2@gmail.com")
-        pid = conn.add_new_party("Test Party", "'2023-09-05 12:30:00'", 10, "Test Party Description",
-                                 b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
-        conn.attend_party(uid1, pid)
-        conn.attend_party(uid2, pid)
+        conn.clear_table("Users")
+        conn.clear_table("Parties")
+        conn.clear_table("SpotifyIDs")
+        party_auth_manager = SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                          client_secret=SPOTIFY_CLIENT_SECRET,
+                                          redirect_uri="http://localhost:8080",
+                                          scope="playlist-modify-private")
+
+        sp = spotipy.Spotify(auth_manager=party_auth_manager)
+
+        access_token = party_auth_manager.get_access_token(as_dict=False)
+
+        print(access_token)
+
+        uid_host = createTestUser(conn, "JM_Test_User_13", "Jerry", "Meng", "jerry1@gmail.com")
+        pid = conn.exec_host_party("Test Party 12", "https://exampleavatar.com/example.png", "2023-09-05 12:30:00", uid_host, 10, "Test Party 12 Description",
+                                    5, "133 University Ave", "Waterloo", "ON", "A1GM 2C3", ["Great", "No Drugs"], "Cool", False, False, "JM_Test_User_13",
+                                    "https://exampleqr.com/example.png")
+
+        # Create a Spotify playlist for the party and add its ID and access token to the DB
+        playlist_name = f"{pid}"
+        playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name, public=False, collaborative=True)
+        playlist_id = playlist["id"]
+        conn.set_playlist_id(pid, playlist_id, access_token)
+        
+        
+        uid_guest = createTestUser(conn, "JM_Test_User_13", "Jerry", "Meng", "jerry13@gmail.com")
+        conn.exec_attend_party(uid_guest, pid)
+
+        access_token = conn.query_spotify_IDs(pid)[0][2]
+
+        print(access_token)
+
+        sp = spotipy.Spotify(auth=access_token)
+
+        breakpoint()
+        
         rows = conn.show_attendees(pid, show_detail=True)
         print(rows)
-        conn.leave_party(uid1, pid)
+        conn.leave_party(uid_guest, pid)
         rows = conn.show_attendees(pid, show_detail=True)
         print(rows)
+
+        breakpoint()
     except Exception as e:
         logging.fatal("ERROR: TEST_ATTEND_PARTIES FAILED")
         logging.fatal(e)
-    conn.clear_table("Users")
-    conn.clear_table("Parties")
-    conn.clear_table("Guests")
+
     print("********** TEST_ATTEND_PARTIES ENDS **********")
 
 
@@ -478,41 +512,48 @@ Test for hosting parties
 def testHostParties(conn):
     print("********** TEST_HOST_PARTIES STARTS **********")
     try:
-        uid1 = createTestUser(conn, "JM_Test_User_1",
-                              "Jerry", "Meng", "jerry1@gmail.com")
-        pid1 = conn.add_new_party("Test Party 1", "'2023-09-05 12:30:00'", 10, "Test Party 1 Description",
-                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 10)
-        pid2 = conn.add_new_party("Test Party 2", "'2023-09-06 12:30:00'", 20, "Test Party 2 Description",
-                                  b'Thumbnail Data', [b'Photo 1', b'Photo 2'], 20)
-        conn.host_party(uid1, pid1)
+        conn.clear_table("SpotifyIDs")
+        party_auth_manager = SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                          client_secret=SPOTIFY_CLIENT_SECRET,
+                                          redirect_uri="http://localhost:8080",
+                                          scope="playlist-modify-private")
+        
+        sp = spotipy.Spotify(auth_manager=party_auth_manager)
+
+        access_token = party_auth_manager.get_access_token(as_dict=False)
+
+        
+        uid1 = createTestUser(conn, "JM_Test_User_12", "Jerry", "Meng", "jerry12@gmail.com")
+        pid1 = conn.exec_host_party("Test Party 12", "https://exampleavatar.com/example.png", "2023-09-05 12:30:00", uid1, 10, "Test Party 12 Description",
+                        5, "133 University Ave", "Waterloo", "ON", "A1GM 2C3", ["Great", "No Drugs"], "Cool", False, False, "JM_Test_User_12", "https://exampleqr.com/example.png")
+        
+        
         rows = conn.show_hosted_parties(uid1, show_detail=True)
         print(rows)
-        rows = conn.show_host(pid1, show_detail=True)
-        print(rows)
-        uid2 = createTestUser(conn, "JM_Test_User_2",
-                              "Jerry", "Meng", "jerry2@gmail.com")
-        conn.attend_party(uid2, pid1)
-        conn.attend_party(uid2, pid2)
-        rows = conn.show_attended_parties(uid2, show_detail=True)
-        print(rows)
-        conn.cancel_party(pid1)
-        rows = conn.show_attended_parties(uid2, show_detail=True)
-        print(rows)
-        rows = conn.show_hosted_parties(uid1, show_detail=True)
-        print(rows)
+
+        
+
+        # Create a Spotify playlist for the party and add its ID to the DB
+        playlist_name = f"{pid1}"
+        playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name, public=False, collaborative=True)
+        playlist_id = playlist["id"]
+        conn.set_playlist_id(pid1, playlist_id, access_token)
+        
+        
     except Exception as e:
         logging.fatal("ERROR: TEST_HOST_PARTIES FAILED")
         logging.fatal(e)
-    conn.clear_table("Users")
-    conn.clear_table("Parties")
-    conn.clear_table("Guests")
+    # conn.clear_table("Users")
+    # conn.clear_table("Parties")
+    # conn.clear_table("Guests")
     print("********** TEST_HOST_PARTIES ENDS **********")
 
 
 # Hardcoded URL, for POC only
 db_url = config("CDB_URL")
 connection = DatabaseConnection(db_url)
-# connection.create_tables()
+connection.create_tables()
+testAttendParties(connection)
 # breakpoint()
 # connection.drop_table("Users")
 # connection.drop_table("Parties")
@@ -529,9 +570,8 @@ connection = DatabaseConnection(db_url)
 # print(connection.add_new_user("NULL", "JM_Test_User_1", "JM_Test_User_1", 5198884567, "200 University Ave",
 #                               "Waterloo", "ON", "A1B 2C3", "jerry_test_1@gmail.com"))
 # print(connection.exec_attend_party("9c261503-02d2-4fd4-8399-3e905de39588", "04afd1a3-9be3-469a-9f10-bc5937d68de4", 5.0))
-print(connection.show_hosted_parties("b4ed87aa-c770-15bb-f749-20071f2c4106", show_detail=True, show_attend_count=True))
+# print(connection.show_attended_parties("9c261503-02d2-4fd4-8399-3e905de39588", show_detail=True))
 # print(connection.show_attended_parties("6515c9f8-57f1-406f-8707-20033dcd764e", show_detail=True))
 # print(connection.exec_host_party("JM_Test_Party", "NULL", datetime.now(), "9c261503-02d2-4fd4-8399-3e905de39588",
 #                                  50, "A test party", 15.0, "123 Lester St", "Waterloo", "ON", "N2L 3H8", ["Tag"]))
-# print(connection.query_party(tag_subset=["EDM"], show_detail=True, show_attend_count=True))
-# print(connection.query_party(party_name="Test 111"))
+# print(connection.query_party(tag_subset=["EDM"]))
