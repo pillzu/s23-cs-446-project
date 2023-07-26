@@ -262,8 +262,11 @@ fun PartyViewing(
                                 color = Color.Black,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(color = Color.Black, text = "EDM")
-                            Text(color = Color.Black, text = "Alcohol-free")
+//                            Text(color = Color.Black, text = "EDM")
+//                            Text(color = Color.Black, text = "Alcohol-free")
+                            for (tag in partyDetails?.tags!!) {
+                                Text(color = Color.Black, text = tag)
+                            }
                             Text("")
                         }
                         Column(modifier = Modifier.padding(20.dp)) {
