@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 import okhttp3.OkHttpClient;
 import java.util.concurrent.TimeUnit
 
-const val url = "http://192.168.0.34:8080"
+const val url = "http://192.168.0.43:8080"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(

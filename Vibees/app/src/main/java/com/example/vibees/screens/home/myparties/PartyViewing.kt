@@ -14,14 +14,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
@@ -39,16 +45,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat.startActivity
@@ -68,6 +77,9 @@ import com.simonsickle.compose.barcodes.BarcodeType
 import com.example.vibees.graphs.PartyScreen
 import com.example.vibees.payment.CheckoutActivity
 import com.example.vibees.screens.bottombar.BottomBar
+import com.example.vibees.utils.formatDate
+import com.example.vibees.utils.formatTime
+import com.example.vibees.utils.parseDate
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -157,11 +169,12 @@ fun PartyViewing(
         if (idfound or (partyDetails != null)) {
             val att = vibeesApi.verifyAttendance(attendfn, unattendfn, id)
             idfound = true
+            var party_datetime = parseDate(partyDetails?.date_time!!)
             // show party details
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
 
                 Column(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
@@ -185,10 +198,12 @@ fun PartyViewing(
                 }
 
                 var imgUri = stringResource(R.string.default_avatar)
-                Row(horizontalArrangement = Arrangement.Center,
+                Row(
+                    horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp)) {
+                        .padding(10.dp)
+                ) {
 
                     if (partyDetails?.party_avatar_url != "null") {
                         imgUri = partyDetails?.party_avatar_url!!
@@ -198,14 +213,18 @@ fun PartyViewing(
                         painter = rememberAsyncImagePainter(imgUri),
                         contentDescription = "Party Avatar",
                         contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.size(100.dp).clip(CircleShape)
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(CircleShape)
                     )
                 }
 
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                    horizontalArrangement = Arrangement.Center) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     androidx.compose.material3.Text(
                         text = partyDetails?.name!!,
                         fontSize = MaterialTheme.typography.headlineMedium.fontSize,
@@ -213,100 +232,206 @@ fun PartyViewing(
                         color = Color.Black
                     )
                 }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                    horizontalArrangement = Arrangement.Center) {
-                    Text("Hosted by ${partyDetails?.host_name}", fontWeight = FontWeight.Bold, color = Color.Black)
-                }
-
-                Row(horizontalArrangement = Arrangement.SpaceBetween,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(15.dp)) {
-                    Column{
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Text(
-                                text = "Date",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
-                            Text(color = Color.Black, text = partyDetails?.date_time!!.format(
-                                DateTimeFormatter.ISO_DATE)
-                            )
-                        }
-                        Column (modifier = Modifier.padding(20.dp)) {
-                            Text(
-                                text = "Location",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
-                            Text(color = Color.Black, text = partyDetails?.street!!)
-                            Text(color = Color.Black, text = "${partyDetails?.city}, ${partyDetails?.prov}")
-                            Text(color = Color.Black, text = partyDetails?.postal_code!!)
-                        }
-                        Column (modifier = Modifier.padding(20.dp)) {
-                            Text(
-                                text = "Maximum Capacity",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
-                            Text(color = Color.Black, text = partyDetails?.max_cap.toString())
-                        }
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        "Hosted by ${partyDetails?.host_name}",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+
+                // first row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 20.dp).padding(start = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier.width(100.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.timer1),
+                            contentDescription = "Time Icon",
+                            tint = Color.Black
+                        )
+                        Text(
+                            text = "Date",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            color = Color.Black, text = formatTime(party_datetime),
+                            textAlign = TextAlign.Center,
+                        )
                     }
 
-                    Column{
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Text(
-                                text = "Type",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold
-                            )
-//                            Text(color = Color.Black, text = "EDM")
-//                            Text(color = Color.Black, text = "Alcohol-free")
-                            for (tag in partyDetails?.tags!!) {
-                                Text(color = Color.Black, text = tag)
-                            }
-                            Text("")
-                        }
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Text(
-                                text = "Entry Fees",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(color = Color.Black, text = partyDetails?.entry_fee.toString())
-                        }
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.width(70.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.calendar),
+                            contentDescription = "Calendar Icon",
+                            tint = Color.Black,
+                        )
+                        Text(
+                            text = "Date",
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black
+                        )
+                        Text(
+                            color = Color.Black, text = formatDate(party_datetime),
+                            textAlign = TextAlign.Center,
+                        )
+
                     }
                 }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+
+                // second row
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 20.dp).padding(start = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier.width(100.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.people),
+                            contentDescription = "Capacity Icon",
+                            tint = Color.Black
+                        )
                         Text(
-                            text = "Description",
+                            text = "Capacity",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(color = Color.Black, text = partyDetails?.max_cap.toString())
+                    }
+
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.width(70.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.walletmoney),
+                            contentDescription = "Entry Fee Icon",
+                            tint = Color.Black,
+                        )
+                        Text(
+                            text = "Entry Fees",
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
-                        Text(color = Color.Black, text = partyDetails?.desc!!)
+                        Text(color = Color.Black, text = partyDetails?.entry_fee.toString())
+                    }
+                }
+                // third row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp, vertical = 20.dp).padding(start = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.location),
+                            contentDescription = "Location Icon",
+                            tint = Color.Black
+                        )
+                        Text(
+                            text = "Location",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(color = Color.Black, text = partyDetails?.street!!)
+                        Text(
+                            color = Color.Black,
+                            text = "${partyDetails?.city}, ${partyDetails?.prov}"
+                        )
+                        Text(color = Color.Black, text = partyDetails?.postal_code!!)
+                    }
+
+                    Column(
+                        modifier = Modifier.width(70.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.notepad2),
+                            contentDescription = "Type Icon",
+                            tint = Color.Black,
+                        )
+                        Text(
+                            text = "Type",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+                        for (tag in partyDetails?.tags!!) {
+                            Text(color = Color.Black, text = tag)
+                        }
+                        Text("")
                     }
                 }
 
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 50.dp)
+                    ) {
+                        Column() {
+                            Text(
+                                text = "Description",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(color = Color.Black, text = partyDetails?.desc!!)
+                        }
+                    }
+
                 var songString by remember { mutableStateOf("") }
                 if (!attends) {
-                    Column(modifier = Modifier.fillMaxWidth(),
-                           horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Attending this party? Give us your song recommendations!",
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(40.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Attending this party? Give us your song recommendations!",
                             fontWeight = FontWeight.Bold,
-                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                            modifier = Modifier.fillMaxWidth().padding(12.dp, 5.dp, 12.dp, 5.dp),
-                            color = Color.Black)
-                        Text(text = "Enter song names separated by a comma (minimum 1)",
+                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp, 5.dp, 12.dp, 5.dp),
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "Enter song names separated by a comma (minimum 1)",
                             fontWeight = FontWeight.Light,
                             fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                            modifier = Modifier.fillMaxWidth().padding(12.dp, 0.dp, 12.dp, 5.dp),
-                            color = Color.Black)
-                        OutlinedTextField(modifier = Modifier.fillMaxWidth().padding(12.dp, 0.dp, 12.dp, 0.dp),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp, 0.dp, 12.dp, 5.dp),
+                            color = Color.Black
+                        )
+                        OutlinedTextField(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp, 0.dp, 12.dp, 0.dp),
                             value = songString,
                             onValueChange = {
                                 songString = it
@@ -322,13 +447,17 @@ fun PartyViewing(
                 }
                 val songList = mutableListOf(*songString.split(",").toTypedArray())
                 var canAttend by remember { mutableStateOf(false) }
-                if (songString != "") { canAttend = true }
+                if (songString != "") {
+                    canAttend = true
+                }
 
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                    horizontalArrangement = Arrangement.Center) {
-                    androidx.compose.material.Button(
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
                         onClick = {
                             val intent = Intent(activity, CheckoutActivity::class.java)
                             intent.putExtra("entryFee", partyDetails?.entry_fee)
@@ -343,8 +472,10 @@ fun PartyViewing(
                             launcher.launch(intent)
                         },
                         modifier = Modifier.padding(20.dp),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary,
-                        disabledContentColor = Color.Gray),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            disabledContentColor = Color.Gray
+                        ),
                         enabled = (!attends && canAttend)
                     ) {
                         androidx.compose.material.Text(
@@ -397,7 +528,6 @@ fun navigatingBack(
         navController.popBackStack()
     }
 }
-
 
 
 //fun navigatingBack(
