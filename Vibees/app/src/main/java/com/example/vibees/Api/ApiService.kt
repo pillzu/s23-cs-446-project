@@ -74,4 +74,7 @@ interface ApiService {
         @Path("party_id") party_id: String,
         @Body requestModel: Party
     ): Call<ResponseMessage>
+
+    @GET("/parties/playlist/{party_id}")
+    fun getPlaylistInfo(@Path("party_id") party_id: String): Call<ResponseMessage>
 }

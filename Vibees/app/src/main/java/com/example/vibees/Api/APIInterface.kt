@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 import okhttp3.OkHttpClient;
 import java.util.concurrent.TimeUnit
 
-const val url = "http://192.168.203.95:8080"
+const val url = "http://192.168.0.34:8080"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -40,8 +40,8 @@ class APIInterface {
     init {
 
         val httpClientBuilder = OkHttpClient.Builder()
-        httpClientBuilder.connectTimeout(30, TimeUnit.SECONDS) // Increase the connect timeout to 30 seconds
-        httpClientBuilder.readTimeout(30, TimeUnit.SECONDS)    // Increase the read timeout to 30 seconds
+        httpClientBuilder.connectTimeout(3, TimeUnit.SECONDS) // Increase the connect timeout to 30 seconds
+        httpClientBuilder.readTimeout(3, TimeUnit.SECONDS)    // Increase the read timeout to 30 seconds
         val httpClient = httpClientBuilder.build()
 
         val gson = GsonBuilder()
@@ -115,5 +115,9 @@ class APIInterface {
 
     fun getPartyInfo(requestModel: Transaction): Call<PaymentMetaData> {
         return apiService.getPaymentInfo(requestModel)
+    }
+
+    fun getPlaylistInfo(party_id: String): Call<ResponseMessage> {
+        return apiService.getPlaylistInfo(party_id)
     }
 }
