@@ -50,16 +50,19 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.cloudinary.android.MediaManager
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.R
 import com.example.vibees.utils.URIPathHelper
 import com.example.vibees.utils.toFileUri
 import com.example.vibees.utils.uploadToCloudinary
@@ -74,6 +77,7 @@ fun HostPartyAttributesScreen(
     val selectedlist by GlobalAppState::TagList
     var selectedcount by remember { mutableIntStateOf(0) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var imgUri = stringResource(R.string.default_avatar)
 
     val apiService = APIInterface()
     var userID by GlobalAppState::UserID
@@ -232,10 +236,13 @@ fun HostPartyAttributesScreen(
 
                     Log.d("STORE update", partystore.toString())
 
+                    Log.d("UPDATE", imgUri)
                     // set default image here
                     var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
                     if (partystore?.image!! != "") {
-                        UriToCloudinary(partyContext, selectedImageUri, "${partystore?.name}-${userName}", launcher)
+                        var publicId = "${partystore?.name}-${userName}"
+                        uriToCloudinary(partyContext, selectedImageUri, publicId, launcher)
+                        imgUri = MediaManager.get().url().generate(publicId)
                     }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
@@ -282,14 +289,14 @@ fun HostPartyAttributesScreen(
             TextButton(
                 onClick = {
                     partystore?.taglist = selectedlist
-                    partystore?.image = selectedImageUri!!.toFileUri(partyContext).toString()
 
                     Log.d("STORE", partystore.toString())
 
                     // set default image here
-                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
-                    if (partystore?.image!! != "") {
-                        UriToCloudinary(partyContext, selectedImageUri, "${partystore?.name}-${userName}", launcher)
+                    if (selectedImageUri != null){
+                        var publicId = "${partystore?.name}-${userName}"
+                        uriToCloudinary(partyContext, selectedImageUri, publicId, launcher)
+                        imgUri = MediaManager.get().url().generate(publicId)
                     }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
@@ -369,7 +376,7 @@ fun FilterChipTag(
     )
 }
 
-fun UriToCloudinary(partyContext: Context, selectedImageUri:Uri?, publicId: String , launcher: ManagedActivityResultLauncher<String, Boolean>) {
+fun uriToCloudinary(partyContext: Context, selectedImageUri:Uri?, publicId: String , launcher: ManagedActivityResultLauncher<String, Boolean>): String {
     val uriPathHelper = URIPathHelper()
     val filePath = uriPathHelper.getPath(partyContext, selectedImageUri!!)
     Log.i("FilePath", filePath.toString())
@@ -403,4 +410,5 @@ fun UriToCloudinary(partyContext: Context, selectedImageUri:Uri?, publicId: Stri
 
     // upload to cloudinary
     val imgUri = filePath?.let { uploadToCloudinary(it, publicId) }
+    return imgUri!!
 }

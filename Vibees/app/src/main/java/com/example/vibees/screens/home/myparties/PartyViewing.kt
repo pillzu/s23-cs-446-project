@@ -3,6 +3,7 @@ package com.example.vibees.screens.home.myparties
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
@@ -28,22 +30,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
+import coil.compose.rememberAsyncImagePainter
 import com.example.vibees.Api.APIInterface
 import com.example.vibees.Api.LaunchBackgroundEffect
 import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.R
 import com.example.vibees.screens.bottombar.BottomBar
 import java.time.format.DateTimeFormatter
 
@@ -155,15 +162,21 @@ fun PartyViewing(
                     )
                 }
 
+                var imgUri = stringResource(R.string.default_avatar)
                 Row(horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Face,
-                        contentDescription = "Party Icon",
-                        modifier = Modifier
-                            .size(100.dp)
+
+                    if (partyDetails?.party_avatar_url != "null") {
+                        imgUri = partyDetails?.party_avatar_url!!
+                    }
+
+                    Image(
+                        painter = rememberAsyncImagePainter(imgUri),
+                        contentDescription = "Party Avatar",
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.size(100.dp).clip(CircleShape)
                     )
                 }
 

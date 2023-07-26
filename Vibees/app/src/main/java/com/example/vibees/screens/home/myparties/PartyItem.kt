@@ -1,5 +1,6 @@
 package com.example.vibees.screens.home.myparties
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,9 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.R
@@ -158,13 +161,23 @@ fun PartyItem(
                     horizontalAlignment = Alignment.CenterHorizontally,
 
                     ) {
+                    var imgUri = stringResource(R.string.default_avatar)
+                    if (partyInfo?.party_avatar_url != "null") {
+                        imgUri = partyInfo?.party_avatar_url!!
+                    }
                     Image(
-                        painter = painterResource(R.drawable.saly_7),
-                        contentDescription = "${partyInfo.name} Avatar",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
+                        painter = rememberAsyncImagePainter(imgUri),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier.size(80.dp).clip(CircleShape)
                     )
+//                    Image(
+//                        painter = painterResource(R.drawable.saly_7),
+//                        contentDescription = "${partyInfo.name} Avatar",
+//                        modifier = Modifier
+//                            .size(80.dp)
+//                            .clip(CircleShape)
+//                    )
                 }
             }
 

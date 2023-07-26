@@ -16,9 +16,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 
-
 fun uploadToCloudinary(filepath: String, public_id: String): String {
-    var id = MediaManager.get().upload(filepath).unsigned("vibees").callback(object : UploadCallback {
+    var id = MediaManager.get().upload(filepath).unsigned("vibees").option("public_id", public_id).callback(object : UploadCallback {
         override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
             Log.d("TAG CLD", "Task successful")
         }
