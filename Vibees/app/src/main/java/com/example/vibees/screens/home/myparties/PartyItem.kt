@@ -122,8 +122,10 @@ fun PartyItem(
                 Text(
                     text = partyInfo.name!!,
                     style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = "${formatDate(party_datetime)}",
