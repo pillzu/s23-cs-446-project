@@ -1,33 +1,35 @@
 // Vibees/app/src/main/java/com/example/vibees/screens/SettingsScreen.kt:
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Button
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import com.example.vibees.Api.VibeesApi
-import com.example.vibees.Models.User
 import com.example.vibees.GlobalAppState
-import com.example.vibees.graphs.AuthScreen
-import com.example.vibees.graphs.Graph
-import com.example.vibees.graphs.authNavGraph
-import com.example.vibees.screens.home.HomeScreen
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import com.example.vibees.Models.User
 
 @Composable
 fun SettingsScreen(navController: NavHostController) {
@@ -130,7 +132,11 @@ private fun UserDetailsSection(
             enabled = true,
             modifier = Modifier
                 .padding(2.dp)
-                .height(60.dp)
+                .height(60.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+            )
         )
 //        TextField(
 //            value = firstName,
@@ -145,7 +151,11 @@ private fun UserDetailsSection(
             enabled = true,
             modifier = Modifier
                 .padding(2.dp)
-                .height(60.dp)
+                .height(60.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+            )
         )
 //        TextField(
 //            value = lastName,
@@ -161,7 +171,11 @@ private fun UserDetailsSection(
             enabled = true,
             modifier = Modifier
                 .padding(2.dp)
-                .height(60.dp)
+                .height(60.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+            )
         )
 
         OutlinedTextField(
@@ -172,7 +186,11 @@ private fun UserDetailsSection(
             enabled = true,
             modifier = Modifier
                 .padding(2.dp)
-                .height(60.dp)
+                .height(60.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+            )
         )
 
         OutlinedTextField(
@@ -183,7 +201,11 @@ private fun UserDetailsSection(
             enabled = true,
             modifier = Modifier
                 .padding(2.dp)
-                .height(60.dp)
+                .height(60.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+            )
         )
 
         OutlinedTextField(
@@ -194,7 +216,11 @@ private fun UserDetailsSection(
             enabled = true,
             modifier = Modifier
                 .padding(2.dp)
-                .height(60.dp)
+                .height(60.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,//Show next as IME button
+                keyboardType = KeyboardType.Text, //Plain text keyboard
+            )
         )
 
 //        TextField(
@@ -251,8 +277,7 @@ private fun DeleteAccountSection(
                     // Handle success response if needed
                     // After successful deletion, null current user and navigate to login/signup screen
                     GlobalAppState.currentUser = null
-                    Toast.makeText(deleteContext, "Account successfully deleted", Toast.LENGTH_LONG).show()
-                    navController.navigate(AuthScreen.Login.route)
+                    Toast.makeText(deleteContext, "Account successfully deleted. Restart the app.", Toast.LENGTH_LONG).show()
                 },
                 failurefn = { error ->
                     Toast.makeText(deleteContext, "Account could not be deleted", Toast.LENGTH_LONG).show()
