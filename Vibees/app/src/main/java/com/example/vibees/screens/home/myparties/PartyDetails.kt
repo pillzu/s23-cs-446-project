@@ -3,6 +3,7 @@ package com.example.vibees.screens.home.myparties
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -59,7 +60,10 @@ import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import coil.compose.rememberAsyncImagePainter
 import com.example.vibees.Api.APIInterface
+import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
+import com.example.vibees.Models.Party
+import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.R
 import com.example.vibees.graphs.HostScreens
 import com.example.vibees.qr_scanner.PreviewViewComposable
@@ -97,9 +101,38 @@ fun PartyDetails(
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
+    val vibeesApi = VibeesApi()
 
     val openDeleteDialog = remember { mutableStateOf(false) }
     val openLeaveDialog = remember { mutableStateOf(false) }
+
+    val successfn_unattend: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG UNATTEND", "success: unattended party")
+    }
+
+    val failurefn_unattend: (Throwable) -> Unit = { t ->
+        Log.d("TAG UNATTEND", "FAILURE: unattend party")
+        Log.d("TAG UNATTEND", t.printStackTrace().toString())
+    }
+
+    val successfn_cancel_party: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG CANCEL PARTY", "success: party cancelled")
+    }
+
+    val failurefn_cancel_party: (Throwable) -> Unit = { t ->
+        Log.d("TAG CANCEL PARTY", "FAILURE: party cancelling")
+        Log.d("TAG CANCEL PARTY", t.printStackTrace().toString())
+    }
+
+    val successfn_update_party: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG UPDATE PARTY", "success: party updated")
+    }
+
+    val failurefn_update_party: (Throwable) -> Unit = { t ->
+        Log.d("TAG UPDATE PARTY", "FAILURE: party updating")
+        Log.d("TAG UPDATE PARTY", t.printStackTrace().toString())
+    }
+
 
     if (openDeleteDialog.value) {
         AlertDialog(
@@ -128,6 +161,7 @@ fun PartyDetails(
                         openDeleteDialog.value = false
 
                         // delete party
+                        vibeesApi.cancelParty(successfn_cancel_party, failurefn_cancel_party, partyDetails?.party_id!!)
 
                         navController.navigate(BottomBar.MyParties.route) {
                             popUpTo(BottomBar.MyParties.route) {
@@ -178,6 +212,7 @@ fun PartyDetails(
                         openLeaveDialog.value = false
 
                         // leave party
+                        vibeesApi.unattendUserFromParty(successfn_unattend, failurefn_unattend, partyDetails?.party_id!!, userID.toString())
 
                         navController.navigate(BottomBar.MyParties.route) {
                             popUpTo(BottomBar.MyParties.route) {

@@ -101,6 +101,18 @@ class APIInterface {
         return apiService.checkQrAttendee(qr_endpoint = user_qr )
     }
 
+    fun unattendParty(party_id: String, user_id: String): Call<ResponseMessage> {
+        return apiService.unattendUserFromParty(party_id, user_id)
+    }
+
+    fun cancelParty(party_id: String): Call<ResponseMessage> {
+        return apiService.cancelParty(party_id)
+    }
+
+    fun updatePartyDetails(party_id: String, party_model: Party): Call<ResponseMessage> {
+        return apiService.updatePartyDetails(party_id, party_model)
+    }
+
     fun getPartyInfo(requestModel: Transaction): Call<PaymentMetaData> {
         return apiService.getPaymentInfo(requestModel)
     }

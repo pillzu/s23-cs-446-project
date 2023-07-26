@@ -353,6 +353,7 @@ class DatabaseConnection:
     def leave_party(self, user_id, party_id):
         try:
             statement = f"DELETE FROM Transactions t WHERE t.guest_id = '{user_id}' AND t.party_id = '{party_id}'"
+            print(statement)
             assert self.exec_DDL(statement)
             return True
 
@@ -557,6 +558,121 @@ class DatabaseConnection:
             logging.fatal("Updating users failed")
             logging.fatal(e)
             return False
+
+
+
+    """
+    update_party(party_id, name, date_time, host_id, max_cap, desc, entry_fee, type, drug, byob,
+    host_name, qr_endpoint, street, city, prov, portal_code, tags): 
+    updates the party record in database based on the given party_id
+        Parameters:
+            - party_id: the id of the party
+            - name: name of the party
+            - date_time: the date on which the party is hosted
+            - host_id: user_id of the host
+            - max_cap: maximum capacity of the party
+            - desc: textual description of the party
+            - entry_fee: the entry fee of the party
+            - type: the type of the party
+            - drug: if drug use is enabled in this party
+            - byob: if alcohol use is enabled in this party
+            - host_name: the name of the host
+            - qr_endpoint: the qr code endpoint of the party
+            - street, city, prov, postal_code: identifies the party location
+            - tags: the tags associated with the party
+        Returns:
+            - true: If the party is updated successfully
+            - false: Otherwise
+    """
+
+    def update_party(self, party_id, party_avatar_url=None, name=None, date_time=None, host_id=None,
+                     max_cap=None, desc=None, entry_fee=None, type=None, drug=None, byob=None,
+                     host_name=None, qr_endpoint=None, street=None, city=None, prov=None,
+                     portal_code=None, tags=None):
+        try:
+            stmt = ""
+
+            # update party
+            sub_queries = []
+
+            if party_avatar_url is not None:
+                sub_queries.append(f" party_avatar_url = '{party_avatar_url}'")
+
+            if name is not None:
+                sub_queries.append(f" party_name = '{name}'")
+
+            if date_time is not None:
+                sub_queries.append(f" date_time = '{date_time}'")
+
+            if host_id is not None:
+                sub_queries.append(f" host_id = '{host_id}'")
+
+            if max_cap is not None:
+                sub_queries.append(f" max_capacity = {max_cap}")
+
+            if desc is not None:
+                sub_queries.append(f" description = '{desc}'")
+
+            if entry_fee is not None:
+                sub_queries.append(f" entry_fee = {entry_fee}")
+
+            if type is not None:
+                sub_queries.append(f" type = '{type}'")
+
+            if drug is not None:
+                sub_queries.append(f" drug = {drug}")
+
+            if byob is not None:
+                sub_queries.append(f" byob = {byob}")
+
+            if host_name is not None:
+                sub_queries.append(f" host_name = '{host_name}'")
+
+            if qr_endpoint is not None:
+                sub_queries.append(f" qr_endpoint = '{qr_endpoint}'")
+
+            if sub_queries:
+                stmt += self.__join_subqueries(
+                    "UPDATE Parties SET", sub_queries)
+                stmt += f" WHERE party_id = '{party_id}';\n"
+
+
+            # update location
+            sub_queries = []
+
+            if street is not None:
+                sub_queries.append(f" street = '{street}'")
+
+            if city is not None:
+                sub_queries.append(f" city = '{city}'")
+
+            if prov is not None:
+                sub_queries.append(f" prov = '{prov}'")
+
+            if portal_code is not None:
+                sub_queries.append(f" postal_code = '{portal_code}'")
+
+            if sub_queries:
+                stmt += self.__join_subqueries(
+                    "UPDATE PartyLocations SET", sub_queries)
+                stmt += f" WHERE party_id = '{party_id}';\n"
+
+
+            # update tags
+            if tags is not None:
+                stmt += f"UPDATE Tags SET tag_list = ARRAY[{tags}] WHERE party_id = '{party_id}';\n"
+
+            print(stmt)
+
+            return self.exec_DDL(stmt)
+
+        except Exception as e:
+            logging.fatal("Updating users failed")
+            logging.fatal(e)
+            return False
+
+
+
     """
     Delete a user from Users table with user_id
     """
