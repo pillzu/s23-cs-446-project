@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity() {
             result = oneTapClient.beginSignIn(signInRequest).await()
         }
         catch (e: Exception) {
+            Log.d("TAG error", "${e.message}")
             showToast("Google One Tap Sign in is not available.")
         }
         try {
