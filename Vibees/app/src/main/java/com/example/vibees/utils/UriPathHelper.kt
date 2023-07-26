@@ -9,24 +9,22 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 
 class URIPathHelper {
-
     fun getPath(context: Context, uri: Uri): String? {
 // DocumentProvider
         if (DocumentsContract.isDocumentUri(context, uri)) {
 // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
+            if (checkType(isExternalStorageDocument(), uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).toTypedArray()
                 val type = split[0]
                 if ("primary".equals(type, ignoreCase = true)) {
                     return Environment.getExternalStorageDirectory().toString() + "/" + split[1]
                 }
-
-            } else if (isDownloadsDocument(uri)) {
+            } else if (checkType(isDownloadsDocument(), uri)) {
                 val id = DocumentsContract.getDocumentId(uri)
                 val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
                 return getDataColumn(context, contentUri, null, null)
-            } else if (isMediaDocument(uri)) {
+            } else if (checkType(isMediaDocument(), uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).toTypedArray()
                 val type = split[0]
@@ -66,15 +64,29 @@ class URIPathHelper {
         return null
     }
 
-    fun isExternalStorageDocument(uri: Uri): Boolean {
-        return "com.android.externalstorage.documents" == uri.authority
+    private fun checkType(documentStrategy: DocumentStrategy, uri: Uri): Boolean {
+        return documentStrategy.istype(uri)
     }
 
-    fun isDownloadsDocument(uri: Uri): Boolean {
-        return "com.android.providers.downloads.documents" == uri.authority
+    interface DocumentStrategy {
+        fun istype(uri: Uri): Boolean
     }
 
-    fun isMediaDocument(uri: Uri): Boolean {
-        return "com.android.providers.media.documents" == uri.authority
+    class isExternalStorageDocument : DocumentStrategy {
+        override fun istype(uri: Uri): Boolean {
+            return "com.android.externalstorage.documents" == uri.authority
+        }
+    }
+
+    class isDownloadsDocument : DocumentStrategy {
+        override fun istype(uri: Uri): Boolean {
+            return "com.android.providers.downloads.documents" == uri.authority
+        }
+    }
+
+    class isMediaDocument : DocumentStrategy {
+        override fun istype(uri: Uri): Boolean {
+            return "com.android.providers.media.documents" == uri.authority
+        }
     }
 }
