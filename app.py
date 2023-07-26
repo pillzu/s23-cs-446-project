@@ -27,27 +27,29 @@ def host_party():
     req = request.json
 
     party_id = db.exec_host_party(req["name"], req["party_avatar_url"],
-                                  req["date_time"], req["host_id"],
+                                  req["date_time"], req["user_id"],
                                   req["max_cap"], req["desc"],
                                   req["entry_fee"], req["street"],
                                   req["city"], req["prov"],
-                                  req["postal_code"], req["tags"],
-                                  req["type"], req["drug"],
-                                  req["byob"], req["host_name"], req["qr_endpoint"])
+                                  req["postal_code"], req["tags"])
 
     if not party_id:
         return jsonify({"message": "Unable to create party. Please try again..."}), 400
 
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
-                                                     client_secret=SPOTIFY_CLIENT_SECRET,
-                                                     redirect_uri="http://localhost:8080",
-                                                     scope="playlist-modify-public"))
+    party_auth_manager = SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                      client_secret=SPOTIFY_CLIENT_SECRET,
+                                      redirect_uri="http://localhost:8080",
+                                      scope="playlist-modify-private")
+        
+    sp = spotipy.Spotify(auth_manager=party_auth_manager)
 
-    # Create a public Spotify playlist for the party and add its ID to the DB
+    access_token = party_auth_manager.get_access_token(as_dict=False)
+
+    # Create a Spotify playlist for the party and add its ID and access token to the DB
     playlist_name = f"{party_id}"
-    playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name)
+    playlist = sp.user_playlist_create(SPOTIFY_USER_ID, playlist_name, public=False, collaborative=True)
     playlist_id = playlist["id"]
-    db.set_playlist_id(party_id, playlist_id)
+    db.set_playlist_id(party_id, playlist_id, access_token)
     
     return jsonify({
         "message": "Party successfully hosted"
@@ -95,13 +97,10 @@ def get_party_details(party_id):
 def attend_party(party_id):
     """Endpoint to register attendee to a party"""
     req = request.json
-    user = req["user"]
-    user_id = user["user_id"]
-#     user_id = req.get("user_id", None)
+    user_id = req.get("user_id", None)
     
     # TODO: Edit frontend connecting to attend_party to ask attendee for a list of Spotify track names
-#     track_names = req.get("track_names")
-    track_names = req["songList"]
+    track_names = req.get("track_names")
 
     if user_id is None:
         return {"message": "No user id provided! Please try again..."}, 400
@@ -110,10 +109,12 @@ def attend_party(party_id):
     if not db.exec_attend_party(user_id, party_id):
         return {"message": "Unable to add user as an attendee! Please call help..."}, 500
 
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+    access_token = db.query_spotify_IDs(party_id)[0][2]
+
+    sp = spotipy.Spotify(auth=access_token, auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
                                                      client_secret=SPOTIFY_CLIENT_SECRET,
                                                      redirect_uri="http://localhost:8080",
-                                                     scope="playlist-modify-public"))
+                                                     scope="playlist-modify-private"))
     playlist_id = db.query_spotify_IDs(party_id)[0][1]
     
     # Convert track names to track uris for Spotify API parsing
