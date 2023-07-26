@@ -232,18 +232,18 @@ fun HostPartyAttributesScreen(
             TextButton(
                 onClick = {
                     partystore?.taglist = selectedlist
-                    partystore?.image = selectedImageUri.toString()
+//                    partystore?.image = selectedImageUri.toString()
 
                     Log.d("STORE update", partystore.toString())
 
                     Log.d("UPDATE", imgUri)
                     // set default image here
-                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
-                    if (partystore?.image!! != "") {
-                        var publicId = "${partystore?.name}-${userName}"
-                        uriToCloudinary(partyContext, selectedImageUri, publicId, launcher)
-                        imgUri = MediaManager.get().url().generate(publicId)
-                    }
+//                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
+//                    if (partystore?.image!! != "") {
+//                        var publicId = "${partystore?.name}-${userName}"
+//                        uriToCloudinary(partyContext, selectedImageUri, publicId, launcher)
+//                        imgUri = MediaManager.get().url().generate(publicId)
+//                    }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
@@ -268,7 +268,7 @@ fun HostPartyAttributesScreen(
                     Log.d("Obj value", obj.toString())
 
                     // call endpoint to update a party
-                    //vibeesApi.createParty(successfn, failurefn, obj)
+                    vibeesApi.update_party(successfn, failurefn, partystore?.party_id!!, obj)
                 },
                 modifier = Modifier.align(Alignment.End),
                 enabled = (selectedcount > 0) and (selectedcount < 6)
