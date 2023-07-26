@@ -1,8 +1,12 @@
 package com.example.vibees.screens.home.myparties
 
 import android.Manifest
+import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -12,8 +16,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -56,6 +62,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import coil.compose.rememberAsyncImagePainter
@@ -94,12 +101,20 @@ fun PartyDetails(
     navController: NavHostController,
     id: String,
 ) {
+
     var userID by GlobalAppState::UserID
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     var partystore by GlobalAppState::PartyStore
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
+    val openUrlLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Handle any post-action logic here if needed
+        }
+    }
 
     val vibeesApi = VibeesApi()
 
@@ -378,7 +393,7 @@ fun PartyDetails(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                    .clip(RoundedCornerShape(15.dp))
+                        .clip(RoundedCornerShape(15.dp))
                 ) {
                     PreviewViewComposable(navController, partyDetails?.party_id!!)
                 }
@@ -506,8 +521,62 @@ fun PartyDetails(
                 Text(color = Color.Black, text = partyDetails?.desc!!)
             }
         }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.Center
+
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable {
+                        // Successful request
+                        val successfn: (ResponseMessage) -> Unit = { response ->
+                            Log.d("TAG", "success")
+                            val playlist_id = response.message
+                            val uri = Uri.parse("https://open.spotify.com/playlist/$playlist_id")
+                            Log.d("Spotify:", "${uri.toString()}")
+                            val intent = Intent(Intent.ACTION_VIEW, uri)
+                            try {
+                                openUrlLauncher.launch(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                // Handle the case where there's no app to handle the URL
+                                Toast.makeText(context, "Spotify is not available", Toast.LENGTH_LONG).show()
+                            }
+                        }
+
+                        // failed request
+                        val failurefn: (Throwable) -> Unit = { t ->
+                            Log.d("SPTM", "FAILURE: SPOTIFY FAILED")
+                            Log.d("TAG", t.printStackTrace().toString())
+                            Toast.makeText(context, "Could not retrieve spotify playlist", Toast.LENGTH_LONG).show()
+                        }
+
+                        val response = vibeesApi.getPlaylistInfo(successfn, failurefn, partyDetails?.party_id!!)
+
+                    }
+                    .clip(RoundedCornerShape(40.dp))
+                    .background(
+                        Color(0xFF1DB954)
+                    )
+                    .padding(15.dp, 10.dp)
+                    .defaultMinSize(50.dp)
+            ) {
+                androidx.compose.material.Text(
+                    text = "Party Playlist",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
     }
 }
+
 
 @Composable
 fun Leave(): ImageVector {

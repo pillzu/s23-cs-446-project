@@ -61,6 +61,25 @@ def host_party():
     }), 200
 
 
+@app.get("/parties/playlist/<party_id>")
+def get_playlist_id(party_id):
+
+    if not party_id:
+        return jsonify({
+            "message": "Error retrieving playlist info"
+        }), 400
+
+    try:
+        playlist_id = db.query_spotify_IDs(party_id)[0][1]
+    except:
+        return jsonify({
+            "message": "Error fetching playlist id"
+        }), 400
+
+    return jsonify({
+        "message": playlist_id
+    })
+
 @app.post("/parties")
 def get_tagged_parties():
     """Endpoint to get parties with a specific tag"""
