@@ -101,12 +101,30 @@ fun PartyDetails(
     val openLeaveDialog = remember { mutableStateOf(false) }
 
     val successfn_unattend: (ResponseMessage) -> Unit = { response ->
-        Log.d("TAG UNATTEND", "success: unattending")
+        Log.d("TAG UNATTEND", "success: unattended party")
     }
 
     val failurefn_unattend: (Throwable) -> Unit = { t ->
-        Log.d("TAG UNATTEND", "FAILURE: unattending")
+        Log.d("TAG UNATTEND", "FAILURE: unattend party")
         Log.d("TAG UNATTEND", t.printStackTrace().toString())
+    }
+
+    val successfn_cancel_party: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG CANCEL PARTY", "success: party cancelled")
+    }
+
+    val failurefn_cancel_party: (Throwable) -> Unit = { t ->
+        Log.d("TAG CANCEL PARTY", "FAILURE: party cancelling")
+        Log.d("TAG CANCEL PARTY", t.printStackTrace().toString())
+    }
+
+    val successfn_update_party: (ResponseMessage) -> Unit = { response ->
+        Log.d("TAG UPDATE PARTY", "success: party updated")
+    }
+
+    val failurefn_update_party: (Throwable) -> Unit = { t ->
+        Log.d("TAG UPDATE PARTY", "FAILURE: party updating")
+        Log.d("TAG UPDATE PARTY", t.printStackTrace().toString())
     }
 
 
@@ -137,6 +155,7 @@ fun PartyDetails(
                         openDeleteDialog.value = false
 
                         // delete party
+                        vibeesApi.cancelParty(successfn_cancel_party, failurefn_cancel_party, partyDetails?.party_id!!)
 
                         navController.navigate(BottomBar.MyParties.route) {
                             popUpTo(BottomBar.MyParties.route) {

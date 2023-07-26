@@ -301,4 +301,57 @@ class VibeesApi {
             }
         )
     }
+
+    fun cancelParty(
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+        party_id: String
+    ) {
+        val callResponse = apiService.cancelParty(party_id)
+        return callResponse.enqueue(
+            object: Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
+
+    fun update_party(
+        successfn: (ResponseMessage) -> Unit,
+        failurefn: (Throwable) -> Unit,
+        party_id: String,
+        requestModel: Party
+    ) {
+        val callResponse = apiService.updatePartyDetails(party_id, requestModel)
+        return callResponse.enqueue(
+            object : Callback<ResponseMessage> {
+                override fun onResponse(
+                    call: Call<ResponseMessage>,
+                    response: Response<ResponseMessage>
+                ) {
+                    if (response.isSuccessful) {
+                        successfn(response.body()!!)
+                    } else {
+                        failurefn(Throwable(response.errorBody().toString()))
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
 }

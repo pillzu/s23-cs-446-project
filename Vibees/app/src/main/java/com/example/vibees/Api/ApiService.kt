@@ -57,4 +57,15 @@ interface ApiService {
         @Path("party_id") party_id: String,
         @Path("user_id") user_id: String
     ): Call<ResponseMessage>
+
+    @DELETE("/parties/cancel/{party_id}")
+    fun cancelParty(
+        @Path("party_id") party_id: String
+    ): Call<ResponseMessage>
+
+    @PUT("/party/update/{party_id}")
+    fun updatePartyDetails(
+        @Path("party_id") party_id: String,
+        @Body requestModel: Party
+    ): Call<ResponseMessage>
 }
