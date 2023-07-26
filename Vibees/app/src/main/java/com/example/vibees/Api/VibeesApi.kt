@@ -351,7 +351,7 @@ class VibeesApi {
 
     fun update_party(
         successfn: (ResponseMessage) -> Unit,
-        failurefn: (Throwable) -> Unit,
+        failurefn: (ResponseBody) -> Unit,
         party_id: String,
         requestModel: Party
     ) {
@@ -365,12 +365,12 @@ class VibeesApi {
                     if (response.isSuccessful) {
                         successfn(response.body()!!)
                     } else {
-                        failurefn(Throwable(response.errorBody().toString()))
+                        failurefn(response.errorBody()!!)
                     }
                 }
 
                 override fun onFailure(call: Call<ResponseMessage>, t: Throwable) {
-                    failurefn(t)
+                    Log.d("ERROR", "FAILURE: Create party")
                 }
             }
         )
