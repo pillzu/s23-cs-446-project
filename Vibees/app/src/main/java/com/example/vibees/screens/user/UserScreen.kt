@@ -281,7 +281,7 @@ fun UserScreen(
             }
 
             // User Interest Tags
-            var tagList = listOf("All", "Anime", "EDM", "Dance", "Board game", "Karaoke", "Barbecue", "Pool", "Disco", "Birthday",
+            var tagList = listOf("All", "Dance", "Board game", "Karaoke", "Barbecue", "Pool", "Disco", "Birthday",
                 "Graduation", "Adult only", "Business", "Formal", "Wedding", "Sports", "Bar Hopping", "Day",
                 "Late Night")
 
