@@ -1,12 +1,20 @@
 // Vibees/app/src/main/java/com/example/vibees/screens/SettingsScreen.kt:
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,10 +33,10 @@ import java.nio.charset.StandardCharsets
 fun SettingsScreen(navController: NavHostController) {
     var api = VibeesApi()
     val currentUser = GlobalAppState.currentUser
-    Column(
+    Column (
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (currentUser != null) {
             UserDetailsSection(
@@ -38,7 +46,6 @@ fun SettingsScreen(navController: NavHostController) {
                     GlobalAppState.currentUser = updatedUser
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
             DeleteAccountSection(
                 api = api,
                 currentUser = currentUser,
@@ -61,6 +68,7 @@ private fun UserDetailsSection(
     var addressCity by remember { mutableStateOf(TextFieldValue()) }
     var addressProv by remember { mutableStateOf(TextFieldValue()) }
     var addressPostal by remember { mutableStateOf(TextFieldValue()) }
+    val updateContext = LocalContext.current
 
     // Function to handle the save button click
     val onSaveClick: () -> Unit = {
@@ -80,8 +88,10 @@ private fun UserDetailsSection(
                 successfn = { response ->
                     // Handle success response if needed
                     onUpdateUser(user)
+                    Toast.makeText(updateContext, "Your personal details were updated!", Toast.LENGTH_LONG).show()
                 },
                 failurefn = { error ->
+                    Toast.makeText(updateContext, "Could not update personal details", Toast.LENGTH_LONG).show()
                     // Handle failure response if needed
                 },
                 requestModel = user
@@ -90,45 +100,137 @@ private fun UserDetailsSection(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextField(
+        Text(text = "Manage your account",
+            style = MaterialTheme.typography.displaySmall,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 20.dp)
+        )
+        Text(text = "Update your personal details or delete your account",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.padding(top = 5.dp, bottom = 15.dp)
+        )
+
+        Text(text = "Change your personal details by entering new information below and clicking 'Update'",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Black,
+            modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 5.dp)
+        )
+        OutlinedTextField(
             value = firstName,
             onValueChange = { firstName = it },
-            label = { Text("New First Name") }
+            label = { androidx.compose.material3.Text("New First Name") },
+            placeholder = { androidx.compose.material3.Text("First Name", color = Color.Gray) },
+            enabled = true,
+            modifier = Modifier
+                .padding(2.dp)
+                .height(60.dp)
         )
-        TextField(
+//        TextField(
+//            value = firstName,
+//            onValueChange = { firstName = it },
+//            label = { Text("New First Name") }
+//        )
+        OutlinedTextField(
             value = lastName,
             onValueChange = { lastName = it },
-            label = { Text("New Last Name") }
+            label = { androidx.compose.material3.Text("New Last Name") },
+            placeholder = { androidx.compose.material3.Text("Last Name", color = Color.Gray) },
+            enabled = true,
+            modifier = Modifier
+                .padding(2.dp)
+                .height(60.dp)
         )
-        TextField(
+//        TextField(
+//            value = lastName,
+//            onValueChange = { lastName = it },
+//            label = { Text("New Last Name") }
+//        )
+
+        OutlinedTextField(
             value = addressStreet,
             onValueChange = { addressStreet = it },
-            label = { Text("New Address Street") }
+            label = { androidx.compose.material3.Text("New Address Street") },
+            placeholder = { androidx.compose.material3.Text("Address Street ", color = Color.Gray) },
+            enabled = true,
+            modifier = Modifier
+                .padding(2.dp)
+                .height(60.dp)
         )
-        TextField(
+
+        OutlinedTextField(
             value = addressCity,
             onValueChange = { addressCity = it },
-            label = { Text("New Address City") }
+            label = { androidx.compose.material3.Text("New Address City") },
+            placeholder = { androidx.compose.material3.Text("Address City", color = Color.Gray) },
+            enabled = true,
+            modifier = Modifier
+                .padding(2.dp)
+                .height(60.dp)
         )
-        TextField(
+
+        OutlinedTextField(
             value = addressProv,
             onValueChange = { addressProv = it },
-            label = { Text("New Address Province") }
+            label = { androidx.compose.material3.Text("New Province") },
+            placeholder = { androidx.compose.material3.Text("Province", color = Color.Gray) },
+            enabled = true,
+            modifier = Modifier
+                .padding(2.dp)
+                .height(60.dp)
         )
-        TextField(
+
+        OutlinedTextField(
             value = addressPostal,
             onValueChange = { addressPostal = it },
-            label = { Text("New Address Postal Code") }
+            label = { androidx.compose.material3.Text("New Postal Code") },
+            placeholder = { androidx.compose.material3.Text("Postal Code", color = Color.Gray) },
+            enabled = true,
+            modifier = Modifier
+                .padding(2.dp)
+                .height(60.dp)
         )
+
+//        TextField(
+//            value = addressStreet,
+//            onValueChange = { addressStreet = it },
+//            label = { Text("New Address Street") }
+//        )
+//        TextField(
+//            value = addressCity,
+//            onValueChange = { addressCity = it },
+//            label = { Text("New Address City") }
+//        )
+//        TextField(
+//            value = addressProv,
+//            onValueChange = { addressProv = it },
+//            label = { Text("New Address Province") }
+//        )
+//        TextField(
+//            value = addressPostal,
+//            onValueChange = { addressPostal = it },
+//            label = { Text("New Address Postal Code") }
+//        )
         Button(
             onClick = onSaveClick,
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 5.dp),
+            colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text("Save")
+            Text("Update")
         }
+
+        Text(text = "Or delete your account by clicking the 'Delete Account' ",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Black,
+            modifier = Modifier.padding(10.dp, 10.dp, 10.dp, 5.dp)
+        )
+
     }
 }
 
@@ -138,6 +240,7 @@ private fun DeleteAccountSection(
     currentUser: User,
     navController: NavHostController
 ) {
+    val deleteContext = LocalContext.current
     // Function to handle the delete account button click
     val onDeleteAccountClick: () -> Unit = {
         // Check if the current user exists before calling the API
@@ -148,19 +251,19 @@ private fun DeleteAccountSection(
                     // Handle success response if needed
                     // After successful deletion, null current user and navigate to login/signup screen
                     GlobalAppState.currentUser = null
-
-                    // TODO: Navigate to login/signup screen
+                    Toast.makeText(deleteContext, "Account successfully deleted", Toast.LENGTH_LONG).show()
+                    navController.navigate(AuthScreen.Login.route)
                 },
                 failurefn = { error ->
+                    Toast.makeText(deleteContext, "Account could not be deleted", Toast.LENGTH_LONG).show()
                     // Handle failure response if needed
                 }
             )
         }
     }
-
     Button(
         onClick = onDeleteAccountClick,
-        modifier = Modifier.fillMaxWidth()
+        colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary)
     ) {
         Text("Delete Account")
     }
