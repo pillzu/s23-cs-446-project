@@ -660,7 +660,7 @@ class DatabaseConnection:
 
             # update tags
             if tags is not None:
-                stmt += f"UPDATE Tags SET tag_list = ARRAY[{tags}] WHERE party_id = '{party_id}';\n"
+                stmt += f"UPDATE Tags SET tag_list = ARRAY{tags} WHERE party_id = '{party_id}';\n"
 
             print(stmt)
 
