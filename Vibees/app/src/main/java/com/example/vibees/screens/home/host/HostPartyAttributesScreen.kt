@@ -1,11 +1,13 @@
 package com.example.vibees.screens.home.host
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -230,39 +232,11 @@ fun HostPartyAttributesScreen(
 
                     Log.d("STORE update", partystore.toString())
 
-                    val uriPathHelper = URIPathHelper()
-                    val filePath = uriPathHelper.getPath(partyContext, selectedImageUri!!)
-                    Log.i("FilePath", filePath.toString())
-
-                    when (PackageManager.PERMISSION_GRANTED) {
-                        ContextCompat.checkSelfPermission(
-                            partyContext,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        ) -> {
-                            // Some works that require permission
-                            Log.d("HostScreen","Code has write permission")
-                        }
-                        else -> {
-                            // Asking for permission
-                            launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        }
+                    // set default image here
+                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
+                    if (partystore?.image!! != "") {
+                        UriToCloudinary(partyContext, selectedImageUri, "${partystore?.name}-${userName}", launcher)
                     }
-                    when (PackageManager.PERMISSION_GRANTED) {
-                        ContextCompat.checkSelfPermission(
-                            partyContext,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ) -> {
-                            // Some works that require permission
-                            Log.d("HostScreen","Code has read permission")
-                        }
-                        else -> {
-                            // Asking for permission
-                            launcher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                        }
-                    }
-
-                    // upload to cloudinary
-                    val imgUri = filePath?.let { uploadToCloudinary(it) }
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
@@ -312,6 +286,12 @@ fun HostPartyAttributesScreen(
 
                     Log.d("STORE", partystore.toString())
 
+                    // set default image here
+                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
+                    if (partystore?.image!! != "") {
+                        UriToCloudinary(partyContext, selectedImageUri, "${partystore?.name}-${userName}", launcher)
+                    }
+
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
                         Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
@@ -325,12 +305,6 @@ fun HostPartyAttributesScreen(
                         Log.d("TAG", "FAILURE: could not create party.")
                         Log.d("TAG", response.toString())
                         Toast.makeText(partyContext, "ERROR: Could not create party.", Toast.LENGTH_LONG).show()
-                    }
-
-                    // set default image here
-                    var imgUri = "https://res.cloudinary.com/dw9xmrzlz/image/upload/v1690315612/mramxypdh3edcplc0nux.jpg"
-                    if (partystore?.image!! != "") {
-                         imgUri = uploadToCloudinary(partystore?.image!!)
                     }
 
                     val obj = Party("", imgUri, partystore?.name, partystore?.date_time!!,
@@ -393,4 +367,40 @@ fun FilterChipTag(
         },
         modifier = Modifier.padding(4.dp)
     )
+}
+
+fun UriToCloudinary(partyContext: Context, selectedImageUri:Uri?, publicId: String , launcher: ManagedActivityResultLauncher<String, Boolean>) {
+    val uriPathHelper = URIPathHelper()
+    val filePath = uriPathHelper.getPath(partyContext, selectedImageUri!!)
+    Log.i("FilePath", filePath.toString())
+
+    when (PackageManager.PERMISSION_GRANTED) {
+        ContextCompat.checkSelfPermission(
+            partyContext,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) -> {
+            // Some works that require permission
+            Log.d("HostScreen","Code has write permission")
+        }
+        else -> {
+            // Asking for permission
+            launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+    when (PackageManager.PERMISSION_GRANTED) {
+        ContextCompat.checkSelfPermission(
+            partyContext,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) -> {
+            // Some works that require permission
+            Log.d("HostScreen","Code has read permission")
+        }
+        else -> {
+            // Asking for permission
+            launcher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
+
+    // upload to cloudinary
+    val imgUri = filePath?.let { uploadToCloudinary(it, publicId) }
 }
