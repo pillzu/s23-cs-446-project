@@ -48,6 +48,9 @@ import com.example.vibees.Models.Party
 import com.example.vibees.R
 import com.example.vibees.ui.theme.SubtleWhite
 import com.example.vibees.ui.theme.Yellow
+import com.example.vibees.utils.formatDate
+import com.example.vibees.utils.formatTime
+import com.example.vibees.utils.parseDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -89,6 +92,7 @@ fun PartyItem(
     onClick: (id: String) -> Unit
 ) {
     var partyDetails by GlobalAppState::PartyDetails
+    var party_datetime = parseDate(partyInfo?.date_time!!)
     Card(
         colors = CardDefaults.elevatedCardColors(
             containerColor = SubtleWhite,
@@ -122,7 +126,7 @@ fun PartyItem(
                     color = Color.Black,
                 )
                 Text(
-                    text = "${partyInfo.date_time!!.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))}",
+                    text = "${formatDate(party_datetime)}",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(end = 15.dp),
                     color = Color.Black
@@ -137,6 +141,12 @@ fun PartyItem(
                 Column(
                     modifier = Modifier.weight(0.6f)
                 ) {
+                    PartyCardAttribute(key = "Time", value = formatTime(party_datetime))
+                    PartyCardAttribute(key = "Entry Fee", value = "$${partyInfo.entry_fee}")
+                    PartyCardAttribute(
+                        key = "Location",
+                        value = "${partyInfo.street}, ${partyInfo.city}"
+                    )
                     PartyCardAttribute(
 //                        key = "Time", value = partyInfo.date_time.format(
 //                            DateTimeFormatter.ofPattern("hh:mm a")
@@ -145,12 +155,6 @@ fun PartyItem(
                             .replace("[", "")
                             .replace("\"", "")
                             .replace("]", "")
-                    )
-                    PartyCardAttribute(key = "Entry Fee", value = "$${partyInfo.entry_fee}")
-                    PartyCardAttribute(key = "Host", value = partyInfo.host_name)
-                    PartyCardAttribute(
-                        key = "Location",
-                        value = "${partyInfo.street}, ${partyInfo.city}"
                     )
                 }
                 Column(
@@ -171,25 +175,18 @@ fun PartyItem(
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.size(80.dp).clip(CircleShape)
                     )
-//                    Image(
-//                        painter = painterResource(R.drawable.saly_7),
-//                        contentDescription = "${partyInfo.name} Avatar",
-//                        modifier = Modifier
-//                            .size(80.dp)
-//                            .clip(CircleShape)
-//                    )
                 }
             }
 
-            var notice = ""
+            var notice = "May have "
             if (partyInfo.drug)
-                notice += "drug "
+                notice += "drugs"
             if (partyInfo.byob)
-                notice += "alcohol"
+                notice += ", alcohol"
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth().padding(top=10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
