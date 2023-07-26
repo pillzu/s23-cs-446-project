@@ -181,12 +181,17 @@ fun PartyItem(
             }
 
             var notice = "Has "
+            var noticeColor = Color.Red
             if (partyInfo.drug && partyInfo.byob)
                 notice += "drugs, alcohol"
             else if (partyInfo.byob)
                 notice += "alcohol"
             else if (partyInfo.drug)
                 notice += "drugs"
+            else {
+                notice = "drug-free, alcohol-free"
+                noticeColor = Color(20, 100, 20)
+            }
 
             Row(
                 modifier = Modifier
@@ -195,9 +200,9 @@ fun PartyItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (notice.isEmpty()) "drug-free, alcohol-free" else notice,
+                    text = notice,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (notice.isEmpty()) Color(20, 100, 20) else Color.Red,
+                    color = noticeColor,
                     modifier = Modifier.weight(0.3f)
                 )
                 Text(
