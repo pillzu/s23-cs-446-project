@@ -113,10 +113,8 @@ def attend_party(party_id):
 
     access_token = db.query_spotify_IDs(party_id)[0][2]
 
-    sp = spotipy.Spotify(auth=access_token, auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
-                                                     client_secret=SPOTIFY_CLIENT_SECRET,
-                                                     redirect_uri="http://localhost:8080",
-                                                     scope="playlist-modify-private"))
+    sp = spotipy.Spotify(auth=access_token)
+    
     playlist_id = db.query_spotify_IDs(party_id)[0][1]
     
     # Convert track names to track uris for Spotify API parsing
