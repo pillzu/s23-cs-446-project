@@ -1,9 +1,11 @@
 package com.example.vibees.Api
 
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.Playlist
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
+import com.example.vibees.Models.Transaction
 import com.example.vibees.Models.User
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
@@ -15,8 +17,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import okhttp3.OkHttpClient;
+import java.util.concurrent.TimeUnit
 
-const val url = "http://192.168.183.85:5000"
+
+const val url = "http://192.168.0.34:8080"
 
 class LocalDateTimeDeserializer : JsonDeserializer<LocalDateTime> {
     override fun deserialize(
@@ -35,12 +40,18 @@ class APIInterface {
 
     init {
 
+        val httpClientBuilder = OkHttpClient.Builder()
+        httpClientBuilder.connectTimeout(30, TimeUnit.SECONDS) // Increase the connect timeout to 30 seconds
+        httpClientBuilder.readTimeout(30, TimeUnit.SECONDS)    // Increase the read timeout to 30 seconds
+        val httpClient = httpClientBuilder.build()
+
         val gson = GsonBuilder()
             .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeDeserializer())
             .create()
 
         val retrofit = Retrofit.Builder()
             .baseUrl(url)
+            .client(httpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
@@ -89,5 +100,9 @@ class APIInterface {
 
     fun checkQrAttendee(user_qr: String): Call<ResponseMessage> {
         return apiService.checkQrAttendee(qr_endpoint = user_qr )
+    }
+
+    fun getPartyInfo(requestModel: Transaction): Call<PaymentMetaData> {
+        return apiService.getPaymentInfo(requestModel)
     }
 }

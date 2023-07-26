@@ -39,6 +39,17 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
+
+        <!-- Declare your CheckoutActivity -->
+        <activity
+            android:name=".payment.CheckoutActivity"
+            android:label="Checkout"
+            android:theme="@style/AppTheme.CheckoutActivity">
+
+            <!-- Intent filters if needed -->
+            <!-- ... -->
+
+        </activity>
     </application>
 
 </manifest>

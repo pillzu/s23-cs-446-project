@@ -4,7 +4,9 @@ import android.util.Log
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.Playlist
+import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.Models.Transaction
 import com.example.vibees.Models.Tags
 import com.example.vibees.Models.User
 import okhttp3.ResponseBody
@@ -86,6 +88,8 @@ class VibeesApi {
     }
 
     fun getPartiesHosting(successfn: (List<Party>) -> Unit, failurefn: (Throwable) -> Unit) {
+        var userID by GlobalAppState::UserID
+        Log.d("TAG", "$userID")
         val callResponseHosting = apiService.getMyPartiesHosting(User(userID!!))
         return callResponseHosting.enqueue(
             object: Callback<List<Party>> {
@@ -173,6 +177,23 @@ class VibeesApi {
         )
     }
 
+    fun getPaymentInfo(transaction: Transaction, successfn: (PaymentMetaData) -> Unit, failurefn: (Throwable) -> Unit) {
+        val callResponse = apiService.getPartyInfo(transaction)
+        return callResponse.enqueue(
+            object: Callback<PaymentMetaData> {
+                override fun onResponse(
+                    call: Call<PaymentMetaData>,
+                    response: Response<PaymentMetaData>
+                ) {
+                    successfn(response.body()!!)
+                }
+
+                override fun onFailure(call: Call<PaymentMetaData>, t: Throwable) {
+                    failurefn(t)
+                }
+            }
+        )
+    }
 
     fun verifyAttendance(successfn: (Int) -> Unit, failurefn: () -> Unit, party_id: String) {
         val callResponse = apiService.verifyAttendance(party_id, userID.toString())

@@ -1,6 +1,13 @@
 package com.example.vibees.screens.home.myparties
 
+import android.app.Activity
+import android.content.ContentValues
+import android.content.Intent
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -30,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +45,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Text
 import com.example.vibees.Api.APIInterface
@@ -45,6 +55,11 @@ import com.example.vibees.Api.VibeesApi
 import com.example.vibees.GlobalAppState
 import com.example.vibees.Models.Party
 import com.example.vibees.Models.ResponseMessage
+import com.example.vibees.Models.User
+import com.simonsickle.compose.barcodes.Barcode
+import com.simonsickle.compose.barcodes.BarcodeType
+import com.example.vibees.graphs.PartyScreen
+import com.example.vibees.payment.CheckoutActivity
 import com.example.vibees.screens.bottombar.BottomBar
 import java.time.format.DateTimeFormatter
 
@@ -55,26 +70,26 @@ fun PartyViewing(
 ) {
 
     var userID by GlobalAppState::UserID
+    var UserName by GlobalAppState::UserName
     val apiService = APIInterface()
     var partyDetails by GlobalAppState::PartyDetails
     val vibeesApi = VibeesApi()
+    val activity = LocalContext.current as? ComponentActivity
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // Handle the result here if needed
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Handle successful result
+        } else {
+            // Handle other result codes or errors
+        }
+    }
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
     var idfound by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
-
-    // Successful request
-    val successfn: (ResponseMessage) -> Unit = { response ->
-        Log.d("TAG", "${response.message}")
-        navController.navigate(BottomBar.MyParties.route)
-    }
-
-    // failed request
-    val failurefn: (Throwable) -> Unit = { t ->
-        Log.d("TAG", "FAILURE")
-        Log.d("TAG", t.printStackTrace().toString())
-    }
 
     var attends by remember {
         mutableStateOf(false)
@@ -299,7 +314,17 @@ fun PartyViewing(
                     horizontalArrangement = Arrangement.Center) {
                     androidx.compose.material.Button(
                         onClick = {
-                            val callResponse = vibeesApi.registerUserForParty(successfn, failurefn, partyDetails?.party_id!!, songList)
+                            val intent = Intent(activity, CheckoutActivity::class.java)
+                            intent.putExtra("entryFee", partyDetails?.entry_fee)
+                            val userId = userID.toString()
+                            intent.putExtra("userID", userId)
+                            val userName: String = UserName!!
+                            intent.putExtra("userName", userName)
+                            intent.putExtra("partyID", partyDetails?.party_id!!)
+                            val songArrayList: ArrayList<String?> = ArrayList(songList)
+                            Log.d("TAG", "songlist: ${songArrayList}")
+                            intent.putStringArrayListExtra("songList", songArrayList)
+                            launcher.launch(intent)
                         },
                         modifier = Modifier.padding(20.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary,
