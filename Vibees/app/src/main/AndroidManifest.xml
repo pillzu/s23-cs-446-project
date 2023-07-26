@@ -42,6 +42,16 @@
             </intent-filter>
         </activity>
         <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://555289532233172:QE2Ve_szf-zrbImJmhVBHpag4f4@dw9xmrzlz"/>
+        <!-- Declare your CheckoutActivity -->
+        <activity
+            android:name=".payment.CheckoutActivity"
+            android:label="Checkout"
+            android:theme="@style/AppTheme.CheckoutActivity">
+
+            <!-- Intent filters if needed -->
+            <!-- ... -->
+
+        </activity>
     </application>
 
 </manifest>

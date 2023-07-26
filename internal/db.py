@@ -322,6 +322,24 @@ class DatabaseConnection:
             logging.fatal(e)
             return False
 
+    def set_playlist_id(self, party_id, playlist_id, access_token, exec_stmt=True):
+        try:
+            location = self.query_locations
+            statement = f"INSERT INTO SpotifyIDs VALUES ('{party_id}', '{playlist_id}', '{access_token}') " \
+                        f"ON CONFLICT (party_id) DO UPDATE " \
+                        f"SET (playlist_id, access_token) = ('{playlist_id}', '{access_token}');\n"
+
+            if exec_stmt:
+                assert self.exec_DDL(statement)
+                return True
+            else:
+                return statement
+
+        except Exception as e:
+            logging.fatal("Setting Spotify playlist ID failed")
+            logging.fatal(e)
+            return False
+        
     """
     leave_party(user_id, party_id): Remove the user with user_id from the party with party_id as a guest
         Parameters: 
@@ -924,11 +942,20 @@ class DatabaseConnection:
             logging.fatal(e)
             return None
 
+    def query_spotify_IDs(self, party_id):
+        try:
+            return self.exec_DML(f"SELECT * FROM SpotifyIDs s WHERE s.party_id = '{party_id}'")
+        except Exception as e:
+            logging.fatal("Query locations failed")
+            logging.fatal(e)
+            return None
+
     """
     exec_attend_party(user_id, party_id): Registers the user with user_id into the party with party_id as a guest
         Parameters: 
             - user_id: the user's id number
             - party_id: the party's id number
+            - track_list: the track list for the party as suggested by the user
         Returns:
             - trans_id: if the user is registered as a guest successfully, return transaction id
             - False: otherwise
@@ -1099,6 +1126,18 @@ class DatabaseConnection:
                         "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE, " \
                         "CONSTRAINT guest_id " \
                         "FOREIGN KEY (guest_id) REFERENCES Users(user_id) ON DELETE CASCADE)"
+            self.exec_DDL(statement)
+
+            # SpotifyIDs
+            statement = "CREATE TABLE IF NOT EXISTS SpotifyIDs (" \
+                        "party_id UUID, " \
+                        "playlist_id VARCHAR(30), " \
+                        "access_token VARCHAR(300), " \
+                        "UNIQUE(party_id), " \
+                        "UNIQUE(playlist_id), " \
+                        "UNIQUE(access_token), " \
+                        "CONSTRAINT party_id " \
+                        "FOREIGN KEY (party_id) REFERENCES Parties(party_id) ON DELETE CASCADE)"
             self.exec_DDL(statement)
 
             # Transactions

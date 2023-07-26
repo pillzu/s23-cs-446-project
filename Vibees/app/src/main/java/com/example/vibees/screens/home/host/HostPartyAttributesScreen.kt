@@ -301,6 +301,7 @@ fun HostPartyAttributesScreen(
 
                     val successfn: (ResponseMessage) -> Unit = { response ->
                         Log.d("TAG", response.message)
+                        Toast.makeText(partyContext, "Playlist successfully created!", Toast.LENGTH_LONG).show()
                         Toast.makeText(partyContext, response.message, Toast.LENGTH_LONG).show()
                         selectedlist.clear()
                         onClick()

@@ -1,8 +1,11 @@
 package com.example.vibees.Api
 
 import com.example.vibees.Models.Party
+import com.example.vibees.Models.Playlist
+import com.example.vibees.Models.PaymentMetaData
 import com.example.vibees.Models.ResponseMessage
 import com.example.vibees.Models.Tags
+import com.example.vibees.Models.Transaction
 import com.example.vibees.Models.User
 import retrofit2.Call
 import retrofit2.http.Body
@@ -32,7 +35,7 @@ interface ApiService {
     @POST("/parties/attend/{party_id}")
     fun registerUserForParty(
         @Path("party_id") party_id: String,
-        @Body requestModel: User
+        @Body requestModel: Playlist
     ): Call<ResponseMessage>
 
     @POST("/user")
@@ -51,4 +54,7 @@ interface ApiService {
     @GET("{qr_url}")
     fun checkQrAttendee(@Path("qr_url", encoded = true) qr_endpoint: String): Call<ResponseMessage>
 
+
+    @POST("/payment-sheet")
+    fun getPaymentInfo(@Body requestModel: Transaction): Call<PaymentMetaData>
 }
